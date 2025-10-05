@@ -3,803 +3,1550 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Золотая лихорадка</title>
+    <title>Битва Крепостей</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
-
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a2a6c, #2d3881);
+            background: linear-gradient(135deg, #1a2a6c, #3a7bd5);
             color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .start-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden;
             height: 100vh;
-            text-align: center;
-        }
-
-        .start-screen h1 {
-            font-size: 3em;
-            margin-bottom: 30px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .tab-btn {
-            padding: 15px 30px;
-            font-size: 1.2em;
-            background: #ffd700;
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .tab-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255,215,0,0.4);
-        }
-
-        .game-screen {
-            display: none;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(0,0,0,0.3);
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .resource {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.2em;
-        }
-
-        .resource-icon {
-            font-size: 1.5em;
-        }
-
-        /* Навигация между вкладками */
-        .game-navigation {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .nav-btn {
-            padding: 12px 30px;
-            font-size: 1.1em;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: 2px solid #ffd700;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .nav-btn:hover {
-            background: rgba(255,215,0,0.2);
-            transform: translateY(-2px);
-        }
-
-        .nav-btn.active {
-            background: #ffd700;
-            color: #000;
-            box-shadow: 0 0 15px rgba(255,215,0,0.5);
-        }
-
-        .production-tab {
-            display: none;
-        }
-
-        .cases-tab {
-            display: none;
-        }
-
-        .production-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            height: 70vh;
-        }
-
-        .mine-section, .workshop-section {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
         }
-
-        .mine-visual, .workshop-visual {
-            width: 200px;
-            height: 200px;
-            background: linear-gradient(45deg, #ffd700, #ffed4e);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4em;
-            margin: 20px 0;
-            box-shadow: 0 0 30px rgba(255,215,0,0.5);
-        }
-
-        .workshop-visual {
-            background: linear-gradient(45deg, #4a00e0, #8e2de2);
-            box-shadow: 0 0 30px rgba(74,0,224,0.5);
-        }
-
-        .upgrade-controls, .workshop-controls {
-            width: 100%;
-            text-align: center;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            font-size: 1em;
-        }
-
-        .btn-gold {
-            background: #ffd700;
-            color: #000;
-        }
-
-        .btn-gold:hover {
-            background: #ffed4e;
-            transform: translateY(-2px);
-        }
-
-        .btn-key {
-            background: #4a00e0;
-            color: white;
-        }
-
-        .btn-key:hover {
-            background: #8e2de2;
-            transform: translateY(-2px);
-        }
-
-        .btn-case {
-            background: #ff6b6b;
-            color: white;
-        }
-
-        .btn-case:hover {
-            background: #ff8e8e;
-            transform: translateY(-2px);
-        }
-
-        .gold-loading {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .gold-loading input {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background: rgba(255,255,255,0.9);
-            color: #000;
-        }
-
-        .progress-container {
-            width: 100%;
-            background: rgba(255,255,255,0.2);
+        
+        #game-container {
+            position: relative;
+            width: 1200px;
+            height: 800px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             border-radius: 10px;
-            margin: 10px 0;
             overflow: hidden;
         }
-
-        .progress-bar {
-            height: 20px;
-            background: linear-gradient(90deg, #4a00e0, #8e2de2);
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .inventory {
-            margin-top: 30px;
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .item {
-            padding: 15px 10px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: bold;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .common { 
-            background: #b8b8b8; 
-            color: #000;
-        }
-        .rare { 
-            background: #4fc3f7; 
-            color: #000;
-        }
-        .epic { 
-            background: #ba68c8; 
-            color: #fff;
-        }
-        .mythic { 
-            background: #ff8a65; 
-            color: #fff;
-        }
-        .impossible { 
-            background: linear-gradient(45deg, #ffd700, #ff6b6b);
-            color: #000;
-        }
-
-        .log {
-            margin-top: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .log-entry {
-            margin: 8px 0;
-            padding: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 5px;
-            border-left: 3px solid #ffd700;
-        }
-
-        .stats {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .stat {
-            background: rgba(255,255,255,0.1);
-            padding: 10px 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        /* Анимация выпадения предмета */
-        .case-opening {
-            position: fixed;
+        
+        #game-canvas {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
+        }
+        
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            background: rgba(26, 42, 108, 0.9);
+            z-index: 10;
         }
-
-        .case-content {
+        
+        .hidden {
+            display: none;
+        }
+        
+        h1 {
+            font-size: 64px;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        h2 {
+            font-size: 48px;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        p {
+            font-size: 24px;
+            margin-bottom: 40px;
             text-align: center;
-            background: linear-gradient(135deg, #2d3881, #1a2a6c);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 0 50px rgba(255,215,0,0.5);
-            animation: pulse 2s infinite;
+            max-width: 80%;
         }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .reward-item {
-            font-size: 5em;
-            margin: 20px 0;
-            animation: bounce 1s infinite alternate;
-        }
-
-        @keyframes bounce {
-            from { transform: translateY(0); }
-            to { transform: translateY(-20px); }
-        }
-
-        .reward-rarity {
-            font-size: 2em;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .reward-name {
-            font-size: 1.5em;
-            margin: 10px 0;
-        }
-
-        .close-reward {
-            margin-top: 20px;
-            padding: 10px 20px;
+        
+        .button {
             background: #ffd700;
             color: #000;
             border: none;
-            border-radius: 5px;
+            padding: 15px 30px;
+            font-size: 24px;
+            border-radius: 15px;
             cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            min-width: 250px;
+            text-align: center;
+        }
+        
+        .button:hover {
+            background: #ffed4e;
+            transform: translateY(-2px);
+        }
+        
+        .button:active {
+            transform: translateY(1px);
+        }
+        
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 30px;
+        }
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+        }
+        
+        .menu-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 600px;
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 20px;
+            width: 90%;
+        }
+        
+        .card {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            width: 300px;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid;
+        }
+        
+        .card-common { border-color: #c8c8c8; }
+        .card-rare { border-color: #0064ff; }
+        .card-epic { border-color: #b400ff; }
+        .card-mythic { border-color: #ffa500; }
+        .card-legendary { border-color: #ffd700; }
+        
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .character-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            overflow: hidden;
+        }
+        
+        .character-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .character-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .character-rarity {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .character-description {
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .character-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        .stat-item {
+            font-size: 14px;
+        }
+        
+        .character-ability {
+            font-size: 14px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .character-status {
+            margin-top: auto;
+            font-size: 16px;
             font-weight: bold;
         }
-
-        .item-new {
-            animation: glow 2s ease-in-out;
-            box-shadow: 0 0 20px currentColor;
+        
+        .owned { color: #4caf50; }
+        .locked { color: #ff6b6b; }
+        
+        .upgrade-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 30px;
+            width: 600px;
+            margin-bottom: 30px;
         }
-
-        @keyframes glow {
-            0% { 
-                transform: scale(1);
-                box-shadow: 0 0 5px currentColor;
-            }
-            50% { 
-                transform: scale(1.1);
-                box-shadow: 0 0 30px currentColor;
-            }
-            100% { 
-                transform: scale(1);
-                box-shadow: 0 0 5px currentColor;
-            }
+        
+        .upgrade-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .upgrade-description {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #4caf50;
+            border-radius: 5px;
+        }
+        
+        .upgrade-stats {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .shop-items {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .shop-item {
+            width: 120px;
+            height: 100px;
+            background: rgba(255, 215, 0, 0.8);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #000;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+        
+        .shop-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .shop-item.disabled {
+            background: rgba(100, 100, 100, 0.8);
+            cursor: not-allowed;
+        }
+        
+        .shop-item-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .shop-item-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .shop-item-name {
+            font-size: 12px;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #000;
+        }
+        
+        .shop-item-cost {
+            font-size: 12px;
+            color: #000;
+        }
+        
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 5;
+        }
+        
+        .ui-panel {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+        }
+        
+        .game-result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 20;
+        }
+        
+        .case-result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 25;
+            font-size: 20px;
         }
     </style>
 </head>
 <body>
-    <!-- Стартовый экран -->
-    <div class="start-screen" id="startScreen">
-        <h1>🏆 Золотая Лихорадка</h1>
-        <div class="tab-buttons">
-            <button class="tab-btn" onclick="startGame('production')">⛏️ Производство</button>
-            <button class="tab-btn" onclick="startGame('cases')">🎁 Кейсы</button>
-        </div>
-        <p>Золото падает автоматически каждую секунду!</p>
-    </div>
-
-    <!-- Игровой экран -->
-    <div class="game-screen" id="gameScreen">
-        <!-- Шапка с ресурсами -->
-        <div class="header">
-            <div class="resource">
-                <span class="resource-icon">💰</span>
-                <span id="gold">0</span>
+    <div id="game-container">
+        <canvas id="game-canvas" width="1200" height="800"></canvas>
+        
+        <!-- Главное меню -->
+        <div id="main-menu" class="screen">
+            <h1>🏰 Битва Крепостей</h1>
+            <p>Стратегическая битва за территории и ресурсы</p>
+            
+            <div class="stats-panel">
+                <div class="stat">💰 <span id="gold-stat">1000</span></div>
+                <div class="stat">⚡ <span id="energy-stat">100</span></div>
+                <div class="stat">🔑 <span id="keys-stat">5</span></div>
+                <div class="stat">👥 <span id="chars-stat">1/15</span></div>
             </div>
-            <div class="resource">
-                <span class="resource-icon">🔑</span>
-                <span id="keys">0</span>
-            </div>
-            <div class="resource">
-                <span class="resource-icon">⚡</span>
-                <span id="speed">1x</span>
+            
+            <div class="menu-buttons">
+                <button class="button" id="characters-btn">👥 Персонажи</button>
+                <button class="button" id="play-btn">🎮 Играть</button>
+                <button class="button" id="production-btn">⛏️ Производство</button>
+                <button class="button" id="upgrades-btn">⚡ Улучшения</button>
+                <button class="button" id="cases-btn">🎁 Кейсы</button>
             </div>
         </div>
-
-        <!-- Навигация между вкладками -->
-        <div class="game-navigation">
-            <button class="nav-btn active" id="navProduction" onclick="switchTab('production')">⛏️ Производство</button>
-            <button class="nav-btn" id="navCases" onclick="switchTab('cases')">🎁 Кейсы</button>
+        
+        <!-- Экран персонажей -->
+        <div id="characters-screen" class="screen hidden">
+            <h2>👥 Ваши персонажи</h2>
+            <p>Собирайте уникальных героев и улучшайте свою армию</p>
+            
+            <button class="button" id="characters-back-btn">← Назад</button>
+            
+            <div class="card-grid" id="characters-container">
+                <!-- Карточки персонажей будут добавлены через JavaScript -->
+            </div>
         </div>
-
-        <!-- Вкладка производства -->
-        <div class="production-tab" id="productionTab">
-            <div class="production-container">
-                <!-- Левая сторона: Мастерская ключей -->
-                <div class="workshop-section">
-                    <h2>🔧 Мастерская ключей</h2>
-                    <div class="workshop-visual">🔑</div>
-                    
-                    <div class="workshop-controls">
-                        <div class="gold-loading">
-                            <input type="number" id="goldToLoad" placeholder="Количество золота" min="100" step="100">
-                            <button class="btn btn-key" onclick="loadGold()">Загрузить золото</button>
-                        </div>
-                        
-                        <div class="progress-container">
-                            <div class="progress-bar" id="workshopProgress"></div>
-                        </div>
-                        
-                        <div class="stats">
-                            <div class="stat">
-                                <div>Загружено</div>
-                                <div id="loadedGold">0</div>
-                            </div>
-                            <div class="stat">
-                                <div>В процессе</div>
-                                <div id="inProgress">0 ключей</div>
-                            </div>
-                        </div>
-                        
-                        <p style="margin-top: 10px; font-size: 0.9em;">1 ключ = 100💰</p>
-                    </div>
+        
+        <!-- Экран производства -->
+        <div id="production-screen" class="screen hidden">
+            <h2>⛏️ Производство</h2>
+            <p>Управляйте своими ресурсами и производственными мощностями</p>
+            
+            <button class="button" id="production-back-btn">← Назад</button>
+            
+            <div class="upgrade-panel">
+                <div class="upgrade-title">
+                    <span>💰 Золотая шахта</span>
                 </div>
-
-                <!-- Правая сторона: Золотая шахта -->
-                <div class="mine-section">
-                    <h2>⛏️ Золотая шахта</h2>
-                    <div class="mine-visual">💰</div>
-                    
-                    <div class="upgrade-controls">
-                        <button class="btn btn-gold" onclick="buyUpgrade()">
-                            Ускорить шахту (<span id="upgradeCost">10</span>💰)
-                        </button>
-                        
-                        <div class="stats">
-                            <div class="stat">
-                                <div>Текущая скорость</div>
-                                <div id="currentSpeed">1 золото/сек</div>
-                            </div>
-                            <div class="stat">
-                                <div>Следующее улучшение</div>
-                                <div id="nextSpeed">+0.5 золота</div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="upgrade-description">Производит: <span id="mine-production">1</span> золота/сек</div>
+                <div class="upgrade-stats">Уровень: <span id="mine-level">1</span></div>
+                <button class="button" id="upgrade-mine-btn">Улучшить шахту (<span id="mine-upgrade-cost">100</span>💰)</button>
+            </div>
+            
+            <div class="upgrade-panel">
+                <div class="upgrade-title">
+                    <span>🔑 Производство ключей</span>
+                </div>
+                <div class="upgrade-description">Стоимость ключа: 1000💰</div>
+                <p>Ключи нужны для открытия кейсов с новыми персонажами</p>
+                <div class="menu-buttons">
+                    <button class="button" id="produce-1-key-btn">1 ключ</button>
+                    <button class="button" id="produce-10-keys-btn">10 ключей</button>
                 </div>
             </div>
         </div>
-
-        <!-- Вкладка кейсов -->
-        <div class="cases-tab" id="casesTab">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <button class="btn btn-case" onclick="openCase()" id="openCaseBtn" disabled>
-                    Открыть кейс (1🔑)
-                </button>
-            </div>
-
-            <div class="inventory">
-                <h3>🎒 Ваши предметы</h3>
-                <div class="items-grid" id="itemsGrid">
-                    <!-- Предметы будут добавляться сюда -->
+        
+        <!-- Экран улучшений -->
+        <div id="upgrades-screen" class="screen hidden">
+            <h2>⚡ Улучшения</h2>
+            <p>Улучшайте характеристики своей крепости и армии</p>
+            
+            <button class="button" id="upgrades-back-btn">← Назад</button>
+            
+            <div class="upgrade-panel">
+                <div class="upgrade-title">
+                    <span>⚡ Генератор энергии</span>
+                    <span id="energy-upgrade-cost">150</span>💰
                 </div>
+                <div class="upgrade-description">Увеличивает скорость генерации энергии во время матчей</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="energy-progress" style="width: 10%"></div>
+                </div>
+                <div class="upgrade-stats">Уровень: <span id="energy-level">1</span>/10 | Генерация: <span id="energy-generation">1</span>/сек</div>
+                <button class="button" id="upgrade-energy-btn">Улучшить генератор</button>
+            </div>
+            
+            <div class="upgrade-panel">
+                <div class="upgrade-title">
+                    <span>❤️ Укрепление замка</span>
+                    <span id="castle-upgrade-cost">200</span>💰
+                </div>
+                <div class="upgrade-description">Увеличивает прочность вашей крепости</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="castle-progress" style="width: 10%"></div>
+                </div>
+                <div class="upgrade-stats">Уровень: <span id="castle-level">1</span>/10 | Здоровье: <span id="castle-health">100</span></div>
+                <button class="button" id="upgrade-castle-btn">Укрепить замок</button>
             </div>
         </div>
-
-        <!-- Журнал событий -->
-        <div class="log">
-            <h3>📜 Журнал событий</h3>
-            <div id="logEntries"></div>
+        
+        <!-- Экран кейсов -->
+        <div id="cases-screen" class="screen hidden">
+            <h2>🎁 Кейсы</h2>
+            <p>Открывайте кейсы для получения новых персонажей и бонусов</p>
+            
+            <button class="button" id="cases-back-btn">← Назад</button>
+            
+            <div class="upgrade-panel">
+                <div class="upgrade-title">
+                    <span>🎁 Боевой кейс</span>
+                </div>
+                <div class="upgrade-stats">Доступные ключи: <span id="available-keys">5</span> 🔑</div>
+                <p>Шансы: Обычный 50%, Редкий 30%, Эпический 15%, Мифический 4%, Легендарный 1%</p>
+                <button class="button" id="open-case-btn">Открыть кейс (1🔑)</button>
+            </div>
         </div>
-    </div>
-
-    <!-- Анимация открытия кейса -->
-    <div class="case-opening" id="caseOpening">
-        <div class="case-content">
-            <h2>🎁 Открытие кейса</h2>
-            <div class="reward-item" id="rewardIcon">❓</div>
-            <div class="reward-rarity" id="rewardRarity">Загрузка...</div>
-            <div class="reward-name" id="rewardName">Определение награды...</div>
-            <button class="close-reward" onclick="closeReward()">Забрать награду</button>
+        
+        <!-- Игровой UI (отображается поверх игрового экрана) -->
+        <div id="game-ui" class="game-ui hidden">
+            <div class="ui-panel">
+                ⚡ <span id="game-energy">0</span>
+            </div>
+            <div class="ui-panel">
+                ❤️ <span id="game-health">100</span>
+            </div>
+            <div class="ui-panel">
+                👹 <span id="game-enemy-health">1000</span>
+            </div>
+        </div>
+        
+        <!-- Результат игры -->
+        <div id="game-result" class="game-result hidden">
+            <h2 id="result-title">ПОБЕДА!</h2>
+            <p id="result-message">+1 ключ, +50 золота</p>
+            <button class="button" id="continue-btn">Продолжить</button>
+        </div>
+        
+        <!-- Результат открытия кейса -->
+        <div id="case-result" class="case-result hidden">
+            <p id="case-result-message">🎉 Поздравляем! Вы получили нового персонажа!</p>
         </div>
     </div>
 
     <script>
-        // Игровые переменные
-        let gold = 0;
-        let keys = 0;
-        let speed = 1;
-        let upgradeCost = 10;
-        let upgradeLevel = 1;
-        let loadedGold = 0;
-        let keysInProgress = 0;
-        let isWorkshopActive = false;
-        let currentTab = 'production';
-        
-        // Шансы выпадения предметов
-        const rarityChances = {
-            common: 50,
-            rare: 30,
-            epic: 12,
-            mythic: 6,
-            impossible: 2
-        };
-        
-        // Названия предметов по редкостям
-        const rarityNames = {
-            common: 'Обычный',
-            rare: 'Редкий', 
-            epic: 'Эпический',
-            mythic: 'Мифический',
-            impossible: 'Невозможный'
+        // Константы игры
+        const SCREEN_WIDTH = 1200;
+        const SCREEN_HEIGHT = 800;
+        const FPS = 60;
+
+        // Цвета
+        const COLORS = {
+            BACKGROUND: '#1a2a6c',
+            GOLD: '#ffd700',
+            ENERGY: '#00c8ff',
+            HEALTH: '#ff0000',
+            TEXT: '#ffffff',
+            BUTTON: '#ffd700',
+            BUTTON_HOVER: '#ffed4e',
+            PANEL: 'rgba(0, 0, 0, 0.7)',
+            CASTLE: '#8b4513',
+            BATTLEFIELD: '#27ae60',
+            RARITY: {
+                common: '#c8c8c8',
+                rare: '#0064ff',
+                epic: '#b400ff',
+                mythic: '#ffa500',
+                legendary: '#ffd700'
+            }
         };
 
-        // Иконки для предметов разных редкостей
-        const rarityIcons = {
-            common: '⚪',
-            rare: '🔵', 
-            epic: '🟣',
-            mythic: '🟠',
-            impossible: '🌈'
+        // Игровые данные
+        const characters = {
+            'white_guy': {
+                'name': 'Белый Воин',
+                'image': 'white_guy.png',
+                'cost': 10,
+                'health': 100,
+                'damage': 20,
+                'speed': 0.6,
+                'attack_speed': 1.0,
+                'attack_range': 80,
+                'description': 'Базовый боец, сбалансированные характеристики',
+                'rarity': 'common',
+                'ability': null,
+                'owned': true
+            },
+            'yellow_guy': {
+                'name': 'Желтый Страж',
+                'image': 'yellow_guy.png',
+                'cost': 15,
+                'health': 80,
+                'damage': 25,
+                'speed': 0.8,
+                'attack_speed': 1.2,
+                'attack_range': 70,
+                'description': 'Быстрый атакующий',
+                'rarity': 'common',
+                'ability': null,
+                'owned': false
+            },
+            'red_guy': {
+                'name': 'Красный Берсерк',
+                'image': 'red_guy.png',
+                'cost': 20,
+                'health': 120,
+                'damage': 30,
+                'speed': 0.4,
+                'attack_speed': 0.8,
+                'attack_range': 60,
+                'description': 'Мощный удар, медленный',
+                'rarity': 'common',
+                'ability': null,
+                'owned': false
+            },
+            'green_guy': {
+                'name': 'Зеленый Лучник',
+                'image': 'green_guy.png',
+                'cost': 25,
+                'health': 70,
+                'damage': 35,
+                'speed': 0.7,
+                'attack_speed': 1.5,
+                'attack_range': 120,
+                'description': 'Дальний бой, высокая скорость',
+                'rarity': 'common',
+                'ability': null,
+                'owned': false
+            },
+            'blue_guy': {
+                'name': 'Синий Маг',
+                'image': 'blue_guy.png',
+                'cost': 30,
+                'health': 60,
+                'damage': 40,
+                'speed': 0.3,
+                'attack_speed': 0.7,
+                'attack_range': 150,
+                'description': 'Мощные заклинания',
+                'rarity': 'common',
+                'ability': null,
+                'owned': false
+            },
+            'classic_rare_1': {
+                'name': 'Рыцарь Света',
+                'image': 'classic_rare_1.png',
+                'cost': 50,
+                'health': 150,
+                'damage': 35,
+                'speed': 0.5,
+                'attack_speed': 1.0,
+                'attack_range': 90,
+                'description': 'Защитник с усиленной броней',
+                'rarity': 'rare',
+                'ability': 'Усиленная защита: +20% к здоровью',
+                'owned': false
+            },
+            'classic_rare_2': {
+                'name': 'Теневой Убийца',
+                'image': 'classic_rare_2.png',
+                'cost': 55,
+                'health': 90,
+                'damage': 45,
+                'speed': 0.9,
+                'attack_speed': 1.8,
+                'attack_range': 70,
+                'description': 'Быстрый и смертоносный',
+                'rarity': 'rare',
+                'ability': 'Критический удар: шанс нанести двойной урон',
+                'owned': false
+            },
+            'classic_rare_3': {
+                'name': 'Лесной Охотник',
+                'image': 'classic_rare_3.png',
+                'cost': 60,
+                'health': 110,
+                'damage': 40,
+                'speed': 0.7,
+                'attack_speed': 1.3,
+                'attack_range': 130,
+                'description': 'Меткий стрелок из лука',
+                'rarity': 'rare',
+                'ability': 'Двойной выстрел: иногда атакует дважды',
+                'owned': false
+            },
+            'classic_rare_4': {
+                'name': 'Горный Воин',
+                'image': 'classic_rare_4.png',
+                'cost': 65,
+                'health': 180,
+                'damage': 30,
+                'speed': 0.3,
+                'attack_speed': 0.9,
+                'attack_range': 65,
+                'description': 'Невероятно живучий боец',
+                'rarity': 'rare',
+                'ability': 'Живучесть: восстанавливает здоровье со временем',
+                'owned': false
+            },
+            'classic_epic_1': {
+                'name': 'Маг Огня',
+                'image': 'classic_epic_1.png',
+                'cost': 100,
+                'health': 120,
+                'damage': 60,
+                'speed': 0.4,
+                'attack_speed': 0.6,
+                'attack_range': 160,
+                'description': 'Поджигает врагов',
+                'rarity': 'epic',
+                'ability': 'Огненная аура: наносит урон всем врагам вблизи',
+                'owned': false
+            },
+            'classic_epic_2': {
+                'name': 'Ледяной Страж',
+                'image': 'classic_epic_2.png',
+                'cost': 110,
+                'health': 200,
+                'damage': 35,
+                'speed': 0.3,
+                'attack_speed': 0.8,
+                'attack_range': 80,
+                'description': 'Замедляет врагов',
+                'rarity': 'epic',
+                'ability': 'Ледяная броня: замедляет атакующих его врагов',
+                'owned': false
+            },
+            'classic_epic_3': {
+                'name': 'Штормовой Призыватель',
+                'image': 'classic_epic_3.png',
+                'cost': 120,
+                'health': 100,
+                'damage': 55,
+                'speed': 0.5,
+                'attack_speed': 1.1,
+                'attack_range': 140,
+                'description': 'Призывает молнии',
+                'rarity': 'epic',
+                'ability': 'Электрический разряд: шанс оглушить врага',
+                'owned': false
+            },
+            'classic_myth_1': {
+                'name': 'Драконий Рыцарь',
+                'image': 'classic_myth_1.png',
+                'cost': 200,
+                'health': 250,
+                'damage': 70,
+                'speed': 0.5,
+                'attack_speed': 0.9,
+                'attack_range': 100,
+                'description': 'Дыхание дракона сжигает врагов',
+                'rarity': 'mythic',
+                'ability': 'Дыхание дракона: периодически наносит урон по площади',
+                'owned': false
+            },
+            'classic_myth_2': {
+                'name': 'Феникс Воитель',
+                'image': 'classic_myth_2.png',
+                'cost': 220,
+                'health': 180,
+                'damage': 80,
+                'speed': 0.6,
+                'attack_speed': 1.2,
+                'attack_range': 110,
+                'description': 'Возрождается после смерти',
+                'rarity': 'mythic',
+                'ability': 'Возрождение: с шансом 30% воскрешается с 50% здоровья',
+                'owned': false
+            },
+            'classic_leg': {
+                'name': 'Владыка Битвы',
+                'image': 'classic_leg.png',
+                'cost': 500,
+                'health': 400,
+                'damage': 100,
+                'speed': 0.7,
+                'attack_speed': 1.5,
+                'attack_range': 120,
+                'description': 'Легендарный воин с божественной силой',
+                'rarity': 'legendary',
+                'ability': 'Божественная ярость: при низком здоровье урон увеличивается вдвое',
+                'owned': false
+            }
         };
 
-        // Названия конкретных предметов для каждой редкости
-        const itemNames = {
-            common: ['Каменный меч', 'Кожаный доспех', 'Деревянный щит', 'Простой посох'],
-            rare: ['Стальной меч', 'Кольчужный доспех', 'Стальной щит', 'Магический посох'],
-            epic: ['Мифриловый меч', 'Пластинчатый доспех', 'Мифриловый щит', 'Древний посох'],
-            mythic: ['Легендарный клинок', 'Драконий доспех', 'Щит героя', 'Посох архимага'],
-            impossible: ['Оружие богов', 'Броня титана', 'Щит судьбы', 'Артефакт вселенной']
+        const enemyTypes = [
+            {health: 80, damage: 15, speed: 0.6, attack_speed: 1.0, attack_range: 70, image: 'white_guy.png'},
+            {health: 50, damage: 25, speed: 0.8, attack_speed: 1.2, attack_range: 90, image: 'yellow_guy.png'},
+            {health: 120, damage: 10, speed: 0.4, attack_speed: 0.8, attack_range: 60, image: 'red_guy.png'}
+        ];
+
+        // Игровое состояние
+        let gameState = {
+            currentScreen: 'main_menu',
+            gold: 1000,
+            energy: 100,
+            playerHealth: 100,
+            maxCastleHealth: 100,
+            enemyHealth: 1000,
+            mineLevel: 1,
+            mineProduction: 1,
+            mineUpgradeCost: 100,
+            energyGenLevel: 1,
+            energyGeneration: 1,
+            energyGenUpgradeCost: 150,
+            castleLevel: 1,
+            castleUpgradeCost: 200,
+            keys: 5,
+            ownedCharacters: ['white_guy'],
+            units: [],
+            enemyUnits: [],
+            enemySpawnTimer: 0,
+            unitCounter: 0,
+            enemyCounter: 0,
+            lastGoldUpdate: 0,
+            lastEnergyUpdate: 0,
+            gameOver: false,
+            gameResult: null
         };
 
-        // Начать игру и показать выбранную вкладку
-        function startGame(tabName) {
-            document.getElementById('startScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'block';
-            switchTab(tabName);
-            addLogEntry('Добро пожаловать в игру!', '#4fc3f7');
-        }
+        // Получение элементов DOM
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
 
-        // Переключение между вкладками
-        function switchTab(tabName) {
-            // Скрываем все вкладки
-            document.getElementById('productionTab').style.display = 'none';
-            document.getElementById('casesTab').style.display = 'none';
-            
-            // Убираем активный класс со всех кнопок
-            document.getElementById('navProduction').classList.remove('active');
-            document.getElementById('navCases').classList.remove('active');
-            
-            // Показываем выбранную вкладку и активируем кнопку
-            if (tabName === 'production') {
-                document.getElementById('productionTab').style.display = 'block';
-                document.getElementById('navProduction').classList.add('active');
-                currentTab = 'production';
-            } else if (tabName === 'cases') {
-                document.getElementById('casesTab').style.display = 'block';
-                document.getElementById('navCases').classList.add('active');
-                currentTab = 'cases';
-            }
-            
-            updateUI();
-        }
+        const screens = {
+            main_menu: document.getElementById('main-menu'),
+            characters: document.getElementById('characters-screen'),
+            game: null, // Игровой экран рисуется на canvas
+            production: document.getElementById('production-screen'),
+            upgrades: document.getElementById('upgrades-screen'),
+            cases: document.getElementById('cases-screen')
+        };
 
-        // Обновление интерфейса
-        function updateUI() {
-            document.getElementById('gold').textContent = gold;
-            document.getElementById('keys').textContent = keys;
-            document.getElementById('speed').textContent = speed + 'x';
-            document.getElementById('upgradeCost').textContent = upgradeCost;
-            document.getElementById('loadedGold').textContent = loadedGold;
-            document.getElementById('inProgress').textContent = keysInProgress + ' ключей';
-            document.getElementById('currentSpeed').textContent = speed + ' золото/сек';
-            document.getElementById('nextSpeed').textContent = '+0.5 золота';
-            document.getElementById('openCaseBtn').disabled = keys === 0;
-        }
-
-        // Пассивный заработок золота - каждую секунду!
-        setInterval(() => {
-            gold += speed;
-            updateUI();
+        // Кнопки
+        const buttons = {
+            // Главное меню
+            characters: document.getElementById('characters-btn'),
+            play: document.getElementById('play-btn'),
+            production: document.getElementById('production-btn'),
+            upgrades: document.getElementById('upgrades-btn'),
+            cases: document.getElementById('cases-btn'),
             
-            // Автоматически создаем ключи, если есть загруженное золото
-            processWorkshop();
-        }, 1000); // 1000 мс = 1 секунда
+            // Назад
+            charactersBack: document.getElementById('characters-back-btn'),
+            productionBack: document.getElementById('production-back-btn'),
+            upgradesBack: document.getElementById('upgrades-back-btn'),
+            casesBack: document.getElementById('cases-back-btn'),
+            
+            // Производство
+            upgradeMine: document.getElementById('upgrade-mine-btn'),
+            produce1Key: document.getElementById('produce-1-key-btn'),
+            produce10Keys: document.getElementById('produce-10-keys-btn'),
+            
+            // Улучшения
+            upgradeEnergy: document.getElementById('upgrade-energy-btn'),
+            upgradeCastle: document.getElementById('upgrade-castle-btn'),
+            
+            // Кейсы
+            openCase: document.getElementById('open-case-btn'),
+            
+            // Игра
+            continue: document.getElementById('continue-btn')
+        };
 
-        // Улучшение шахты с возвращенными ценами
-        function buyUpgrade() {
-            if (gold >= upgradeCost) {
-                gold -= upgradeCost;
-                speed += 0.5; // Увеличиваем на 0.5 золота в секунду
-                upgradeLevel++;
+        // Статистика
+        const stats = {
+            gold: document.getElementById('gold-stat'),
+            energy: document.getElementById('energy-stat'),
+            keys: document.getElementById('keys-stat'),
+            chars: document.getElementById('chars-stat'),
+            
+            // Производство
+            mineProduction: document.getElementById('mine-production'),
+            mineLevel: document.getElementById('mine-level'),
+            mineUpgradeCost: document.getElementById('mine-upgrade-cost'),
+            
+            // Улучшения
+            energyLevel: document.getElementById('energy-level'),
+            energyGeneration: document.getElementById('energy-generation'),
+            energyUpgradeCost: document.getElementById('energy-upgrade-cost'),
+            energyProgress: document.getElementById('energy-progress'),
+            castleLevel: document.getElementById('castle-level'),
+            castleHealth: document.getElementById('castle-health'),
+            castleUpgradeCost: document.getElementById('castle-upgrade-cost'),
+            castleProgress: document.getElementById('castle-progress'),
+            
+            // Кейсы
+            availableKeys: document.getElementById('available-keys'),
+            
+            // Игра
+            gameEnergy: document.getElementById('game-energy'),
+            gameHealth: document.getElementById('game-health'),
+            gameEnemyHealth: document.getElementById('game-enemy-health')
+        };
+
+        // Результаты
+        const gameResult = document.getElementById('game-result');
+        const resultTitle = document.getElementById('result-title');
+        const resultMessage = document.getElementById('result-message');
+        const caseResult = document.getElementById('case-result');
+        const caseResultMessage = document.getElementById('case-result-message');
+
+        // Игровой UI
+        const gameUI = document.getElementById('game-ui');
+
+        // Загруженные изображения
+        const images = {};
+
+        // Инициализация игры
+        function init() {
+            // Загрузка изображений
+            loadImages().then(() => {
+                // Настройка кнопок
+                setupButtons();
                 
-                // Возвращаем старую систему цен: 10, 15, 22, 33, 49, 73...
-                upgradeCost = Math.floor(upgradeCost * 1.5);
+                // Обновление статистики
+                updateStats();
                 
-                updateUI();
-                addLogEntry('⚡ Скорость шахты увеличена!', '#4caf50');
-            } else {
-                addLogEntry('❌ Недостаточно золота для улучшения!', '#f44336');
+                // Запуск игрового цикла
+                gameLoop();
+            });
+        }
+
+        // Загрузка изображений
+        function loadImages() {
+            const promises = [];
+            
+            // Загрузка изображений персонажей
+            Object.values(characters).forEach(character => {
+                promises.push(loadImage(character.image));
+            });
+            
+            // Загрузка изображений врагов
+            enemyTypes.forEach(enemy => {
+                promises.push(loadImage(enemy.image));
+            });
+            
+            return Promise.all(promises);
+        }
+
+        // Загрузка отдельного изображения
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    images[src] = img;
+                    resolve();
+                };
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        // Настройка обработчиков кнопок
+        function setupButtons() {
+            // Главное меню
+            buttons.characters.addEventListener('click', () => showScreen('characters'));
+            buttons.play.addEventListener('click', startGame);
+            buttons.production.addEventListener('click', () => showScreen('production'));
+            buttons.upgrades.addEventListener('click', () => showScreen('upgrades'));
+            buttons.cases.addEventListener('click', () => showScreen('cases'));
+            
+            // Кнопки назад
+            buttons.charactersBack.addEventListener('click', () => showScreen('main_menu'));
+            buttons.productionBack.addEventListener('click', () => showScreen('main_menu'));
+            buttons.upgradesBack.addEventListener('click', () => showScreen('main_menu'));
+            buttons.casesBack.addEventListener('click', () => {
+                showScreen('main_menu');
+                hideCaseResult();
+            });
+            
+            // Производство
+            buttons.upgradeMine.addEventListener('click', upgradeMine);
+            buttons.produce1Key.addEventListener('click', () => produceKeys(1));
+            buttons.produce10Keys.addEventListener('click', () => produceKeys(10));
+            
+            // Улучшения
+            buttons.upgradeEnergy.addEventListener('click', upgradeEnergyGeneration);
+            buttons.upgradeCastle.addEventListener('click', upgradeCastle);
+            
+            // Кейсы
+            buttons.openCase.addEventListener('click', openCase);
+            
+            // Игра
+            buttons.continue.addEventListener('click', () => {
+                gameResult.classList.add('hidden');
+                showScreen('main_menu');
+            });
+        }
+
+        // Показать экран
+        function showScreen(screenName) {
+            // Скрыть все экраны
+            Object.values(screens).forEach(screen => {
+                if (screen) screen.classList.add('hidden');
+            });
+            
+            // Скрыть игровой UI
+            gameUI.classList.add('hidden');
+            
+            // Показать выбранный экран
+            if (screenName === 'game') {
+                // Игровой экран рисуется на canvas
+                gameUI.classList.remove('hidden');
+            } else if (screens[screenName]) {
+                screens[screenName].classList.remove('hidden');
+            }
+            
+            gameState.currentScreen = screenName;
+            
+            // Обновление контента экрана
+            if (screenName === 'characters') {
+                renderCharactersScreen();
+            } else if (screenName === 'production' || screenName === 'upgrades' || 
+                      screenName === 'cases' || screenName === 'main_menu') {
+                updateStats();
             }
         }
 
-        // Загрузка золота в мастерскую
-        function loadGold() {
-            const goldInput = document.getElementById('goldToLoad');
-            const amount = parseInt(goldInput.value);
+        // Обновление статистики
+        function updateStats() {
+            // Главное меню
+            stats.gold.textContent = gameState.gold;
+            stats.energy.textContent = gameState.energy;
+            stats.keys.textContent = gameState.keys;
+            stats.chars.textContent = `${gameState.ownedCharacters.length}/${Object.keys(characters).length}`;
             
-            if (isNaN(amount) || amount < 100) {
-                addLogEntry('❌ Введите минимум 100 золота!', '#f44336');
-                return;
-            }
+            // Производство
+            stats.mineProduction.textContent = gameState.mineProduction;
+            stats.mineLevel.textContent = gameState.mineLevel;
+            stats.mineUpgradeCost.textContent = gameState.mineUpgradeCost;
             
-            if (gold < amount) {
-                addLogEntry('❌ Недостаточно золота!', '#f44336');
-                return;
-            }
+            // Улучшения
+            stats.energyLevel.textContent = gameState.energyGenLevel;
+            stats.energyGeneration.textContent = gameState.energyGeneration;
+            stats.energyUpgradeCost.textContent = gameState.energyGenUpgradeCost;
+            stats.energyProgress.style.width = `${(gameState.energyGenLevel / 10) * 100}%`;
             
-            gold -= amount;
-            loadedGold += amount;
-            goldInput.value = '';
-            updateUI();
-            addLogEntry(`🔧 Загружено ${amount} золота в мастерскую`, '#8e2de2');
+            stats.castleLevel.textContent = gameState.castleLevel;
+            stats.castleHealth.textContent = gameState.maxCastleHealth;
+            stats.castleUpgradeCost.textContent = gameState.castleUpgradeCost;
+            stats.castleProgress.style.width = `${(gameState.castleLevel / 10) * 100}%`;
             
-            // Запускаем обработку, если мастерская не активна
-            if (!isWorkshopActive) {
-                processWorkshop();
+            // Кейсы
+            stats.availableKeys.textContent = gameState.keys;
+            
+            // Игра
+            stats.gameEnergy.textContent = gameState.energy;
+            stats.gameHealth.textContent = gameState.playerHealth;
+            stats.gameEnemyHealth.textContent = gameState.enemyHealth;
+        }
+
+        // Рендер экрана персонажей
+        function renderCharactersScreen() {
+            const container = document.getElementById('characters-container');
+            container.innerHTML = '';
+            
+            // Сортировка персонажей по редкости
+            const sortedChars = Object.entries(characters).sort((a, b) => {
+                const rarityOrder = ['common', 'rare', 'epic', 'mythic', 'legendary'];
+                return rarityOrder.indexOf(b[1].rarity) - rarityOrder.indexOf(a[1].rarity);
+            });
+            
+            sortedChars.forEach(([charId, char]) => {
+                const card = document.createElement('div');
+                card.className = `card card-${char.rarity}`;
+                
+                const isOwned = gameState.ownedCharacters.includes(charId);
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="character-icon">
+                            <img src="${char.image}" alt="${char.name}">
+                        </div>
+                        <div class="character-name">${char.name}</div>
+                        <div class="character-rarity">${char.rarity.toUpperCase()}</div>
+                    </div>
+                    <div class="character-description">${char.description}</div>
+                    ${char.ability ? `<div class="character-ability">${char.ability}</div>` : ''}
+                    <div class="character-stats">
+                        <div class="stat-item">❤️ ${char.health}</div>
+                        <div class="stat-item">⚔️ ${char.damage}</div>
+                        <div class="stat-item">👟 ${char.speed}</div>
+                        <div class="stat-item">📏 ${char.attack_range}</div>
+                        <div class="stat-item">⚡ ${char.cost}</div>
+                    </div>
+                    <div class="character-status ${isOwned ? 'owned' : 'locked'}">
+                        ${isOwned ? '✅ В вашей коллекции' : '🔒 Не получен'}
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Начать игру
+        function startGame() {
+            // Сброс состояния игры
+            gameState.playerHealth = gameState.maxCastleHealth;
+            gameState.enemyHealth = 1000;
+            gameState.energy = 0;
+            gameState.units = [];
+            gameState.enemyUnits = [];
+            gameState.enemySpawnTimer = 0;
+            gameState.unitCounter = 0;
+            gameState.enemyCounter = 0;
+            gameState.gameOver = false;
+            gameState.gameResult = null;
+            
+            showScreen('game');
+        }
+
+        // Спавн юнита
+        function spawnUnit(characterId) {
+            const character = characters[characterId];
+            if (gameState.energy >= character.cost && gameState.ownedCharacters.includes(characterId)) {
+                gameState.energy -= character.cost;
+                gameState.unitCounter++;
+                gameState.units.push({
+                    id: `unit_${gameState.unitCounter}`,
+                    characterId: characterId,
+                    x: 300,
+                    health: character.health,
+                    maxHealth: character.health,
+                    damage: character.damage,
+                    speed: character.speed,
+                    attackSpeed: character.attack_speed,
+                    attackRange: character.attack_range,
+                    image: character.image,
+                    isFighting: false,
+                    target: null,
+                    lastAttackTime: 0,
+                    isAttacking: false
+                });
             }
         }
 
-        // Обработка создания ключей в мастерской
-        function processWorkshop() {
-            if (loadedGold >= 100 && !isWorkshopActive) {
-                isWorkshopActive = true;
-                createKey();
-            }
+        // Спавн вражеского юнита
+        function spawnEnemyUnit() {
+            const enemy = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            gameState.enemyCounter++;
+            gameState.enemyUnits.push({
+                id: `enemy_${gameState.enemyCounter}`,
+                x: SCREEN_WIDTH - 300,
+                health: enemy.health,
+                maxHealth: enemy.health,
+                damage: enemy.damage,
+                speed: enemy.speed,
+                attackSpeed: enemy.attack_speed,
+                attackRange: enemy.attack_range,
+                image: enemy.image,
+                isFighting: false,
+                target: null,
+                lastAttackTime: 0,
+                isAttacking: false
+            });
         }
 
-        // Создание одного ключа
-        function createKey() {
-            if (loadedGold < 100) {
-                isWorkshopActive = false;
-                return;
-            }
+        // Обновление юнитов
+        function updateUnits() {
+            const now = Date.now();
             
-            loadedGold -= 100;
-            keysInProgress++;
-            updateUI();
-            
-            const progressBar = document.getElementById('workshopProgress');
-            let progress = 0;
-            
-            const interval = setInterval(() => {
-                progress += 2;
-                progressBar.style.width = progress + '%';
+            // Движение игровых юнитов
+            gameState.units.forEach(unit => {
+                const character = characters[unit.characterId];
+                const reachedEnemyCastle = unit.x >= SCREEN_WIDTH - 400;
                 
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    keys++;
-                    keysInProgress--;
-                    updateUI();
-                    addLogEntry('🔑 Ключ создан!', '#4a00e0');
-                    
-                    // Создаем следующий ключ, если есть золото
-                    setTimeout(() => {
-                        processWorkshop();
-                    }, 100);
-                }
-            }, 100);
-        }
-
-        // Открытие кейса с анимацией
-        function openCase() {
-            if (keys > 0) {
-                keys--;
-                updateUI();
-                
-                // Анимация открытия кейса
-                const openCaseBtn = document.getElementById('openCaseBtn');
-                openCaseBtn.textContent = 'Открывается...';
-                openCaseBtn.disabled = true;
-                
-                // Определяем выпавший предмет
-                const random = Math.random() * 100;
-                let accumulated = 0;
-                let selectedRarity;
-                
-                for (const [rarity, chance] of Object.entries(rarityChances)) {
-                    accumulated += chance;
-                    if (random <= accumulated) {
-                        selectedRarity = rarity;
+                // Поиск вражеских юнитов в радиусе атаки
+                let enemyInRange = null;
+                for (const enemy of gameState.enemyUnits) {
+                    if (Math.abs(unit.x - enemy.x) <= unit.attackRange && enemy.health > 0) {
+                        enemyInRange = enemy;
                         break;
                     }
                 }
                 
-                // Выбираем случайный предмет выпавшей редкости
-                const items = itemNames[selectedRarity];
-                const selectedItem = items[Math.floor(Math.random() * items.length)];
+                if (enemyInRange) {
+                    // Бой с вражеским юнитом
+                    unit.isFighting = true;
+                    unit.target = enemyInRange;
+                    
+                    // Атака вражеского юнита
+                    if (!unit.lastAttackTime || now - unit.lastAttackTime > (1000 / unit.attackSpeed)) {
+                        enemyInRange.health -= unit.damage;
+                        unit.lastAttackTime = now;
+                        unit.isAttacking = true;
+                        
+                        if (enemyInRange.health <= 0) {
+                            gameState.enemyUnits = gameState.enemyUnits.filter(u => u !== enemyInRange);
+                            unit.isFighting = false;
+                            unit.target = null;
+                        }
+                    }
+                } else if (reachedEnemyCastle) {
+                    // Атака вражеской крепости
+                    unit.isFighting = true;
+                    
+                    if (!unit.lastAttackTime || now - unit.lastAttackTime > (1000 / unit.attackSpeed)) {
+                        gameState.enemyHealth -= unit.damage;
+                        unit.lastAttackTime = now;
+                        unit.isAttacking = true;
+                    }
+                } else {
+                    // Свободное движение
+                    unit.isFighting = false;
+                    unit.target = null;
+                    unit.x += unit.speed;
+                }
+            });
+            
+            // Движение вражеских юнитов
+            gameState.enemyUnits.forEach(unit => {
+                const reachedPlayerCastle = unit.x <= 400;
                 
-                // Показываем анимацию выпадения
-                setTimeout(() => {
-                    showRewardAnimation(selectedRarity, selectedItem);
+                // Поиск игровых юнитов в радиусе атаки
+                let playerInRange = null;
+                for (const playerUnit of gameState.units) {
+                    if (Math.abs(unit.x - playerUnit.x) <= unit.attackRange && playerUnit.health > 0) {
+                        playerInRange = playerUnit;
+                        break;
+                    }
+                }
+                
+                if (playerInRange) {
+                    // Бой с игровым юнитом
+                    unit.isFighting = true;
+                    unit.target = playerInRange;
                     
-                    // Добавляем предмет в инвентарь после анимации
-                    setTimeout(() => {
-                        addItemToInventory(selectedRarity, selectedItem);
-                    }, 500);
+                    // Атака игрового юнита
+                    if (!unit.lastAttackTime || now - unit.lastAttackTime > (1000 / unit.attackSpeed)) {
+                        playerInRange.health -= unit.damage;
+                        unit.lastAttackTime = now;
+                        unit.isAttacking = true;
+                        
+                        if (playerInRange.health <= 0) {
+                            gameState.units = gameState.units.filter(u => u !== playerInRange);
+                            unit.isFighting = false;
+                            unit.target = null;
+                        }
+                    }
+                } else if (reachedPlayerCastle) {
+                    // Атака игровой крепости
+                    unit.isFighting = true;
                     
-                    openCaseBtn.textContent = 'Открыть кейс (1🔑)';
-                    openCaseBtn.disabled = keys === 0;
-                }, 1000);
+                    if (!unit.lastAttackTime || now - unit.lastAttackTime > (1000 / unit.attackSpeed)) {
+                        gameState.playerHealth -= unit.damage;
+                        unit.lastAttackTime = now;
+                        unit.isAttacking = true;
+                    }
+                } else {
+                    // Свободное движение
+                    unit.isFighting = false;
+                    unit.target = null;
+                    unit.x -= unit.speed;
+                }
+            });
+            
+            // Удаление мертвых юнитов
+            gameState.units = gameState.units.filter(unit => unit.health > 0);
+            gameState.enemyUnits = gameState.enemyUnits.filter(unit => unit.health > 0);
+        }
+
+        // Обновление игры
+        function updateGame() {
+            const currentTime = Date.now();
+            
+            // Пассивный доход золота
+            if (currentTime - gameState.lastGoldUpdate > 1000) {
+                gameState.gold += gameState.mineProduction;
+                gameState.lastGoldUpdate = currentTime;
+                updateStats();
+            }
+            
+            // Если мы в игре, обновляем состояние игры
+            if (gameState.currentScreen === 'game' && !gameState.gameOver) {
+                // Генерация энергии в матче
+                if (currentTime - gameState.lastEnergyUpdate > 1000) {
+                    gameState.energy += gameState.energyGeneration;
+                    gameState.lastEnergyUpdate = currentTime;
+                    updateStats();
+                }
+                
+                // Спавн вражеских юнитов
+                gameState.enemySpawnTimer += 1000 / FPS;
+                if (gameState.enemySpawnTimer >= 3000) {
+                    spawnEnemyUnit();
+                    gameState.enemySpawnTimer = 0;
+                }
+                
+                // Обновление позиций и атак юнитов
+                updateUnits();
+                
+                // Проверка конца игры
+                if (gameState.playerHealth <= 0 || gameState.enemyHealth <= 0) {
+                    gameState.gameOver = true;
+                    if (gameState.playerHealth <= 0) {
+                        gameState.gameResult = 'lose';
+                        resultTitle.textContent = 'ПОРАЖЕНИЕ';
+                        resultMessage.textContent = 'Попробуйте еще раз!';
+                    } else {
+                        gameState.gameResult = 'win';
+                        resultTitle.textContent = 'ПОБЕДА!';
+                        resultMessage.textContent = '+1 ключ, +50 золота';
+                        // Награда за победу
+                        gameState.keys += 1;
+                        gameState.gold += 50;
+                        updateStats();
+                    }
+                    gameResult.classList.remove('hidden');
+                }
             }
         }
 
-        // Показать анимацию награды
-        function showRewardAnimation(rarity, itemName) {
-            const caseOpening = document.getElementById('caseOpening');
-            const rewardIcon = document.getElementById('rewardIcon');
-            const rewardRarity = document.getElementById('rewardRarity');
-            const rewardName = document.getElementById('rewardName');
-            
-            // Устанавливаем данные о награде
-            rewardIcon.textContent = rarityIcons[rarity];
-            rewardRarity.textContent = rarityNames[rarity];
-            rewardRarity.className = `reward-rarity ${rarity}`;
-            rewardName.textContent = itemName;
-            
-            // Показываем анимацию
-            caseOpening.style.display = 'flex';
+        // Улучшения
+        function upgradeMine() {
+            if (gameState.gold >= gameState.mineUpgradeCost) {
+                gameState.gold -= gameState.mineUpgradeCost;
+                gameState.mineLevel += 1;
+                gameState.mineProduction += 1;
+                gameState.mineUpgradeCost = Math.floor(gameState.mineUpgradeCost * 1.5);
+                updateStats();
+            }
         }
 
-        // Закрыть анимацию награды
-        function closeReward() {
-            document.getElementById('caseOpening').style.display = 'none';
+        function produceKeys(amount) {
+            const cost = amount * 1000;
+            if (gameState.gold >= cost) {
+                gameState.gold -= cost;
+                gameState.keys += amount;
+                updateStats();
+            }
         }
 
-        // Добавление предмета в инвентарь с анимацией
-        function addItemToInventory(rarity, itemName) {
-            const itemsGrid = document.getElementById('itemsGrid');
-            const item = document.createElement('div');
-            item.className = `item ${rarity} item-new`;
-            item.innerHTML = `${rarityIcons[rarity]}<br>${itemName}`;
-            item.title = `${rarityNames[rarity]}: ${itemName}`;
-            itemsGrid.appendChild(item);
+        function upgradeEnergyGeneration() {
+            if (gameState.gold >= gameState.energyGenUpgradeCost) {
+                gameState.gold -= gameState.energyGenUpgradeCost;
+                gameState.energyGenLevel += 1;
+                gameState.energyGeneration += 0.5;
+                gameState.energyGenUpgradeCost = Math.floor(gameState.energyGenUpgradeCost * 1.5);
+                updateStats();
+            }
+        }
+
+        function upgradeCastle() {
+            if (gameState.gold >= gameState.castleUpgradeCost) {
+                gameState.gold -= gameState.castleUpgradeCost;
+                gameState.castleLevel += 1;
+                gameState.maxCastleHealth += 20;
+                gameState.castleUpgradeCost = Math.floor(gameState.castleUpgradeCost * 1.5);
+                updateStats();
+            }
+        }
+
+        function openCase() {
+            if (gameState.keys > 0) {
+                gameState.keys -= 1;
+                updateStats();
+                
+                // Шансы выпадения по редкости
+                const rarityRoll = Math.random();
+                let targetRarity;
+                if (rarityRoll < 0.01) {
+                    targetRarity = 'legendary';
+                } else if (rarityRoll < 0.05) {
+                    targetRarity = 'mythic';
+                } else if (rarityRoll < 0.20) {
+                    targetRarity = 'epic';
+                } else if (rarityRoll < 0.50) {
+                    targetRarity = 'rare';
+                } else {
+                    targetRarity = 'common';
+                }
+                
+                // Доступные персонажи этой редкости
+                const availableChars = Object.keys(characters).filter(charId => 
+                    !gameState.ownedCharacters.includes(charId) && characters[charId].rarity === targetRarity
+                );
+                
+                let resultMessage;
+                if (availableChars.length > 0) {
+                    // Выпадение нового персонажа
+                    const randomCharId = availableChars[Math.floor(Math.random() * availableChars.length)];
+                    gameState.ownedCharacters.push(randomCharId);
+                    characters[randomCharId].owned = true;
+                    resultMessage = `🎉 Поздравляем! Вы получили ${characters[randomCharId].name} (${targetRarity.toUpperCase()})!`;
+                } else {
+                    // Выпадение золота
+                    const goldReward = Math.floor(Math.random() * 401) + 100;
+                    gameState.gold += goldReward;
+                    resultMessage = `💰 Вы получили ${goldReward} золота!`;
+                }
+                
+                showCaseResult(resultMessage);
+            }
+        }
+
+        function showCaseResult(message) {
+            caseResultMessage.textContent = message;
+            caseResult.classList.remove('hidden');
+        }
+
+        function hideCaseResult() {
+            caseResult.classList.add('hidden');
+        }
+
+        // Рендер игры
+        function renderGame() {
+            // Очистка canvas
+            ctx.fillStyle = COLORS.BACKGROUND;
+            ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
             
-            // Убираем класс анимации через 2 секунды
-            setTimeout(() => {
-                item.classList.remove('item-new');
-            }, 2000);
+            // Поле боя
+            ctx.fillStyle = COLORS.BATTLEFIELD;
+            ctx.fillRect(0, SCREEN_HEIGHT - 150, SCREEN_WIDTH, 150);
             
-            addLogEntry(
-                `🎁 Вы получили: <span class="${rarity}">${rarityNames[rarity]} ${itemName}</span>`, 
-                '#4caf50'
-            );
+            // Замки
+            // Замок игрока
+            ctx.fillStyle = COLORS.CASTLE;
+            ctx.fillRect(100, SCREEN_HEIGHT - 400, 200, 250);
+            ctx.strokeStyle = '#654321';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(100, SCREEN_HEIGHT - 400, 200, 250);
+            
+            // Полоска здоровья замка игрока
+            ctx.fillStyle = '#333';
+            ctx.fillRect(100, SCREEN_HEIGHT - 440, 200, 20);
+            ctx.fillStyle = COLORS.HEALTH;
+            ctx.fillRect(100, SCREEN_HEIGHT - 440, 200 * (gameState.playerHealth / gameState.maxCastleHealth), 20);
+            
+            // Замок врага
+            ctx.fillStyle = COLORS.CASTLE;
+            ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 400, 200, 250);
+            ctx.strokeStyle = '#654321';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 400, 200, 250);
+            
+            // Полоска здоровья замка врага
+            ctx.fillStyle = '#333';
+            ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 440, 200, 20);
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 440, 200 * (gameState.enemyHealth / 1000), 20);
+            
+            // Юниты
+            gameState.units.forEach(unit => {
+                // Юнит
+                if (images[unit.image]) {
+                    ctx.drawImage(images[unit.image], unit.x, SCREEN_HEIGHT - 230, 60, 60);
+                } else {
+                    // Запасной вариант если изображение не загружено
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(unit.x, SCREEN_HEIGHT - 230, 60, 60);
+                }
+                
+                // Полоска здоровья юнита
+                ctx.fillStyle = '#333';
+                ctx.fillRect(unit.x, SCREEN_HEIGHT - 240, 60, 8);
+                ctx.fillStyle = '#4caf50';
+                ctx.fillRect(unit.x, SCREEN_HEIGHT - 240, 60 * (unit.health / unit.maxHealth), 8);
+                
+                // Индикатор боя
+                if (unit.isFighting) {
+                    ctx.font = '12px Arial';
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillText('⚔️ БОЙ', unit.x + 10, SCREEN_HEIGHT - 250);
+                }
+            });
+            
+            // Вражеские юниты
+            gameState.enemyUnits.forEach(unit => {
+                // Юнит
+                if (images[unit.image]) {
+                    ctx.drawImage(images[unit.image], unit.x, SCREEN_HEIGHT - 230, 60, 60);
+                } else {
+                    // Запасной вариант если изображение не загружено
+                    ctx.fillStyle = '#c00';
+                    ctx.fillRect(unit.x, SCREEN_HEIGHT - 230, 60, 60);
+                }
+                
+                // Полоска здоровья юнита
+                ctx.fillStyle = '#333';
+                ctx.fillRect(unit.x, SCREEN_HEIGHT - 240, 60, 8);
+                ctx.fillStyle = '#4caf50';
+                ctx.fillRect(unit.x, SCREEN_HEIGHT - 240, 60 * (unit.health / unit.maxHealth), 8);
+                
+                // Индикатор боя
+                if (unit.isFighting) {
+                    ctx.font = '12px Arial';
+                    ctx.fillStyle = '#ff0000';
+                    ctx.fillText('⚔️ БОЙ', unit.x + 10, SCREEN_HEIGHT - 250);
+                }
+            });
+            
+            // Магазин
+            ctx.fillStyle = COLORS.PANEL;
+            ctx.fillRect(SCREEN_WIDTH / 2 - 300, SCREEN_HEIGHT - 140, 600, 120);
+            ctx.strokeStyle = COLORS.GOLD;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(SCREEN_WIDTH / 2 - 300, SCREEN_HEIGHT - 140, 600, 120);
+            
+            const shopItemWidth = 120;
+            const shopMargin = 20;
+            const shopStartX = SCREEN_WIDTH / 2 - 300 + shopMargin;
+            
+            // Отрисовка предметов магазина
+            for (let i = 0; i < Math.min(5, gameState.ownedCharacters.length); i++) {
+                const charId = gameState.ownedCharacters[i];
+                const character = characters[charId];
+                const x = shopStartX + i * (shopItemWidth + shopMargin);
+                const rarityColor = COLORS.RARITY[character.rarity];
+                
+                // Фон предмета магазина
+                const itemColor = gameState.energy >= character.cost ? rarityColor : '#666';
+                ctx.fillStyle = itemColor;
+                ctx.fillRect(x, SCREEN_HEIGHT - 130, shopItemWidth, 100);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, SCREEN_HEIGHT - 130, shopItemWidth, 100);
+                
+                // Изображение персонажа
+                if (images[character.image]) {
+                    ctx.drawImage(images[character.image], x + shopItemWidth / 2 - 20, SCREEN_HEIGHT - 120, 40, 40);
+                }
+                
+                // Название
+                ctx.font = '12px Arial';
+                ctx.fillStyle = '#000';
+                ctx.fillText(character.name, x + 5, SCREEN_HEIGHT - 70);
+                
+                // Стоимость
+                ctx.fillText(`${character.cost}⚡`, x + shopItemWidth / 2 - 15, SCREEN_HEIGHT - 50);
+            }
         }
 
-        // Добавление записи в журнал
-        function addLogEntry(message, color) {
-            const logEntries = document.getElementById('logEntries');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
-            entry.style.borderLeftColor = color;
-            logEntries.appendChild(entry);
-            logEntries.scrollTop = logEntries.scrollHeight;
+        // Обработка кликов по магазину
+        function handleShopClick(x, y) {
+            if (gameState.currentScreen !== 'game' || gameState.gameOver) return;
+            
+            const shopItemWidth = 120;
+            const shopMargin = 20;
+            const shopStartX = SCREEN_WIDTH / 2 - 300 + shopMargin;
+            const shopY = SCREEN_HEIGHT - 130;
+            const shopHeight = 100;
+            
+            for (let i = 0; i < Math.min(5, gameState.ownedCharacters.length); i++) {
+                const charId = gameState.ownedCharacters[i];
+                const itemX = shopStartX + i * (shopItemWidth + shopMargin);
+                
+                if (x >= itemX && x <= itemX + shopItemWidth && 
+                    y >= shopY && y <= shopY + shopHeight) {
+                    spawnUnit(charId);
+                    break;
+                }
+            }
         }
 
-        // Инициализация при загрузке
-        updateUI();
+        // Игровой цикл
+        function gameLoop() {
+            updateGame();
+            
+            if (gameState.currentScreen === 'game') {
+                renderGame();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Обработка кликов по canvas
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (gameState.currentScreen === 'game') {
+                handleShopClick(x, y);
+            }
+        });
+
+        // Запуск игры
+        init();
     </script>
 </body>
 </html>
