@@ -445,6 +445,18 @@
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
+        
+        .difficulty-indicator {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
@@ -559,7 +571,7 @@
                     <span>🎁 Боевой кейс</span>
                 </div>
                 <div class="upgrade-stats">Доступные ключи: <span id="available-keys">5</span> 🔑</div>
-                <p>Шансы: Обычный 50%, Редкий 30%, Эпический 15%, Мифический 4%, Легендарный 1%</p>
+                <p>Шансы: Золото 75%, Обычный 15%, Редкий 6%, Эпический 3%, Мифический 0.9%, Легендарный 0.1%</p>
                 <button class="button" id="open-case-btn">Открыть кейс (1🔑)</button>
             </div>
         </div>
@@ -575,6 +587,11 @@
             <div class="ui-panel">
                 👹 <span id="game-enemy-health">1000</span>
             </div>
+        </div>
+        
+        <!-- Индикатор сложности -->
+        <div id="difficulty-indicator" class="difficulty-indicator hidden">
+            Сложность: <span id="difficulty-level">1</span>
         </div>
         
         <!-- Результат игры -->
@@ -691,7 +708,7 @@
             },
             'classic_rare_1': {
                 'name': 'Теневой Убийца',
-                'image': 'classic_rare_2.png', // Поменяли местами с classic_rare_2
+                'image': 'classic_rare_2.png',
                 'cost': 50,
                 'health': 90,
                 'damage': 45,
@@ -705,7 +722,7 @@
             },
             'classic_rare_2': {
                 'name': 'Рыцарь Света',
-                'image': 'classic_rare_1.png', // Поменяли местами с classic_rare_1
+                'image': 'classic_rare_1.png',
                 'cost': 55,
                 'health': 150,
                 'damage': 35,
@@ -761,7 +778,7 @@
             },
             'classic_epic_2': {
                 'name': 'Феникс Воитель',
-                'image': 'classic_myth_2.png', // Поменяли местами с classic_myth_2
+                'image': 'classic_myth_2.png',
                 'cost': 110,
                 'health': 180,
                 'damage': 80,
@@ -803,7 +820,7 @@
             },
             'classic_myth_2': {
                 'name': 'Ледяной Страж',
-                'image': 'classic_epic_2.png', // Поменяли местами с classic_epic_2
+                'image': 'classic_epic_2.png',
                 'cost': 220,
                 'health': 200,
                 'damage': 35,
@@ -864,7 +881,10 @@
             lastEnergyUpdate: 0,
             gameOver: false,
             gameResult: null,
-            damagePopups: []
+            damagePopups: [],
+            difficulty: 1,
+            gamesPlayed: 0,
+            gamesWon: 0
         };
 
         // Получение элементов DOM
@@ -952,6 +972,8 @@
         // Игровой UI
         const gameUI = document.getElementById('game-ui');
         const energyPanel = document.getElementById('energy-panel');
+        const difficultyIndicator = document.getElementById('difficulty-indicator');
+        const difficultyLevel = document.getElementById('difficulty-level');
 
         // Загруженные изображения
         const images = {};
@@ -1060,11 +1082,13 @@
             
             // Скрыть игровой UI
             gameUI.classList.add('hidden');
+            difficultyIndicator.classList.add('hidden');
             
             // Показать выбранный экран
             if (screenName === 'game') {
                 // Игровой экран рисуется на canvas
                 gameUI.classList.remove('hidden');
+                difficultyIndicator.classList.remove('hidden');
             } else if (screens[screenName]) {
                 screens[screenName].classList.remove('hidden');
             }
@@ -1111,6 +1135,9 @@
             stats.gameEnergy.textContent = gameState.energy;
             stats.gameHealth.textContent = gameState.playerHealth;
             stats.gameEnemyHealth.textContent = gameState.enemyHealth;
+            
+            // Сложность
+            difficultyLevel.textContent = gameState.difficulty;
             
             // Обновление состояния кнопок улучшений
             updateUpgradeButtons();
@@ -1197,8 +1224,13 @@
         function startGame() {
             // Сброс состояния игры
             gameState.playerHealth = gameState.maxCastleHealth;
-            gameState.enemyHealth = 1000;
-            gameState.energy = 0;
+            
+            // Балансировка здоровья вражеского замка в зависимости от сложности
+            const baseEnemyHealth = 500;
+            const difficultyMultiplier = 1 + (gameState.difficulty - 1) * 0.2;
+            gameState.enemyHealth = Math.floor(baseEnemyHealth * difficultyMultiplier);
+            
+            gameState.energy = 50; // Начальная энергия увеличена для баланса
             gameState.units = [];
             gameState.enemyUnits = [];
             gameState.enemySpawnTimer = 0;
@@ -1254,7 +1286,15 @@
 
         // Спавн вражеского юнита
         function spawnEnemyUnit() {
-            const enemy = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+            // Балансировка врагов в зависимости от сложности
+            const difficultyMultiplier = 1 + (gameState.difficulty - 1) * 0.1;
+            
+            const enemy = {...enemyTypes[Math.floor(Math.random() * enemyTypes.length)]};
+            
+            // Увеличиваем характеристики врагов в зависимости от сложности
+            enemy.health = Math.floor(enemy.health * difficultyMultiplier);
+            enemy.damage = Math.floor(enemy.damage * difficultyMultiplier);
+            
             gameState.enemyCounter++;
             gameState.enemyUnits.push({
                 id: `enemy_${gameState.enemyCounter}`,
@@ -1426,9 +1466,15 @@
                     updateStats();
                 }
                 
-                // Спавн вражеских юнитов (увеличен интервал для уменьшения количества врагов)
+                // Спавн вражеских юнитов (интервал зависит от сложности)
                 gameState.enemySpawnTimer += 1000 / FPS;
-                if (gameState.enemySpawnTimer >= 5000) { // Увеличили с 3000 до 5000 мс
+                
+                // Балансировка интервала спавна врагов
+                const baseSpawnInterval = 5000; // 5 секунд
+                const difficultySpawnMultiplier = 1 - (gameState.difficulty - 1) * 0.1;
+                const spawnInterval = Math.max(2000, baseSpawnInterval * difficultySpawnMultiplier);
+                
+                if (gameState.enemySpawnTimer >= spawnInterval) {
                     spawnEnemyUnit();
                     gameState.enemySpawnTimer = 0;
                 }
@@ -1439,20 +1485,30 @@
                 // Проверка конца игры
                 if (gameState.playerHealth <= 0 || gameState.enemyHealth <= 0) {
                     gameState.gameOver = true;
+                    gameState.gamesPlayed++;
+                    
                     if (gameState.playerHealth <= 0) {
                         gameState.gameResult = 'lose';
                         resultTitle.textContent = 'ПОРАЖЕНИЕ';
                         resultMessage.textContent = 'Попробуйте еще раз!';
+                        
+                        // Уменьшаем сложность после поражения (но не ниже 1)
+                        gameState.difficulty = Math.max(1, gameState.difficulty - 1);
                     } else {
                         gameState.gameResult = 'win';
                         resultTitle.textContent = 'ПОБЕДА!';
                         resultMessage.textContent = '+1 ключ, +50 золота';
+                        
                         // Награда за победу
                         gameState.keys += 1;
                         gameState.gold += 50;
-                        updateStats();
+                        gameState.gamesWon++;
+                        
+                        // Увеличиваем сложность после победы
+                        gameState.difficulty++;
                     }
                     gameResult.classList.remove('hidden');
+                    updateStats();
                 }
             }
         }
@@ -1514,18 +1570,30 @@
                 gameState.keys -= 1;
                 updateStats();
                 
-                // Шансы выпадения по редкости
+                // Новые шансы выпадения: 75% золото, 25% персонаж
                 const rarityRoll = Math.random();
                 let targetRarity;
-                if (rarityRoll < 0.01) {
+                
+                if (rarityRoll < 0.75) {
+                    // 75% шанс выпадения золота
+                    const goldReward = Math.floor(Math.random() * 401) + 100;
+                    gameState.gold += goldReward;
+                    showCaseResult(`💰 Вы получили ${goldReward} золота!`);
+                    updateStats();
+                    return;
+                }
+                
+                // 25% шанс выпадения персонажа
+                const characterRoll = Math.random();
+                if (characterRoll < 0.01) { // 0.1% легендарный (от 25%)
                     targetRarity = 'legendary';
-                } else if (rarityRoll < 0.05) {
+                } else if (characterRoll < 0.046) { // 3.6% мифический (от 25%)
                     targetRarity = 'mythic';
-                } else if (rarityRoll < 0.20) {
+                } else if (characterRoll < 0.166) { // 12% эпический (от 25%)
                     targetRarity = 'epic';
-                } else if (rarityRoll < 0.50) {
+                } else if (characterRoll < 0.406) { // 24% редкий (от 25%)
                     targetRarity = 'rare';
-                } else {
+                } else { // 60% обычный (от 25%)
                     targetRarity = 'common';
                 }
                 
@@ -1549,7 +1617,7 @@
                         }, 100);
                     }
                 } else {
-                    // Выпадение золота
+                    // Если все персонажи этой редкости уже есть, выпадает золото
                     const goldReward = Math.floor(Math.random() * 401) + 100;
                     gameState.gold += goldReward;
                     resultMessage = `💰 Вы получили ${goldReward} золота!`;
@@ -1616,7 +1684,7 @@
             ctx.fillStyle = '#333';
             ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 440, 200, 20);
             ctx.fillStyle = '#ff6b6b';
-            ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 440, 200 * (gameState.enemyHealth / 1000), 20);
+            ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 440, 200 * (gameState.enemyHealth / (500 * (1 + (gameState.difficulty - 1) * 0.2))), 20);
             
             // Юниты
             gameState.units.forEach(unit => {
