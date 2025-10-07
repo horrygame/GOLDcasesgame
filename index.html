@@ -445,32 +445,6 @@
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
-        
-        .auto-spawn-panel {
-            position: absolute;
-            bottom: 150px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border-radius: 10px;
-            display: flex;
-            gap: 10px;
-            z-index: 5;
-        }
-        
-        .auto-spawn-btn {
-            background: rgba(255, 215, 0, 0.8);
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .auto-spawn-btn.active {
-            background: rgba(76, 175, 80, 0.8);
-        }
     </style>
 </head>
 <body>
@@ -603,14 +577,6 @@
             </div>
         </div>
         
-        <!-- Панель автоматического спавна -->
-        <div id="auto-spawn-panel" class="auto-spawn-panel hidden">
-            <button class="auto-spawn-btn" id="auto-spawn-1">Авто: 1</button>
-            <button class="auto-spawn-btn" id="auto-spawn-2">Авто: 2</button>
-            <button class="auto-spawn-btn" id="auto-spawn-3">Авто: 3</button>
-            <button class="auto-spawn-btn" id="auto-spawn-off">Выкл</button>
-        </div>
-        
         <!-- Результат игры -->
         <div id="game-result" class="game-result hidden">
             <h2 id="result-title">ПОБЕДА!</h2>
@@ -724,23 +690,9 @@
                 'owned': false
             },
             'classic_rare_1': {
-                'name': 'Рыцарь Света',
-                'image': 'classic_rare_1.png',
-                'cost': 50,
-                'health': 150,
-                'damage': 35,
-                'speed': 0.5,
-                'attack_speed': 1.0,
-                'attack_range': 90,
-                'description': 'Защитник с усиленной броней',
-                'rarity': 'rare',
-                'ability': 'Усиленная защита: +20% к здоровью',
-                'owned': false
-            },
-            'classic_rare_2': {
                 'name': 'Теневой Убийца',
-                'image': 'classic_rare_2.png',
-                'cost': 55,
+                'image': 'classic_rare_2.png', // Поменяли местами с classic_rare_2
+                'cost': 50,
                 'health': 90,
                 'damage': 45,
                 'speed': 0.9,
@@ -749,6 +701,20 @@
                 'description': 'Быстрый и смертоносный',
                 'rarity': 'rare',
                 'ability': 'Критический удар: шанс нанести двойной урон',
+                'owned': false
+            },
+            'classic_rare_2': {
+                'name': 'Рыцарь Света',
+                'image': 'classic_rare_1.png', // Поменяли местами с classic_rare_1
+                'cost': 55,
+                'health': 150,
+                'damage': 35,
+                'speed': 0.5,
+                'attack_speed': 1.0,
+                'attack_range': 90,
+                'description': 'Защитник с усиленной броней',
+                'rarity': 'rare',
+                'ability': 'Усиленная защита: +20% к здоровью',
                 'owned': false
             },
             'classic_rare_3': {
@@ -794,17 +760,17 @@
                 'owned': false
             },
             'classic_epic_2': {
-                'name': 'Ледяной Страж',
-                'image': 'classic_epic_2.png',
+                'name': 'Феникс Воитель',
+                'image': 'classic_myth_2.png', // Поменяли местами с classic_myth_2
                 'cost': 110,
-                'health': 200,
-                'damage': 35,
-                'speed': 0.3,
-                'attack_speed': 0.8,
-                'attack_range': 80,
-                'description': 'Замедляет врагов',
+                'health': 180,
+                'damage': 80,
+                'speed': 0.6,
+                'attack_speed': 1.2,
+                'attack_range': 110,
+                'description': 'Возрождается после смерти',
                 'rarity': 'epic',
-                'ability': 'Ледяная броня: замедляет атакующих его врагов',
+                'ability': 'Возрождение: с шансом 30% воскрешается с 50% здоровья',
                 'owned': false
             },
             'classic_epic_3': {
@@ -836,17 +802,17 @@
                 'owned': false
             },
             'classic_myth_2': {
-                'name': 'Феникс Воитель',
-                'image': 'classic_myth_2.png',
+                'name': 'Ледяной Страж',
+                'image': 'classic_epic_2.png', // Поменяли местами с classic_epic_2
                 'cost': 220,
-                'health': 180,
-                'damage': 80,
-                'speed': 0.6,
-                'attack_speed': 1.2,
-                'attack_range': 110,
-                'description': 'Возрождается после смерти',
+                'health': 200,
+                'damage': 35,
+                'speed': 0.3,
+                'attack_speed': 0.8,
+                'attack_range': 80,
+                'description': 'Замедляет врагов',
                 'rarity': 'mythic',
-                'ability': 'Возрождение: с шансом 30% воскрешается с 50% здоровья',
+                'ability': 'Ледяная броня: замедляет атакующих его врагов',
                 'owned': false
             },
             'classic_leg': {
@@ -898,11 +864,6 @@
             lastEnergyUpdate: 0,
             gameOver: false,
             gameResult: null,
-            autoSpawn: {
-                active: false,
-                characterId: null,
-                interval: null
-            },
             damagePopups: []
         };
 
@@ -947,13 +908,7 @@
             openCase: document.getElementById('open-case-btn'),
             
             // Игра
-            continue: document.getElementById('continue-btn'),
-            
-            // Автоспавн
-            autoSpawn1: document.getElementById('auto-spawn-1'),
-            autoSpawn2: document.getElementById('auto-spawn-2'),
-            autoSpawn3: document.getElementById('auto-spawn-3'),
-            autoSpawnOff: document.getElementById('auto-spawn-off')
+            continue: document.getElementById('continue-btn')
         };
 
         // Статистика
@@ -997,7 +952,6 @@
         // Игровой UI
         const gameUI = document.getElementById('game-ui');
         const energyPanel = document.getElementById('energy-panel');
-        const autoSpawnPanel = document.getElementById('auto-spawn-panel');
 
         // Загруженные изображения
         const images = {};
@@ -1095,12 +1049,6 @@
                 gameResult.classList.add('hidden');
                 showScreen('main_menu');
             });
-            
-            // Автоспавн
-            buttons.autoSpawn1.addEventListener('click', () => setupAutoSpawn('white_guy', 2000));
-            buttons.autoSpawn2.addEventListener('click', () => setupAutoSpawn('white_guy', 1500));
-            buttons.autoSpawn3.addEventListener('click', () => setupAutoSpawn('white_guy', 1000));
-            buttons.autoSpawnOff.addEventListener('click', disableAutoSpawn);
         }
 
         // Показать экран
@@ -1112,13 +1060,11 @@
             
             // Скрыть игровой UI
             gameUI.classList.add('hidden');
-            autoSpawnPanel.classList.add('hidden');
             
             // Показать выбранный экран
             if (screenName === 'game') {
                 // Игровой экран рисуется на canvas
                 gameUI.classList.remove('hidden');
-                autoSpawnPanel.classList.remove('hidden');
             } else if (screens[screenName]) {
                 screens[screenName].classList.remove('hidden');
             }
@@ -1262,9 +1208,6 @@
             gameState.gameResult = null;
             gameState.damagePopups = [];
             
-            // Отключение автоспавна
-            disableAutoSpawn();
-            
             showScreen('game');
         }
 
@@ -1328,44 +1271,6 @@
                 lastAttackTime: 0,
                 isAttacking: false
             });
-        }
-
-        // Настройка автоспавна
-        function setupAutoSpawn(characterId, interval) {
-            disableAutoSpawn();
-            
-            gameState.autoSpawn.active = true;
-            gameState.autoSpawn.characterId = characterId;
-            gameState.autoSpawn.interval = setInterval(() => {
-                if (gameState.currentScreen === 'game' && !gameState.gameOver) {
-                    spawnUnit(characterId);
-                }
-            }, interval);
-            
-            // Визуальная обратная связь
-            buttons.autoSpawn1.classList.remove('active');
-            buttons.autoSpawn2.classList.remove('active');
-            buttons.autoSpawn3.classList.remove('active');
-            
-            if (interval === 2000) buttons.autoSpawn1.classList.add('active');
-            if (interval === 1500) buttons.autoSpawn2.classList.add('active');
-            if (interval === 1000) buttons.autoSpawn3.classList.add('active');
-        }
-
-        // Отключение автоспавна
-        function disableAutoSpawn() {
-            if (gameState.autoSpawn.interval) {
-                clearInterval(gameState.autoSpawn.interval);
-            }
-            gameState.autoSpawn.active = false;
-            gameState.autoSpawn.characterId = null;
-            gameState.autoSpawn.interval = null;
-            
-            // Визуальная обратная связь
-            buttons.autoSpawn1.classList.remove('active');
-            buttons.autoSpawn2.classList.remove('active');
-            buttons.autoSpawn3.classList.remove('active');
-            buttons.autoSpawnOff.classList.add('active');
         }
 
         // Создание всплывающего сообщения об уроне
@@ -1521,9 +1426,9 @@
                     updateStats();
                 }
                 
-                // Спавн вражеских юнитов
+                // Спавн вражеских юнитов (увеличен интервал для уменьшения количества врагов)
                 gameState.enemySpawnTimer += 1000 / FPS;
-                if (gameState.enemySpawnTimer >= 3000) {
+                if (gameState.enemySpawnTimer >= 5000) { // Увеличили с 3000 до 5000 мс
                     spawnEnemyUnit();
                     gameState.enemySpawnTimer = 0;
                 }
@@ -1548,9 +1453,6 @@
                         updateStats();
                     }
                     gameResult.classList.remove('hidden');
-                    
-                    // Отключение автоспавна при завершении игры
-                    disableAutoSpawn();
                 }
             }
         }
