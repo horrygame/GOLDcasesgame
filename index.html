@@ -739,7 +739,7 @@
         const SCREEN_HEIGHT = 800;
         const FPS = 60;
         const PREPARATION_TIME = 60; // 60 секунд на подготовку
-        const CASTLE_RADIUS = 80; // Радиус крепости
+        const BATTLE_DURATION = 120; // 120 секунд длительность битвы
 
         // Цвета в средневековом стиле
         const COLORS = {
@@ -808,6 +808,36 @@
                 'rarity': 'common',
                 'ability': null,
                 'owned': false
+            },
+            'green_guy': {
+                'name': 'Зеленый Лучник',
+                'image': 'green_guy.png',
+                'cost': 25,
+                'health': 70,
+                'damage': 35,
+                'speed': 1.7,
+                'attack_speed': 1.5,
+                'attack_range': 120,
+                'vision_range': 200,
+                'description': 'Дальний бой, высокая скорость',
+                'rarity': 'common',
+                'ability': null,
+                'owned': false
+            },
+            'blue_guy': {
+                'name': 'Синий Маг',
+                'image': 'blue_guy.png',
+                'cost': 30,
+                'health': 60,
+                'damage': 40,
+                'speed': 1.2,
+                'attack_speed': 0.7,
+                'attack_range': 150,
+                'vision_range': 180,
+                'description': 'Мощные заклинания',
+                'rarity': 'common',
+                'ability': null,
+                'owned': false
             }
         };
 
@@ -841,16 +871,16 @@
             unitCounter: 0,
             enemyCounter: 0,
             lastGoldUpdate: 0,
+            lastSecondUpdate: 0,
             preparationTimeLeft: PREPARATION_TIME,
+            battleTimeLeft: BATTLE_DURATION,
             gameOver: false,
             gameResult: null,
             damagePopups: [],
             selectedCharacter: null,
             selectedUnit: null,
             gamesPlayed: 0,
-            gamesWon: 0,
-            battleTime: 0,
-            lastTime: 0
+            gamesWon: 0
         };
 
         // Получение элементов DOM
@@ -954,18 +984,63 @@
 
         // Инициализация игры
         function init() {
-            // Настройка кнопок
-            setupButtons();
+            // Загрузка изображений
+            loadImages().then(() => {
+                // Настройка кнопок
+                setupButtons();
+                
+                // Обновление статистики
+                updateStats();
+                
+                // Создание кнопок персонажей
+                createCharacterButtons();
+                
+                // Запуск игрового цикла
+                gameLoop();
+            });
+        }
+
+        // Загрузка изображений
+        function loadImages() {
+            const promises = [];
             
-            // Обновление статистики
-            updateStats();
+            // Загрузка изображений персонажей
+            Object.values(characters).forEach(character => {
+                promises.push(loadImage(character.image));
+            });
             
-            // Создание кнопок персонажей
-            createCharacterButtons();
+            // Загрузка изображений врагов
+            enemyTypes.forEach(enemy => {
+                promises.push(loadImage(enemy.image));
+            });
             
-            // Запуск игрового цикла
-            gameState.lastTime = Date.now();
-            gameLoop();
+            return Promise.all(promises);
+        }
+
+        // Загрузка отдельного изображения
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    images[src] = img;
+                    resolve();
+                };
+                img.onerror = () => {
+                    // Создаем заглушку если изображение не загружено
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 60;
+                    canvas.height = 60;
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#8d6e63';
+                    ctx.fillRect(0, 0, 60, 60);
+                    ctx.fillStyle = '#5d4037';
+                    ctx.font = '10px Arial';
+                    ctx.fillText('IMG', 20, 30);
+                    images[src] = canvas;
+                    resolve();
+                };
+                img.src = src;
+            });
         }
 
         // Настройка обработчиков кнопок
@@ -1020,18 +1095,16 @@
                 
                 button.innerHTML = `
                     <div class="character-button-icon">
-                        <div style="width:40px;height:40px;background:#8d6e63;display:flex;justify-content:center;align-items:center;color:#fff;font-weight:bold">${character.name.charAt(0)}</div>
+                        <img src="${character.image}" alt="${character.name}">
                     </div>
                     <div class="character-button-name">${character.name}</div>
                     <div class="character-button-cost">${character.cost}⚡</div>
                 `;
                 
                 button.addEventListener('click', () => {
-                    if (gameState.gamePhase === 'preparation') {
-                        gameState.selectedCharacter = charId;
-                        // Снимаем выделение с юнитов
-                        gameState.selectedUnit = null;
-                    }
+                    gameState.selectedCharacter = charId;
+                    // Снимаем выделение с юнитов
+                    gameState.selectedUnit = null;
                 });
                 
                 characterButtons.appendChild(button);
@@ -1109,8 +1182,9 @@
             // Обновление таймера в зависимости от фазы игры
             if (gameState.gamePhase === 'preparation') {
                 stats.gameTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
+                preparationTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
             } else if (gameState.gamePhase === 'battle') {
-                stats.gameTimer.textContent = Math.floor(gameState.battleTime / 1000);
+                stats.gameTimer.textContent = Math.ceil(gameState.battleTimeLeft);
             }
             
             // Обновление состояния кнопок улучшений
@@ -1171,7 +1245,7 @@
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="character-icon">
-                            <div style="width:60px;height:60px;background:#8d6e63;display:flex;justify-content:center;align-items:center;color:#fff;font-weight:bold;border-radius:5px;">${char.name.charAt(0)}</div>
+                            <img src="${char.image}" alt="${char.name}">
                         </div>
                         <div class="character-name">${char.name}</div>
                         <div class="character-rarity">${char.rarity.toUpperCase()}</div>
@@ -1206,13 +1280,14 @@
             gameState.unitCounter = 0;
             gameState.enemyCounter = 0;
             gameState.preparationTimeLeft = PREPARATION_TIME;
+            gameState.battleTimeLeft = BATTLE_DURATION;
             gameState.gamePhase = 'preparation';
             gameState.gameOver = false;
             gameState.gameResult = null;
             gameState.damagePopups = [];
             gameState.selectedCharacter = null;
             gameState.selectedUnit = null;
-            gameState.battleTime = 0;
+            gameState.lastSecondUpdate = Date.now();
             
             showScreen('game');
         }
@@ -1228,14 +1303,6 @@
             if (gameState.selectedCharacter && gameState.energy >= characters[gameState.selectedCharacter].cost) {
                 const character = characters[gameState.selectedCharacter];
                 
-                // Проверяем, что юнит размещается не слишком близко к крепости
-                const castleX = SCREEN_WIDTH / 2;
-                const castleY = SCREEN_HEIGHT / 2;
-                if (distance(x, y, castleX, castleY) < CASTLE_RADIUS + 40) {
-                    createDamagePopup(x, y, "Слишком близко к крепости!", '#ef5350');
-                    return false;
-                }
-                
                 gameState.energy -= character.cost;
                 gameState.unitCounter++;
                 gameState.units.push({
@@ -1250,6 +1317,7 @@
                     attackSpeed: character.attack_speed,
                     attackRange: character.attack_range,
                     visionRange: character.vision_range,
+                    image: character.image,
                     target: null,
                     moveTarget: null,
                     lastAttackTime: 0,
@@ -1353,6 +1421,7 @@
                 attackSpeed: enemyType.attack_speed,
                 attackRange: enemyType.attack_range,
                 visionRange: enemyType.vision_range,
+                image: enemyType.image,
                 target: null,
                 lastAttackTime: 0,
                 state: 'moving' // moving, attacking
@@ -1372,7 +1441,7 @@
         }
 
         // Обновление юнитов
-        function updateUnits(deltaTime) {
+        function updateUnits() {
             const now = Date.now();
             const castleX = SCREEN_WIDTH / 2;
             const castleY = SCREEN_HEIGHT / 2;
@@ -1408,8 +1477,8 @@
                     
                     if (dist > unit.attackRange) {
                         // Двигаемся к цели
-                        unit.x += (dx / dist) * unit.speed * (deltaTime / 16);
-                        unit.y += (dy / dist) * unit.speed * (deltaTime / 16);
+                        unit.x += (dx / dist) * unit.speed;
+                        unit.y += (dy / dist) * unit.speed;
                     } else {
                         // Атакуем цель, если в радиусе атаки
                         unit.state = 'attacking';
@@ -1421,8 +1490,8 @@
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
                     if (dist > 5) {
-                        unit.x += (dx / dist) * unit.speed * (deltaTime / 16);
-                        unit.y += (dy / dist) * unit.speed * (deltaTime / 16);
+                        unit.x += (dx / dist) * unit.speed;
+                        unit.y += (dy / dist) * unit.speed;
                     } else {
                         // Достигли точки назначения
                         unit.moveTarget = null;
@@ -1493,8 +1562,8 @@
                     
                     if (dist > enemy.attackRange) {
                         // Двигаемся к цели
-                        enemy.x += (dx / dist) * enemy.speed * (deltaTime / 16);
-                        enemy.y += (dy / dist) * enemy.speed * (deltaTime / 16);
+                        enemy.x += (dx / dist) * enemy.speed;
+                        enemy.y += (dy / dist) * enemy.speed;
                     } else {
                         // Атакуем цель, если в радиусе атаки
                         enemy.state = 'attacking';
@@ -1542,69 +1611,77 @@
         }
 
         // Обновление игры
-        function updateGame(deltaTime) {
+        function updateGame() {
             const currentTime = Date.now();
             
             // Пассивный доход золота
             if (currentTime - gameState.lastGoldUpdate > 1000) {
                 gameState.gold += gameState.mineProduction;
                 gameState.lastGoldUpdate = currentTime;
+                updateStats();
+            }
+            
+            // Обновление таймера каждую секунду
+            if (currentTime - gameState.lastSecondUpdate > 1000) {
+                if (gameState.currentScreen === 'game') {
+                    if (gameState.gamePhase === 'preparation') {
+                        // Обновление таймера подготовки
+                        gameState.preparationTimeLeft -= 1;
+                        
+                        // Автоматическое начало битвы по истечении времени
+                        if (gameState.preparationTimeLeft <= 0) {
+                            startBattle();
+                        }
+                    } else if (gameState.gamePhase === 'battle' && !gameState.gameOver) {
+                        // Уменьшаем время битвы
+                        gameState.battleTimeLeft -= 1;
+                        
+                        // Спавн вражеских юнитов
+                        gameState.enemySpawnTimer += 1;
+                        if (gameState.enemySpawnTimer >= 2) { // Спавн каждые 2 секунды
+                            spawnEnemyUnit();
+                            gameState.enemySpawnTimer = 0;
+                        }
+                    }
+                }
+                
+                gameState.lastSecondUpdate = currentTime;
+                updateStats();
             }
             
             // Если мы в игре, обновляем состояние игры
-            if (gameState.currentScreen === 'game') {
-                if (gameState.gamePhase === 'preparation') {
-                    // Обновление таймера подготовки
-                    gameState.preparationTimeLeft -= deltaTime;
-                    preparationTimer.textContent = Math.ceil(gameState.preparationTimeLeft / 1000);
+            if (gameState.currentScreen === 'game' && !gameState.gameOver) {
+                // Обновление позиций и атак юнитов
+                updateUnits();
+                
+                // Проверка конца игры
+                if (gameState.playerHealth <= 0) {
+                    gameState.gameOver = true;
+                    gameState.gamesPlayed++;
                     
-                    // Автоматическое начало битвы по истечении времени
-                    if (gameState.preparationTimeLeft <= 0) {
-                        startBattle();
-                    }
-                } else if (gameState.gamePhase === 'battle' && !gameState.gameOver) {
-                    // Увеличиваем время битвы
-                    gameState.battleTime += deltaTime;
+                    gameState.gameResult = 'lose';
+                    resultTitle.textContent = 'ПОРАЖЕНИЕ';
+                    resultMessage.textContent = 'Попробуйте еще раз!';
                     
-                    // Спавн вражеских юнитов
-                    gameState.enemySpawnTimer += deltaTime;
-                    if (gameState.enemySpawnTimer >= 2000) { // Спавн каждые 2 секунды
-                        spawnEnemyUnit();
-                        gameState.enemySpawnTimer = 0;
-                    }
+                    gameResult.classList.remove('hidden');
+                    updateStats();
+                } else if (gameState.gamePhase === 'battle' && gameState.battleTimeLeft <= 0) {
+                    gameState.gameOver = true;
+                    gameState.gamesPlayed++;
+                    gameState.gamesWon++;
                     
-                    // Обновление позиций и атак юнитов
-                    updateUnits(deltaTime);
+                    gameState.gameResult = 'win';
+                    resultTitle.textContent = 'ПОБЕДА!';
+                    resultMessage.textContent = '+1 ключ, +50 золота';
                     
-                    // Проверка конца игры
-                    if (gameState.playerHealth <= 0) {
-                        gameState.gameOver = true;
-                        gameState.gamesPlayed++;
-                        
-                        gameState.gameResult = 'lose';
-                        resultTitle.textContent = 'ПОРАЖЕНИЕ';
-                        resultMessage.textContent = 'Попробуйте еще раз!';
-                        
-                        gameResult.classList.remove('hidden');
-                    } else if (gameState.battleTime >= 120000) { // Победа через 2 минуты
-                        gameState.gameOver = true;
-                        gameState.gamesPlayed++;
-                        gameState.gamesWon++;
-                        
-                        gameState.gameResult = 'win';
-                        resultTitle.textContent = 'ПОБЕДА!';
-                        resultMessage.textContent = '+1 ключ, +50 золота';
-                        
-                        // Награда за победу
-                        gameState.keys += 1;
-                        gameState.gold += 50;
-                        
-                        gameResult.classList.remove('hidden');
-                    }
+                    // Награда за победу
+                    gameState.keys += 1;
+                    gameState.gold += 50;
+                    
+                    gameResult.classList.remove('hidden');
+                    updateStats();
                 }
             }
-            
-            updateStats();
         }
 
         // Улучшения
@@ -1662,24 +1739,65 @@
         function openCase() {
             if (gameState.keys > 0) {
                 gameState.keys -= 1;
+                updateStats();
                 
-                // Простая логика открытия кейса - всегда выпадает персонаж
+                // Новые шансы выпадения: 75% золото, 25% персонаж
+                const rarityRoll = Math.random();
+                let targetRarity;
+                
+                if (rarityRoll < 0.75) {
+                    // 75% шанс выпадения золота
+                    const goldReward = Math.floor(Math.random() * 401) + 100;
+                    gameState.gold += goldReward;
+                    showCaseResult(`💰 Вы получили ${goldReward} золота!`);
+                    updateStats();
+                    return;
+                }
+                
+                // 25% шанс выпадения персонажа
+                const characterRoll = Math.random();
+                if (characterRoll < 0.6) { // 60% обычный (от 25%)
+                    targetRarity = 'common';
+                } else if (characterRoll < 0.85) { // 25% редкий (от 25%)
+                    targetRarity = 'rare';
+                } else if (characterRoll < 0.95) { // 10% эпический (от 25%)
+                    targetRarity = 'epic';
+                } else if (characterRoll < 0.99) { // 4% мифический (от 25%)
+                    targetRarity = 'mythic';
+                } else { // 1% легендарный (от 25%)
+                    targetRarity = 'legendary';
+                }
+                
+                // Доступные персонажи этой редкости
                 const availableChars = Object.keys(characters).filter(charId => 
-                    !gameState.ownedCharacters.includes(charId)
+                    !gameState.ownedCharacters.includes(charId) && characters[charId].rarity === targetRarity
                 );
                 
+                let resultMessage;
                 if (availableChars.length > 0) {
+                    // Выпадение нового персонажа
                     const randomCharId = availableChars[Math.floor(Math.random() * availableChars.length)];
                     gameState.ownedCharacters.push(randomCharId);
-                    showCaseResult(`🎉 Поздравляем! Вы получили ${characters[randomCharId].name}!`);
+                    characters[randomCharId].owned = true;
+                    resultMessage = `🎉 Поздравляем! Вы получили ${characters[randomCharId].name} (${targetRarity.toUpperCase()})!`;
                     
                     // Автоматическое обновление кнопок персонажей
                     createCharacterButtons();
+                    
+                    // Автоматическое обновление экрана персонажей
+                    if (gameState.currentScreen === 'cases') {
+                        setTimeout(() => {
+                            renderCharactersScreen();
+                        }, 100);
+                    }
                 } else {
-                    showCaseResult("💰 Все персонажи уже получены! Вы получаете 200 золота!");
-                    gameState.gold += 200;
+                    // Если все персонажи этой редкости уже есть, выпадает золото
+                    const goldReward = Math.floor(Math.random() * 401) + 100;
+                    gameState.gold += goldReward;
+                    resultMessage = `💰 Вы получили ${goldReward} золота!`;
                 }
                 
+                showCaseResult(resultMessage);
                 updateStats();
             }
         }
@@ -1732,7 +1850,7 @@
             // Основание замка
             ctx.fillStyle = '#6d4c41';
             ctx.beginPath();
-            ctx.arc(castleX, castleY, CASTLE_RADIUS, 0, Math.PI * 2);
+            ctx.arc(castleX, castleY, 80, 0, Math.PI * 2);
             ctx.fill();
             
             // Детали замка
@@ -1744,29 +1862,32 @@
             ctx.fillStyle = '#5d4037';
             ctx.fillRect(castleX - 50, castleY - 80, 100, 10);
             ctx.fillStyle = COLORS.HEALTH;
-            const healthPercent = Math.max(0, gameState.playerHealth / gameState.maxCastleHealth);
-            ctx.fillRect(castleX - 50, castleY - 80, 100 * healthPercent, 10);
+            ctx.fillRect(castleX - 50, castleY - 80, 100 * (gameState.playerHealth / gameState.maxCastleHealth), 10);
             
             // Юниты игрока
             gameState.units.forEach(unit => {
                 const character = characters[unit.characterId];
                 
                 // Юнит
-                ctx.fillStyle = '#8d6e63';
-                ctx.beginPath();
-                ctx.arc(unit.x, unit.y, 30, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#5d4037';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(character.name, unit.x, unit.y + 5);
+                if (images[unit.image]) {
+                    ctx.drawImage(images[unit.image], unit.x - 30, unit.y - 30, 60, 60);
+                } else {
+                    // Запасной вариант если изображение не загружено
+                    ctx.fillStyle = '#8d6e63';
+                    ctx.beginPath();
+                    ctx.arc(unit.x, unit.y, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#5d4037';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('ЮНИТ', unit.x, unit.y + 5);
+                }
                 
                 // Полоска здоровья юнита
                 ctx.fillStyle = '#5d4037';
                 ctx.fillRect(unit.x - 30, unit.y - 40, 60, 8);
                 ctx.fillStyle = '#4caf50';
-                const unitHealthPercent = unit.health / unit.maxHealth;
-                ctx.fillRect(unit.x - 30, unit.y - 40, 60 * unitHealthPercent, 8);
+                ctx.fillRect(unit.x - 30, unit.y - 40, 60 * (unit.health / unit.maxHealth), 8);
                 
                 // Индикатор состояния
                 if (unit.state === 'attacking') {
@@ -1826,21 +1947,25 @@
             // Вражеские юниты
             gameState.enemyUnits.forEach(unit => {
                 // Юнит
-                ctx.fillStyle = '#5d4037';
-                ctx.beginPath();
-                ctx.arc(unit.x, unit.y, 30, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#ef5350';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('ВРАГ', unit.x, unit.y + 5);
+                if (images[unit.image]) {
+                    ctx.drawImage(images[unit.image], unit.x - 30, unit.y - 30, 60, 60);
+                } else {
+                    // Запасной вариант если изображение не загружено
+                    ctx.fillStyle = '#5d4037';
+                    ctx.beginPath();
+                    ctx.arc(unit.x, unit.y, 30, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ef5350';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('ВРАГ', unit.x, unit.y + 5);
+                }
                 
                 // Полоска здоровья юнита
                 ctx.fillStyle = '#5d4037';
                 ctx.fillRect(unit.x - 30, unit.y - 40, 60, 8);
                 ctx.fillStyle = '#4caf50';
-                const enemyHealthPercent = unit.health / unit.maxHealth;
-                ctx.fillRect(unit.x - 30, unit.y - 40, 60 * enemyHealthPercent, 8);
+                ctx.fillRect(unit.x - 30, unit.y - 40, 60 * (unit.health / unit.maxHealth), 8);
                 
                 // Индикатор состояния
                 if (unit.state === 'attacking') {
@@ -1872,7 +1997,7 @@
                 ctx.strokeStyle = 'rgba(79, 195, 247, 0.5)';
                 ctx.setLineDash([5, 5]);
                 ctx.beginPath();
-                ctx.arc(castleX, castleY, CASTLE_RADIUS + 40, 0, Math.PI * 2);
+                ctx.arc(castleX, castleY, 120, 0, Math.PI * 2);
                 ctx.stroke();
                 ctx.setLineDash([]);
                 
@@ -1888,18 +2013,13 @@
 
         // Обработка кликов по canvas
         function handleCanvasClick(x, y) {
-            if (gameState.currentScreen !== 'game') return;
+            if (gameState.currentScreen !== 'game' || gameState.gameOver) return;
             
-            if (gameState.gamePhase === 'preparation') {
-                // В фазе подготовки: размещение юнитов
-                if (gameState.selectedCharacter) {
-                    placeUnit(x, y);
-                } else {
-                    // Попытка выбрать юнита
-                    selectUnit(x, y);
-                }
-            } else if (gameState.gamePhase === 'battle') {
-                // В фазе битвы: управление юнитами
+            // Всегда можно размещать юнитов, независимо от фазы игры
+            if (gameState.selectedCharacter) {
+                placeUnit(x, y);
+            } else {
+                // Попытка выбрать юнита
                 if (!selectUnit(x, y)) {
                     // Если не выбрали юнит, задаем цель выбранному юниту
                     if (gameState.selectedUnit) {
@@ -1927,11 +2047,7 @@
 
         // Игровой цикл
         function gameLoop() {
-            const currentTime = Date.now();
-            const deltaTime = currentTime - gameState.lastTime;
-            gameState.lastTime = currentTime;
-            
-            updateGame(deltaTime);
+            updateGame();
             
             if (gameState.currentScreen === 'game') {
                 renderGame();
