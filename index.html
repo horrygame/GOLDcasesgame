@@ -9,12 +9,12 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Times New Roman', serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a6c, #3a7bd5);
-            color: white;
+            background: linear-gradient(135deg, #3e2723, #5d4037);
+            color: #f5e8c8;
             overflow: hidden;
             height: 100vh;
             display: flex;
@@ -26,9 +26,10 @@
             position: relative;
             width: 1200px;
             height: 800px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
             overflow: hidden;
+            border: 8px solid #5d4037;
         }
         
         #game-canvas {
@@ -49,8 +50,9 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(26, 42, 108, 0.9);
+            background: rgba(61, 43, 31, 0.95);
             z-index: 10;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><rect fill="%235d4037" width="100" height="100"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="%233e2723" stroke-width="2"/></svg>');
         }
         
         .hidden {
@@ -59,16 +61,24 @@
         
         h1 {
             font-size: 64px;
-            color: #ffd700;
+            color: #d7ccc8;
             margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 3px solid #8d6e63;
+            padding-bottom: 10px;
         }
         
         h2 {
             font-size: 48px;
-            color: #ffd700;
+            color: #d7ccc8;
             margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            font-weight: bold;
         }
         
         p {
@@ -76,45 +86,56 @@
             margin-bottom: 40px;
             text-align: center;
             max-width: 80%;
+            line-height: 1.5;
+            color: #efebe9;
         }
         
         .button {
-            background: #ffd700;
-            color: #000;
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            color: #fff;
             border: none;
             padding: 15px 30px;
-            font-size: 24px;
-            border-radius: 15px;
+            font-size: 22px;
+            border-radius: 5px;
             cursor: pointer;
             margin: 10px;
             transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
             min-width: 250px;
             text-align: center;
+            border: 2px solid #5d4037;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            font-weight: bold;
+            letter-spacing: 1px;
         }
         
         .button:hover {
-            background: #ffed4e;
+            background: linear-gradient(to bottom, #a1887f, #8d6e63);
             transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
         }
         
         .button:active {
             transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .button:disabled {
-            background: #888;
+            background: linear-gradient(to bottom, #795548, #5d4037);
             cursor: not-allowed;
             transform: none;
+            color: #bcaaa4;
         }
         
         .stats-panel {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(93, 64, 55, 0.8);
             padding: 15px 30px;
-            border-radius: 10px;
+            border-radius: 5px;
             margin-bottom: 30px;
             display: flex;
             gap: 30px;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         .stat {
@@ -122,6 +143,7 @@
             align-items: center;
             gap: 10px;
             font-size: 20px;
+            color: #efebe9;
         }
         
         .menu-buttons {
@@ -142,8 +164,8 @@
         }
         
         .card {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
+            background: rgba(93, 64, 55, 0.8);
+            border-radius: 5px;
             padding: 20px;
             width: 300px;
             height: 400px;
@@ -151,13 +173,19 @@
             flex-direction: column;
             align-items: center;
             border: 2px solid;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
         }
         
-        .card-common { border-color: #c8c8c8; }
-        .card-rare { border-color: #0064ff; }
-        .card-epic { border-color: #b400ff; }
-        .card-mythic { border-color: #ffa500; }
-        .card-legendary { border-color: #ffd700; }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-common { border-color: #a1887f; background: rgba(121, 85, 72, 0.8); }
+        .card-rare { border-color: #4fc3f7; background: rgba(33, 150, 243, 0.2); }
+        .card-epic { border-color: #ba68c8; background: rgba(156, 39, 176, 0.2); }
+        .card-mythic { border-color: #ffb74d; background: rgba(255, 167, 38, 0.2); }
+        .card-legendary { border-color: #ffd54f; background: rgba(255, 193, 7, 0.2); }
         
         .card-header {
             display: flex;
@@ -169,13 +197,15 @@
         .character-icon {
             width: 60px;
             height: 60px;
-            border-radius: 10px;
+            border-radius: 5px;
             margin-bottom: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 24px;
             overflow: hidden;
+            border: 2px solid #5d4037;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .character-icon img {
@@ -188,17 +218,22 @@
             font-size: 20px;
             font-weight: bold;
             margin-bottom: 5px;
+            color: #f5e8c8;
+            text-align: center;
         }
         
         .character-rarity {
             font-size: 14px;
-            opacity: 0.8;
+            opacity: 0.9;
+            font-weight: bold;
         }
         
         .character-description {
             font-size: 14px;
             text-align: center;
             margin-bottom: 15px;
+            color: #efebe9;
+            line-height: 1.4;
         }
         
         .character-stats {
@@ -211,13 +246,15 @@
         
         .stat-item {
             font-size: 14px;
+            color: #f5e8c8;
         }
         
         .character-ability {
             font-size: 14px;
-            color: #ffd700;
+            color: #ffd54f;
             margin-bottom: 10px;
             text-align: center;
+            font-style: italic;
         }
         
         .character-status {
@@ -226,15 +263,17 @@
             font-weight: bold;
         }
         
-        .owned { color: #4caf50; }
-        .locked { color: #ff6b6b; }
+        .owned { color: #81c784; }
+        .locked { color: #e57373; }
         
         .upgrade-panel {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
+            background: rgba(93, 64, 55, 0.8);
+            border-radius: 5px;
             padding: 30px;
             width: 600px;
             margin-bottom: 30px;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         .upgrade-title {
@@ -242,25 +281,30 @@
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
+            color: #f5e8c8;
+            border-bottom: 1px solid #8d6e63;
+            padding-bottom: 10px;
         }
         
         .upgrade-description {
             font-size: 16px;
             margin-bottom: 20px;
+            color: #efebe9;
         }
         
         .progress-bar {
             width: 100%;
             height: 10px;
-            background: #333;
+            background: #5d4037;
             border-radius: 5px;
             margin-bottom: 10px;
             overflow: hidden;
+            border: 1px solid #8d6e63;
         }
         
         .progress-fill {
             height: 100%;
-            background: #4caf50;
+            background: linear-gradient(to right, #8d6e63, #a1887f);
             border-radius: 5px;
         }
         
@@ -268,6 +312,7 @@
             font-size: 18px;
             margin-bottom: 20px;
             text-align: center;
+            color: #f5e8c8;
         }
         
         .shop-items {
@@ -283,25 +328,27 @@
         .shop-item {
             width: 120px;
             height: 100px;
-            background: rgba(255, 215, 0, 0.8);
-            border-radius: 10px;
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            border-radius: 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            border: 2px solid #000;
+            border: 2px solid #5d4037;
             transition: all 0.3s;
             overflow: hidden;
             flex-shrink: 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         .shop-item:hover {
             transform: scale(1.05);
+            background: linear-gradient(to bottom, #a1887f, #8d6e63);
         }
         
         .shop-item.disabled {
-            background: rgba(100, 100, 100, 0.8);
+            background: linear-gradient(to bottom, #795548, #5d4037);
             cursor: not-allowed;
         }
         
@@ -324,12 +371,14 @@
             font-size: 12px;
             text-align: center;
             margin-bottom: 5px;
-            color: #000;
+            color: #fff;
+            font-weight: bold;
         }
         
         .shop-item-cost {
             font-size: 12px;
-            color: #000;
+            color: #ffd54f;
+            font-weight: bold;
         }
         
         .game-ui {
@@ -344,13 +393,16 @@
         }
         
         .ui-panel {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(93, 64, 55, 0.8);
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             display: flex;
             align-items: center;
             gap: 10px;
             font-size: 20px;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            color: #f5e8c8;
         }
         
         .game-result {
@@ -358,11 +410,14 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(61, 43, 31, 0.95);
             padding: 40px;
-            border-radius: 15px;
+            border-radius: 5px;
             text-align: center;
             z-index: 20;
+            border: 3px solid #8d6e63;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            width: 500px;
         }
         
         .case-result {
@@ -370,17 +425,20 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(61, 43, 31, 0.95);
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             text-align: center;
             z-index: 25;
             font-size: 20px;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            color: #f5e8c8;
         }
         
         .damage-popup {
             position: absolute;
-            color: #ff0000;
+            color: #ff5252;
             font-weight: bold;
             font-size: 18px;
             pointer-events: none;
@@ -402,26 +460,29 @@
         
         .tooltip {
             position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
+            background: rgba(61, 43, 31, 0.95);
+            color: #f5e8c8;
             padding: 10px;
             border-radius: 5px;
             font-size: 14px;
             max-width: 200px;
             z-index: 100;
             pointer-events: none;
+            border: 1px solid #8d6e63;
         }
         
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
+            background: rgba(61, 43, 31, 0.95);
+            color: #f5e8c8;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 5px;
             z-index: 1000;
             animation: slideIn 0.5s ease-out;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
         
         @keyframes slideIn {
@@ -436,7 +497,7 @@
         }
         
         .energy-warning {
-            color: #ff6b6b;
+            color: #ff5252;
             animation: pulse 1s infinite;
         }
         
@@ -451,22 +512,40 @@
             top: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(93, 64, 55, 0.8);
             padding: 10px 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-size: 18px;
             z-index: 5;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            color: #f5e8c8;
+        }
+        
+        /* Средневековые декоративные элементы */
+        .medieval-border {
+            border: 8px solid transparent;
+            border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="%238d6e63" stroke-width="4"/></svg>') 8 round;
+        }
+        
+        .parchment {
+            background: #f5e8c8;
+            color: #5d4037;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid #8d6e63;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
+    <div id="game-container" class="medieval-border">
         <canvas id="game-canvas" width="1200" height="800"></canvas>
         
         <!-- Главное меню -->
         <div id="main-menu" class="screen">
-            <h1>🏰 Битва Крепостей</h1>
-            <p>Стратегическая битва за территории и ресурсы</p>
+            <h1>⚔️ Битва Крепостей ⚔️</h1>
+            <p class="parchment">Стратегическая битва за территории и ресурсы в эпоху рыцарей и замков</p>
             
             <div class="stats-panel">
                 <div class="stat">💰 <span id="gold-stat">1000</span></div>
@@ -487,7 +566,7 @@
         <!-- Экран персонажей -->
         <div id="characters-screen" class="screen hidden">
             <h2>👥 Ваши персонажи</h2>
-            <p>Собирайте уникальных героев и улучшайте свою армию</p>
+            <p class="parchment">Собирайте уникальных героев и улучшайте свою армию</p>
             
             <button class="button" id="characters-back-btn">← Назад</button>
             
@@ -499,7 +578,7 @@
         <!-- Экран производства -->
         <div id="production-screen" class="screen hidden">
             <h2>⛏️ Производство</h2>
-            <p>Управляйте своими ресурсами и производственными мощностями</p>
+            <p class="parchment">Управляйте своими ресурсами и производственными мощностями</p>
             
             <button class="button" id="production-back-btn">← Назад</button>
             
@@ -517,7 +596,7 @@
                     <span>🔑 Производство ключей</span>
                 </div>
                 <div class="upgrade-description">Стоимость ключа: 1000💰</div>
-                <p>Ключи нужны для открытия кейсов с новыми персонажами</p>
+                <p class="parchment">Ключи нужны для открытия кейсов с новыми персонажами</p>
                 <div class="menu-buttons">
                     <button class="button" id="produce-1-key-btn">1 ключ</button>
                     <button class="button" id="produce-10-keys-btn">10 ключей</button>
@@ -528,7 +607,7 @@
         <!-- Экран улучшений -->
         <div id="upgrades-screen" class="screen hidden">
             <h2>⚡ Улучшения</h2>
-            <p>Улучшайте характеристики своей крепости и армии</p>
+            <p class="parchment">Улучшайте характеристики своей крепости и армии</p>
             
             <button class="button" id="upgrades-back-btn">← Назад</button>
             
@@ -562,7 +641,7 @@
         <!-- Экран кейсов -->
         <div id="cases-screen" class="screen hidden">
             <h2>🎁 Кейсы</h2>
-            <p>Открывайте кейсы для получения новых персонажей и бонусов</p>
+            <p class="parchment">Открывайте кейсы для получения новых персонажей и бонусов</p>
             
             <button class="button" id="cases-back-btn">← Назад</button>
             
@@ -571,7 +650,7 @@
                     <span>🎁 Боевой кейс</span>
                 </div>
                 <div class="upgrade-stats">Доступные ключи: <span id="available-keys">5</span> 🔑</div>
-                <p>Шансы: Золото 75%, Обычный 15%, Редкий 6%, Эпический 3%, Мифический 0.9%, Легендарный 0.1%</p>
+                <p class="parchment">Шансы: Золото 75%, Обычный 15%, Редкий 6%, Эпический 3%, Мифический 0.9%, Легендарный 0.1%</p>
                 <button class="button" id="open-case-btn">Открыть кейс (1🔑)</button>
             </div>
         </div>
@@ -613,24 +692,24 @@
         const SCREEN_HEIGHT = 800;
         const FPS = 60;
 
-        // Цвета
+        // Цвета в средневековом стиле
         const COLORS = {
-            BACKGROUND: '#1a2a6c',
-            GOLD: '#ffd700',
-            ENERGY: '#00c8ff',
-            HEALTH: '#ff0000',
-            TEXT: '#ffffff',
-            BUTTON: '#ffd700',
-            BUTTON_HOVER: '#ffed4e',
-            PANEL: 'rgba(0, 0, 0, 0.7)',
-            CASTLE: '#8b4513',
-            BATTLEFIELD: '#27ae60',
+            BACKGROUND: '#5d4037',
+            GOLD: '#ffd54f',
+            ENERGY: '#4fc3f7',
+            HEALTH: '#ef5350',
+            TEXT: '#f5e8c8',
+            BUTTON: '#8d6e63',
+            BUTTON_HOVER: '#a1887f',
+            PANEL: 'rgba(93, 64, 55, 0.8)',
+            CASTLE: '#6d4c41',
+            BATTLEFIELD: '#7cb342',
             RARITY: {
-                common: '#c8c8c8',
-                rare: '#0064ff',
-                epic: '#b400ff',
-                mythic: '#ffa500',
-                legendary: '#ffd700'
+                common: '#a1887f',
+                rare: '#4fc3f7',
+                epic: '#ba68c8',
+                mythic: '#ffb74d',
+                legendary: '#ffd54f'
             }
         };
 
@@ -1024,9 +1103,9 @@
                     canvas.width = 60;
                     canvas.height = 60;
                     const ctx = canvas.getContext('2d');
-                    ctx.fillStyle = '#ccc';
+                    ctx.fillStyle = '#8d6e63';
                     ctx.fillRect(0, 0, 60, 60);
-                    ctx.fillStyle = '#000';
+                    ctx.fillStyle = '#5d4037';
                     ctx.font = '10px Arial';
                     ctx.fillText('IMG', 20, 30);
                     images[src] = canvas;
@@ -1267,7 +1346,7 @@
                 });
                 
                 // Визуальная обратная связь
-                createDamagePopup(300, SCREEN_HEIGHT - 280, `-${character.cost}⚡`, '#00c8ff');
+                createDamagePopup(300, SCREEN_HEIGHT - 280, `-${character.cost}⚡`, '#4fc3f7');
                 
                 return true;
             } else {
@@ -1278,7 +1357,7 @@
                         energyPanel.classList.remove('energy-warning');
                     }, 1000);
                     
-                    createDamagePopup(300, SCREEN_HEIGHT - 280, "Недостаточно энергии!", '#ff6b6b');
+                    createDamagePopup(300, SCREEN_HEIGHT - 280, "Недостаточно энергии!", '#ef5350');
                 }
                 return false;
             }
@@ -1355,7 +1434,7 @@
                         unit.isAttacking = true;
                         
                         // Создание всплывающего урона
-                        createDamagePopup(enemyInRange.x + 30, SCREEN_HEIGHT - 280, `-${unit.damage}`, '#ff0000');
+                        createDamagePopup(enemyInRange.x + 30, SCREEN_HEIGHT - 280, `-${unit.damage}`, '#ef5350');
                         
                         if (enemyInRange.health <= 0) {
                             gameState.enemyUnits = gameState.enemyUnits.filter(u => u !== enemyInRange);
@@ -1373,7 +1452,7 @@
                         unit.isAttacking = true;
                         
                         // Создание всплывающего урона
-                        createDamagePopup(SCREEN_WIDTH - 200, SCREEN_HEIGHT - 450, `-${unit.damage}`, '#ff0000');
+                        createDamagePopup(SCREEN_WIDTH - 200, SCREEN_HEIGHT - 450, `-${unit.damage}`, '#ef5350');
                     }
                 } else {
                     // Свободное движение
@@ -1408,7 +1487,7 @@
                         unit.isAttacking = true;
                         
                         // Создание всплывающего урона
-                        createDamagePopup(playerInRange.x + 30, SCREEN_HEIGHT - 280, `-${unit.damage}`, '#ff0000');
+                        createDamagePopup(playerInRange.x + 30, SCREEN_HEIGHT - 280, `-${unit.damage}`, '#ef5350');
                         
                         if (playerInRange.health <= 0) {
                             gameState.units = gameState.units.filter(u => u !== playerInRange);
@@ -1426,7 +1505,7 @@
                         unit.isAttacking = true;
                         
                         // Создание всплывающего урона
-                        createDamagePopup(200, SCREEN_HEIGHT - 450, `-${unit.damage}`, '#ff0000');
+                        createDamagePopup(200, SCREEN_HEIGHT - 450, `-${unit.damage}`, '#ef5350');
                     }
                 } else {
                     // Свободное движение
@@ -1655,35 +1734,53 @@
             ctx.fillStyle = COLORS.BACKGROUND;
             ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
             
-            // Поле боя
-            ctx.fillStyle = COLORS.BATTLEFIELD;
+            // Поле боя - средневековый ландшафт
+            ctx.fillStyle = '#7cb342';
             ctx.fillRect(0, SCREEN_HEIGHT - 150, SCREEN_WIDTH, 150);
+            
+            // Текстура травы
+            ctx.fillStyle = '#689f38';
+            for (let i = 0; i < SCREEN_WIDTH; i += 20) {
+                ctx.fillRect(i, SCREEN_HEIGHT - 150, 10, 10);
+            }
             
             // Замки
             // Замок игрока
-            ctx.fillStyle = COLORS.CASTLE;
+            ctx.fillStyle = '#6d4c41';
             ctx.fillRect(100, SCREEN_HEIGHT - 400, 200, 250);
-            ctx.strokeStyle = '#654321';
+            ctx.strokeStyle = '#5d4037';
             ctx.lineWidth = 5;
             ctx.strokeRect(100, SCREEN_HEIGHT - 400, 200, 250);
             
+            // Детали замка игрока
+            ctx.fillStyle = '#8d6e63';
+            ctx.fillRect(180, SCREEN_HEIGHT - 450, 40, 50); // Башня
+            ctx.fillRect(120, SCREEN_HEIGHT - 380, 40, 30); // Окно
+            ctx.fillRect(240, SCREEN_HEIGHT - 380, 40, 30); // Окно
+            
             // Полоска здоровья замка игрока
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = '#5d4037';
             ctx.fillRect(100, SCREEN_HEIGHT - 440, 200, 20);
             ctx.fillStyle = COLORS.HEALTH;
             ctx.fillRect(100, SCREEN_HEIGHT - 440, 200 * (gameState.playerHealth / gameState.maxCastleHealth), 20);
             
             // Замок врага
-            ctx.fillStyle = '#8b0000'; // Более темный цвет для вражеского замка
+            ctx.fillStyle = '#5d4037';
             ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 400, 200, 250);
-            ctx.strokeStyle = '#654321';
+            ctx.strokeStyle = '#4e342e';
             ctx.lineWidth = 5;
             ctx.strokeRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 400, 200, 250);
             
+            // Детали замка врага
+            ctx.fillStyle = '#795548';
+            ctx.fillRect(SCREEN_WIDTH - 220, SCREEN_HEIGHT - 450, 40, 50); // Башня
+            ctx.fillRect(SCREEN_WIDTH - 280, SCREEN_HEIGHT - 380, 40, 30); // Окно
+            ctx.fillRect(SCREEN_WIDTH - 160, SCREEN_HEIGHT - 380, 40, 30); // Окно
+            
             // Полоска здоровья замка врага
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = '#5d4037';
             ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 440, 200, 20);
-            ctx.fillStyle = '#ff6b6b';
+            ctx.fillStyle = '#ef5350';
             ctx.fillRect(SCREEN_WIDTH - 300, SCREEN_HEIGHT - 440, 200 * (gameState.enemyHealth / (500 * (1 + (gameState.difficulty - 1) * 0.2))), 20);
             
             // Юниты
@@ -1693,12 +1790,15 @@
                     ctx.drawImage(images[unit.image], unit.x, SCREEN_HEIGHT - 230, 60, 60);
                 } else {
                     // Запасной вариант если изображение не загружено
-                    ctx.fillStyle = '#fff';
+                    ctx.fillStyle = '#8d6e63';
                     ctx.fillRect(unit.x, SCREEN_HEIGHT - 230, 60, 60);
+                    ctx.fillStyle = '#5d4037';
+                    ctx.font = '10px Arial';
+                    ctx.fillText('ЮНИТ', unit.x + 15, SCREEN_HEIGHT - 200);
                 }
                 
                 // Полоска здоровья юнита
-                ctx.fillStyle = '#333';
+                ctx.fillStyle = '#5d4037';
                 ctx.fillRect(unit.x, SCREEN_HEIGHT - 240, 60, 8);
                 ctx.fillStyle = '#4caf50';
                 ctx.fillRect(unit.x, SCREEN_HEIGHT - 240, 60 * (unit.health / unit.maxHealth), 8);
@@ -1706,7 +1806,7 @@
                 // Индикатор боя
                 if (unit.isFighting) {
                     ctx.font = '12px Arial';
-                    ctx.fillStyle = '#ff0000';
+                    ctx.fillStyle = '#ef5350';
                     ctx.fillText('⚔️ БОЙ', unit.x + 10, SCREEN_HEIGHT - 250);
                 }
             });
@@ -1718,12 +1818,15 @@
                     ctx.drawImage(images[unit.image], unit.x, SCREEN_HEIGHT - 230, 60, 60);
                 } else {
                     // Запасной вариант если изображение не загружено
-                    ctx.fillStyle = '#c00';
+                    ctx.fillStyle = '#5d4037';
                     ctx.fillRect(unit.x, SCREEN_HEIGHT - 230, 60, 60);
+                    ctx.fillStyle = '#ef5350';
+                    ctx.font = '10px Arial';
+                    ctx.fillText('ВРАГ', unit.x + 15, SCREEN_HEIGHT - 200);
                 }
                 
                 // Полоска здоровья юнита
-                ctx.fillStyle = '#333';
+                ctx.fillStyle = '#5d4037';
                 ctx.fillRect(unit.x, SCREEN_HEIGHT - 240, 60, 8);
                 ctx.fillStyle = '#4caf50';
                 ctx.fillRect(unit.x, SCREEN_HEIGHT - 240, 60 * (unit.health / unit.maxHealth), 8);
@@ -1731,7 +1834,7 @@
                 // Индикатор боя
                 if (unit.isFighting) {
                     ctx.font = '12px Arial';
-                    ctx.fillStyle = '#ff0000';
+                    ctx.fillStyle = '#ef5350';
                     ctx.fillText('⚔️ БОЙ', unit.x + 10, SCREEN_HEIGHT - 250);
                 }
             });
@@ -1753,9 +1856,9 @@
             });
             
             // Магазин
-            ctx.fillStyle = COLORS.PANEL;
+            ctx.fillStyle = 'rgba(93, 64, 55, 0.9)';
             ctx.fillRect(SCREEN_WIDTH / 2 - 300, SCREEN_HEIGHT - 140, 600, 120);
-            ctx.strokeStyle = COLORS.GOLD;
+            ctx.strokeStyle = '#8d6e63';
             ctx.lineWidth = 2;
             ctx.strokeRect(SCREEN_WIDTH / 2 - 300, SCREEN_HEIGHT - 140, 600, 120);
             
@@ -1771,10 +1874,10 @@
                 const rarityColor = COLORS.RARITY[character.rarity];
                 
                 // Фон предмета магазина
-                const itemColor = gameState.energy >= character.cost ? rarityColor : '#666';
+                const itemColor = gameState.energy >= character.cost ? rarityColor : '#795548';
                 ctx.fillStyle = itemColor;
                 ctx.fillRect(x, SCREEN_HEIGHT - 130, shopItemWidth, 100);
-                ctx.strokeStyle = '#000';
+                ctx.strokeStyle = '#5d4037';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(x, SCREEN_HEIGHT - 130, shopItemWidth, 100);
                 
@@ -1785,7 +1888,7 @@
                 
                 // Название
                 ctx.font = '12px Arial';
-                ctx.fillStyle = '#000';
+                ctx.fillStyle = '#f5e8c8';
                 ctx.fillText(character.name, x + 5, SCREEN_HEIGHT - 70);
                 
                 // Стоимость
