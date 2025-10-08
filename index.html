@@ -1410,7 +1410,9 @@
             }
             
             gameState.enemyCounter++;
-            gameState.enemyUnits.push({
+            
+            // Создаем врага с целью - замком
+            const enemy = {
                 id: `enemy_${gameState.enemyCounter}`,
                 x: x,
                 y: y,
@@ -1422,10 +1424,13 @@
                 attackRange: enemyType.attack_range,
                 visionRange: enemyType.vision_range,
                 image: enemyType.image,
-                target: null,
+                target: {x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2, isCastle: true}, // Цель - замок
                 lastAttackTime: 0,
                 state: 'moving' // moving, attacking
-            });
+            };
+            
+            gameState.enemyUnits.push(enemy);
+            console.log('Враг создан!'); // Для отладки
         }
 
         // Создание всплывающего сообщения об уроне
