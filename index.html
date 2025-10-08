@@ -838,156 +838,6 @@
                 'rarity': 'common',
                 'ability': null,
                 'owned': false
-            },
-            'classic_rare_1': {
-                'name': 'Теневой Убийца',
-                'image': 'classic_rare_2.png',
-                'cost': 50,
-                'health': 90,
-                'damage': 45,
-                'speed': 2.5,
-                'attack_speed': 1.8,
-                'attack_range': 70,
-                'vision_range': 160,
-                'description': 'Быстрый и смертоносный',
-                'rarity': 'rare',
-                'ability': 'Критический удар: шанс нанести двойной урон',
-                'owned': false
-            },
-            'classic_rare_2': {
-                'name': 'Рыцарь Света',
-                'image': 'classic_rare_1.png',
-                'cost': 55,
-                'health': 150,
-                'damage': 35,
-                'speed': 1.3,
-                'attack_speed': 1.0,
-                'attack_range': 90,
-                'vision_range': 140,
-                'description': 'Защитник с усиленной броней',
-                'rarity': 'rare',
-                'ability': 'Усиленная защита: +20% к здоровью',
-                'owned': false
-            },
-            'classic_rare_3': {
-                'name': 'Лесной Охотник',
-                'image': 'classic_rare_3.png',
-                'cost': 60,
-                'health': 110,
-                'damage': 40,
-                'speed': 1.8,
-                'attack_speed': 1.3,
-                'attack_range': 130,
-                'vision_range': 220,
-                'description': 'Меткий стрелок из лука',
-                'rarity': 'rare',
-                'ability': 'Двойной выстрел: иногда атакует дважды',
-                'owned': false
-            },
-            'classic_rare_4': {
-                'name': 'Горный Воин',
-                'image': 'classic_rare_4.png',
-                'cost': 65,
-                'health': 180,
-                'damage': 30,
-                'speed': 0.8,
-                'attack_speed': 0.9,
-                'attack_range': 65,
-                'vision_range': 120,
-                'description': 'Невероятно живучий боец',
-                'rarity': 'rare',
-                'ability': 'Живучесть: восстанавливает здоровье со временем',
-                'owned': false
-            },
-            'classic_epic_1': {
-                'name': 'Маг Огня',
-                'image': 'classic_epic_1.png',
-                'cost': 100,
-                'health': 120,
-                'damage': 60,
-                'speed': 1.0,
-                'attack_speed': 0.6,
-                'attack_range': 160,
-                'vision_range': 240,
-                'description': 'Поджигает врагов',
-                'rarity': 'epic',
-                'ability': 'Огненная аура: наносит урон всем врагам вблизи',
-                'owned': false
-            },
-            'classic_epic_2': {
-                'name': 'Феникс Воитель',
-                'image': 'classic_myth_2.png',
-                'cost': 110,
-                'health': 180,
-                'damage': 80,
-                'speed': 1.5,
-                'attack_speed': 1.2,
-                'attack_range': 110,
-                'vision_range': 180,
-                'description': 'Возрождается после смерти',
-                'rarity': 'epic',
-                'ability': 'Возрождение: с шансом 30% воскрешается с 50% здоровья',
-                'owned': false
-            },
-            'classic_epic_3': {
-                'name': 'Штормовой Призыватель',
-                'image': 'classic_epic_3.png',
-                'cost': 120,
-                'health': 100,
-                'damage': 55,
-                'speed': 1.3,
-                'attack_speed': 1.1,
-                'attack_range': 140,
-                'vision_range': 200,
-                'description': 'Призывает молнии',
-                'rarity': 'epic',
-                'ability': 'Электрический разряд: шанс оглушить врага',
-                'owned': false
-            },
-            'classic_myth_1': {
-                'name': 'Драконий Рыцарь',
-                'image': 'classic_myth_1.png',
-                'cost': 200,
-                'health': 250,
-                'damage': 70,
-                'speed': 1.2,
-                'attack_speed': 0.9,
-                'attack_range': 100,
-                'vision_range': 170,
-                'description': 'Дыхание дракона сжигает врагов',
-                'rarity': 'mythic',
-                'ability': 'Дыхание дракона: периодически наносит урон по площади',
-                'owned': false
-            },
-            'classic_myth_2': {
-                'name': 'Ледяной Страж',
-                'image': 'classic_epic_2.png',
-                'cost': 220,
-                'health': 200,
-                'damage': 35,
-                'speed': 0.8,
-                'attack_speed': 0.8,
-                'attack_range': 80,
-                'vision_range': 150,
-                'description': 'Замедляет врагов',
-                'rarity': 'mythic',
-                'ability': 'Ледяная броня: замедляет атакующих его врагов',
-                'owned': false
-            },
-            'classic_leg': {
-                'name': 'Владыка Битвы',
-                'image': 'classic_leg.png',
-                'cost': 500,
-                'health': 400,
-                'damage': 100,
-                'speed': 1.7,
-                'attack_speed': 1.5,
-                'attack_range': 120,
-                'vision_range': 250,
-                'description': 'Легендарный воин с божественной силой',
-                'rarity': 'legendary',
-                'ability': 'Божественная ярость: при низком здоровье урон увеличивается вдвое',
-                'owned': false
             }
         };
 
@@ -1028,7 +878,8 @@
             selectedCharacter: null,
             selectedUnit: null,
             gamesPlayed: 0,
-            gamesWon: 0
+            gamesWon: 0,
+            battleTime: 0
         };
 
         // Получение элементов DOM
@@ -1328,7 +1179,13 @@
             stats.gameEnergy.textContent = gameState.energy;
             stats.gameMaxEnergy.textContent = gameState.maxEnergy;
             stats.gameHealth.textContent = gameState.playerHealth;
-            stats.gameTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
+            
+            // Обновление таймера в зависимости от фазы игры
+            if (gameState.gamePhase === 'preparation') {
+                stats.gameTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
+            } else if (gameState.gamePhase === 'battle') {
+                stats.gameTimer.textContent = Math.floor(gameState.battleTime);
+            }
             
             // Обновление состояния кнопок улучшений
             updateUpgradeButtons();
@@ -1429,6 +1286,7 @@
             gameState.damagePopups = [];
             gameState.selectedCharacter = null;
             gameState.selectedUnit = null;
+            gameState.battleTime = 0;
             
             showScreen('game');
         }
@@ -1776,13 +1634,15 @@
                     // Обновление таймера подготовки
                     gameState.preparationTimeLeft -= 1000 / FPS;
                     preparationTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
-                    stats.gameTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
                     
                     // Автоматическое начало битвы по истечении времени
                     if (gameState.preparationTimeLeft <= 0) {
                         startBattle();
                     }
                 } else if (gameState.gamePhase === 'battle' && !gameState.gameOver) {
+                    // Увеличиваем время битвы
+                    gameState.battleTime += 1000 / FPS;
+                    
                     // Спавн вражеских юнитов
                     gameState.enemySpawnTimer += 1000 / FPS;
                     if (gameState.enemySpawnTimer >= 2000) { // Спавн каждые 2 секунды
@@ -1794,28 +1654,35 @@
                     updateUnits();
                     
                     // Проверка конца игры
-                    if (gameState.playerHealth <= 0 || gameState.enemyUnits.length === 0) {
+                    if (gameState.playerHealth <= 0) {
                         gameState.gameOver = true;
                         gameState.gamesPlayed++;
                         
-                        if (gameState.playerHealth <= 0) {
-                            gameState.gameResult = 'lose';
-                            resultTitle.textContent = 'ПОРАЖЕНИЕ';
-                            resultMessage.textContent = 'Попробуйте еще раз!';
-                        } else {
-                            gameState.gameResult = 'win';
-                            resultTitle.textContent = 'ПОБЕДА!';
-                            resultMessage.textContent = '+1 ключ, +50 золота';
-                            
-                            // Награда за победу
-                            gameState.keys += 1;
-                            gameState.gold += 50;
-                            gameState.gamesWon++;
-                        }
+                        gameState.gameResult = 'lose';
+                        resultTitle.textContent = 'ПОРАЖЕНИЕ';
+                        resultMessage.textContent = 'Попробуйте еще раз!';
+                        
+                        gameResult.classList.remove('hidden');
+                        updateStats();
+                    } else if (gameState.battleTime >= 120000) { // Победа через 2 минуты
+                        gameState.gameOver = true;
+                        gameState.gamesPlayed++;
+                        gameState.gamesWon++;
+                        
+                        gameState.gameResult = 'win';
+                        resultTitle.textContent = 'ПОБЕДА!';
+                        resultMessage.textContent = '+1 ключ, +50 золота';
+                        
+                        // Награда за победу
+                        gameState.keys += 1;
+                        gameState.gold += 50;
+                        
                         gameResult.classList.remove('hidden');
                         updateStats();
                     }
                 }
+                
+                updateStats();
             }
         }
 
@@ -1891,16 +1758,16 @@
                 
                 // 25% шанс выпадения персонажа
                 const characterRoll = Math.random();
-                if (characterRoll < 0.01) { // 0.1% легендарный (от 25%)
-                    targetRarity = 'legendary';
-                } else if (characterRoll < 0.046) { // 3.6% мифический (от 25%)
-                    targetRarity = 'mythic';
-                } else if (characterRoll < 0.166) { // 12% эпический (от 25%)
-                    targetRarity = 'epic';
-                } else if (characterRoll < 0.406) { // 24% редкий (от 25%)
-                    targetRarity = 'rare';
-                } else { // 60% обычный (от 25%)
+                if (characterRoll < 0.6) { // 60% обычный (от 25%)
                     targetRarity = 'common';
+                } else if (characterRoll < 0.85) { // 25% редкий (от 25%)
+                    targetRarity = 'rare';
+                } else if (characterRoll < 0.95) { // 10% эпический (от 25%)
+                    targetRarity = 'epic';
+                } else if (characterRoll < 0.99) { // 4% мифический (от 25%)
+                    targetRarity = 'mythic';
+                } else { // 1% легендарный (от 25%)
+                    targetRarity = 'legendary';
                 }
                 
                 // Доступные персонажи этой редкости
