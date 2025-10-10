@@ -427,6 +427,108 @@
             gap: 20px;
         }
         
+        .programming-panel {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 350px;
+            height: 760px;
+            background: rgba(93, 64, 55, 0.9);
+            border-radius: 5px;
+            padding: 20px;
+            z-index: 10;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .programming-header {
+            font-size: 24px;
+            color: #f5e8c8;
+            text-align: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #8d6e63;
+            padding-bottom: 10px;
+        }
+        
+        .programming-textarea {
+            width: 100%;
+            height: 500px;
+            background: #5d4037;
+            color: #f5e8c8;
+            border: 1px solid #8d6e63;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: none;
+        }
+        
+        .programming-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .programming-button {
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .programming-button:hover {
+            background: linear-gradient(to bottom, #a1887f, #8d6e63);
+        }
+        
+        .programming-help {
+            background: rgba(121, 85, 72, 0.8);
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 12px;
+            color: #f5e8c8;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .programming-help h3 {
+            margin-bottom: 10px;
+            color: #ffd54f;
+        }
+        
+        .programming-help ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .programming-help li {
+            margin-bottom: 5px;
+            padding-left: 10px;
+            border-left: 2px solid #8d6e63;
+        }
+        
+        .unit-program-button {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 20;
+            white-space: nowrap;
+        }
+        
         .game-result {
             position: absolute;
             top: 50%;
@@ -720,6 +822,30 @@
             <!-- Кнопки персонажей будут добавлены через JavaScript -->
         </div>
         
+        <!-- Панель программирования -->
+        <div id="programming-panel" class="programming-panel hidden">
+            <div class="programming-header">Программирование юнита</div>
+            <textarea id="programming-textarea" class="programming-textarea" placeholder="Введите код для юнита..."></textarea>
+            <div class="programming-buttons">
+                <button class="programming-button" id="apply-program-btn">Применить к юниту</button>
+                <button class="programming-button" id="apply-all-btn">Применить ко всем юнитам</button>
+                <button class="programming-button" id="apply-type-btn">Применить ко всем этого типа</button>
+                <button class="programming-button" id="close-programming-btn">Закрыть</button>
+            </div>
+            <div class="programming-help">
+                <h3>Доступные команды:</h3>
+                <ul>
+                    <li>move_forward(distance) - двигаться вперед</li>
+                    <li>move_backward(distance) - двигаться назад</li>
+                    <li>move_left(distance) - двигаться влево</li>
+                    <li>move_right(distance) - двигаться вправо</li>
+                    <li>attack() - атаковать (в радиусе атаки)</li>
+                    <li>move_to(x, y) - двигаться к координатам</li>
+                    <li>get_enemy_coords() - получить координаты врага</li>
+                </ul>
+            </div>
+        </div>
+        
         <!-- Результат игры -->
         <div id="game-result" class="game-result hidden">
             <h2 id="result-title">ПОБЕДА!</h2>
@@ -925,7 +1051,13 @@
             
             // Игра
             continue: document.getElementById('continue-btn'),
-            startEarly: document.getElementById('start-early-btn')
+            startEarly: document.getElementById('start-early-btn'),
+            
+            // Программирование
+            applyProgram: document.getElementById('apply-program-btn'),
+            applyAll: document.getElementById('apply-all-btn'),
+            applyType: document.getElementById('apply-type-btn'),
+            closeProgramming: document.getElementById('close-programming-btn')
         };
 
         // Статистика
@@ -973,6 +1105,8 @@
         const preparationTimer = document.getElementById('preparation-timer');
         const energyPanel = document.getElementById('energy-panel');
         const characterButtons = document.getElementById('character-buttons');
+        const programmingPanel = document.getElementById('programming-panel');
+        const programmingTextarea = document.getElementById('programming-textarea');
 
         // Загруженные изображения
         const images = {};
@@ -1052,7 +1186,7 @@
             buttons.upgrades.addEventListener('click', () => showScreen('upgrades'));
             buttons.cases.addEventListener('click', () => showScreen('cases'));
             
-            // Кнопки назад
+            // Назад
             buttons.charactersBack.addEventListener('click', () => showScreen('main_menu'));
             buttons.productionBack.addEventListener('click', () => showScreen('main_menu'));
             buttons.upgradesBack.addEventListener('click', () => showScreen('main_menu'));
@@ -1081,6 +1215,12 @@
             
             // Начать заранее
             buttons.startEarly.addEventListener('click', startBattle);
+            
+            // Программирование
+            buttons.applyProgram.addEventListener('click', applyProgram);
+            buttons.applyAll.addEventListener('click', applyProgramToAll);
+            buttons.applyType.addEventListener('click', applyProgramToType);
+            buttons.closeProgramming.addEventListener('click', closeProgrammingPanel);
         }
 
         // Создание кнопок персонажей
@@ -1122,6 +1262,7 @@
             gameUI.classList.add('hidden');
             preparationPanel.classList.add('hidden');
             characterButtons.classList.add('hidden');
+            programmingPanel.classList.add('hidden');
             
             // Показать выбранный экран
             if (screenName === 'game') {
@@ -1318,10 +1459,12 @@
                     attackRange: character.attack_range,
                     visionRange: character.vision_range,
                     image: character.image,
+                    program: [], // Программа юнита
+                    state: 'idle', // idle, moving, attacking
                     target: null,
                     moveTarget: null,
                     lastAttackTime: 0,
-                    state: 'idle' // idle, moving, attacking
+                    isExecuting: false // Выполняет ли программу
                 });
                 
                 // Визуальная обратная связь
@@ -1357,29 +1500,144 @@
             return false;
         }
 
-        // Задать цель юниту
-        function setUnitTarget(x, y, isEnemy = false) {
+        // Открыть панель программирования
+        function openProgrammingPanel() {
             if (gameState.selectedUnit) {
-                if (isEnemy) {
-                    // Ищем вражеского юнита по координатам
-                    for (let i = gameState.enemyUnits.length - 1; i >= 0; i--) {
-                        const enemy = gameState.enemyUnits[i];
-                        if (distance(x, y, enemy.x, enemy.y) < 30) {
-                            gameState.selectedUnit.target = enemy;
-                            gameState.selectedUnit.moveTarget = null;
-                            gameState.selectedUnit.state = 'chasing';
-                            return true;
+                programmingTextarea.value = gameState.selectedUnit.program.join('\n');
+                programmingPanel.classList.remove('hidden');
+            }
+        }
+
+        // Закрыть панель программирования
+        function closeProgrammingPanel() {
+            programmingPanel.classList.add('hidden');
+        }
+
+        // Применить программу к выбранному юниту
+        function applyProgram() {
+            if (gameState.selectedUnit) {
+                const programText = programmingTextarea.value;
+                const programLines = programText.split('\n').filter(line => line.trim() !== '');
+                gameState.selectedUnit.program = programLines;
+                gameState.selectedUnit.isExecuting = true;
+                showNotification('Программа применена к юниту!');
+            }
+        }
+
+        // Применить программу ко всем юнитам
+        function applyProgramToAll() {
+            const programText = programmingTextarea.value;
+            const programLines = programText.split('\n').filter(line => line.trim() !== '');
+            
+            gameState.units.forEach(unit => {
+                unit.program = [...programLines];
+                unit.isExecuting = true;
+            });
+            
+            showNotification('Программа применена ко всем юнитам!');
+        }
+
+        // Применить программу ко всем юнитам этого типа
+        function applyProgramToType() {
+            if (gameState.selectedUnit) {
+                const programText = programmingTextarea.value;
+                const programLines = programText.split('\n').filter(line => line.trim() !== '');
+                const characterId = gameState.selectedUnit.characterId;
+                
+                gameState.units.forEach(unit => {
+                    if (unit.characterId === characterId) {
+                        unit.program = [...programLines];
+                        unit.isExecuting = true;
+                    }
+                });
+                
+                showNotification(`Программа применена ко всем юнитам типа ${characters[characterId].name}!`);
+            }
+        }
+
+        // Интерпретатор программы юнита
+        function executeUnitProgram(unit) {
+            if (!unit.isExecuting || unit.program.length === 0) return;
+            
+            const character = characters[unit.characterId];
+            
+            // Выполняем программу по одной команде за кадр
+            for (let i = 0; i < unit.program.length; i++) {
+                const command = unit.program[i].trim();
+                
+                // Парсим команду
+                if (command.startsWith('move_forward(')) {
+                    const distance = parseFloat(command.match(/move_forward\((\d+)\)/)[1]);
+                    unit.y = Math.max(30, unit.y - distance);
+                    break;
+                }
+                else if (command.startsWith('move_backward(')) {
+                    const distance = parseFloat(command.match(/move_backward\((\d+)\)/)[1]);
+                    unit.y = Math.min(SCREEN_HEIGHT - 30, unit.y + distance);
+                    break;
+                }
+                else if (command.startsWith('move_left(')) {
+                    const distance = parseFloat(command.match(/move_left\((\d+)\)/)[1]);
+                    unit.x = Math.max(30, unit.x - distance);
+                    break;
+                }
+                else if (command.startsWith('move_right(')) {
+                    const distance = parseFloat(command.match(/move_right\((\d+)\)/)[1]);
+                    unit.x = Math.min(SCREEN_WIDTH - 30, unit.x + distance);
+                    break;
+                }
+                else if (command === 'attack()') {
+                    // Поиск врага в радиусе атаки
+                    let enemyInRange = null;
+                    for (const enemy of gameState.enemyUnits) {
+                        if (distance(unit.x, unit.y, enemy.x, enemy.y) <= unit.attackRange) {
+                            enemyInRange = enemy;
+                            break;
                         }
                     }
-                } else {
-                    // Задаем точку движения
-                    gameState.selectedUnit.moveTarget = {x: x, y: y};
-                    gameState.selectedUnit.target = null;
-                    gameState.selectedUnit.state = 'moving';
-                    return true;
+                    
+                    if (enemyInRange) {
+                        enemyInRange.health -= unit.damage;
+                        createDamagePopup(enemyInRange.x, enemyInRange.y, `-${unit.damage}`, '#ef5350');
+                        
+                        if (enemyInRange.health <= 0) {
+                            gameState.enemyUnits = gameState.enemyUnits.filter(u => u !== enemyInRange);
+                        }
+                    }
+                    break;
+                }
+                else if (command.startsWith('move_to(')) {
+                    const match = command.match(/move_to\((\d+),\s*(\d+)\)/);
+                    if (match) {
+                        const x = parseInt(match[1]);
+                        const y = parseInt(match[2]);
+                        
+                        // Просто телепортируем юнита к указанным координатам
+                        unit.x = Math.max(30, Math.min(SCREEN_WIDTH - 30, x));
+                        unit.y = Math.max(30, Math.min(SCREEN_HEIGHT - 30, y));
+                    }
+                    break;
+                }
+                else if (command === 'get_enemy_coords()') {
+                    // Поиск врага в поле зрения
+                    let closestEnemy = null;
+                    let closestDistance = unit.visionRange;
+                    
+                    for (const enemy of gameState.enemyUnits) {
+                        const dist = distance(unit.x, unit.y, enemy.x, enemy.y);
+                        if (dist < closestDistance) {
+                            closestDistance = dist;
+                            closestEnemy = enemy;
+                        }
+                    }
+                    
+                    if (closestEnemy) {
+                        // Сохраняем координаты врага в программе
+                        unit.program.push(`# enemy_coords: ${closestEnemy.x}, ${closestEnemy.y}`);
+                    }
+                    break;
                 }
             }
-            return false;
         }
 
         // Спавн вражеского юнита
@@ -1430,7 +1688,6 @@
             };
             
             gameState.enemyUnits.push(enemy);
-            console.log('Враг создан!'); // Для отладки
         }
 
         // Создание всплывающего сообщения об уроне
@@ -1453,80 +1710,12 @@
             
             // Обновление юнитов игрока
             gameState.units.forEach(unit => {
-                const character = characters[unit.characterId];
-                
-                // Автоматическое поведение: поиск врагов в радиусе видимости
-                if (!unit.target && !unit.moveTarget) {
-                    let closestEnemy = null;
-                    let closestDistance = unit.visionRange;
-                    
-                    gameState.enemyUnits.forEach(enemy => {
-                        const dist = distance(unit.x, unit.y, enemy.x, enemy.y);
-                        if (dist < closestDistance) {
-                            closestDistance = dist;
-                            closestEnemy = enemy;
-                        }
-                    });
-                    
-                    if (closestEnemy) {
-                        unit.target = closestEnemy;
-                        unit.state = 'chasing';
-                    }
+                // Выполнение программы юнита
+                if (unit.isExecuting && unit.program.length > 0) {
+                    executeUnitProgram(unit);
                 }
                 
-                // Движение к цели
-                if (unit.target && unit.state === 'chasing') {
-                    const dx = unit.target.x - unit.x;
-                    const dy = unit.target.y - unit.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist > unit.attackRange) {
-                        // Двигаемся к цели
-                        unit.x += (dx / dist) * unit.speed;
-                        unit.y += (dy / dist) * unit.speed;
-                    } else {
-                        // Атакуем цель, если в радиусе атаки
-                        unit.state = 'attacking';
-                    }
-                } else if (unit.moveTarget && unit.state === 'moving') {
-                    // Движение к заданной точке
-                    const dx = unit.moveTarget.x - unit.x;
-                    const dy = unit.moveTarget.y - unit.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist > 5) {
-                        unit.x += (dx / dist) * unit.speed;
-                        unit.y += (dy / dist) * unit.speed;
-                    } else {
-                        // Достигли точки назначения
-                        unit.moveTarget = null;
-                        unit.state = 'idle';
-                    }
-                }
-                
-                // Атака
-                if (unit.target && unit.state === 'attacking') {
-                    const dist = distance(unit.x, unit.y, unit.target.x, unit.target.y);
-                    
-                    if (dist <= unit.attackRange) {
-                        if (!unit.lastAttackTime || now - unit.lastAttackTime > (1000 / unit.attackSpeed)) {
-                            unit.target.health -= unit.damage;
-                            unit.lastAttackTime = now;
-                            
-                            // Создание всплывающего урона
-                            createDamagePopup(unit.target.x, unit.target.y, `-${unit.damage}`, '#ef5350');
-                            
-                            if (unit.target.health <= 0) {
-                                gameState.enemyUnits = gameState.enemyUnits.filter(u => u !== unit.target);
-                                unit.target = null;
-                                unit.state = 'idle';
-                            }
-                        }
-                    } else {
-                        // Цель вышла из радиуса атаки - преследуем
-                        unit.state = 'chasing';
-                    }
-                }
+                // Автоматическое поведение отключено - юниты двигаются только по программе
             });
             
             // Обновление вражеских юнитов
@@ -1895,16 +2084,11 @@
                 ctx.fillRect(unit.x - 30, unit.y - 40, 60 * (unit.health / unit.maxHealth), 8);
                 
                 // Индикатор состояния
-                if (unit.state === 'attacking') {
-                    ctx.font = '12px Arial';
-                    ctx.fillStyle = '#ef5350';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('⚔️', unit.x, unit.y - 50);
-                } else if (unit.state === 'moving' || unit.state === 'chasing') {
+                if (unit.isExecuting) {
                     ctx.font = '12px Arial';
                     ctx.fillStyle = '#4fc3f7';
                     ctx.textAlign = 'center';
-                    ctx.fillText('➤', unit.x, unit.y - 50);
+                    ctx.fillText('⚡', unit.x, unit.y - 50);
                 }
                 
                 // Выделение выбранного юнита
@@ -1930,22 +2114,15 @@
                     
                     ctx.setLineDash([]);
                     
-                    // Линия к цели
-                    if (unit.target) {
-                        ctx.strokeStyle = '#ef5350';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.moveTo(unit.x, unit.y);
-                        ctx.lineTo(unit.target.x, unit.target.y);
-                        ctx.stroke();
-                    } else if (unit.moveTarget) {
-                        ctx.strokeStyle = '#4fc3f7';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.moveTo(unit.x, unit.y);
-                        ctx.lineTo(unit.moveTarget.x, unit.moveTarget.y);
-                        ctx.stroke();
-                    }
+                    // Кнопка программирования
+                    ctx.fillStyle = 'rgba(93, 64, 55, 0.9)';
+                    ctx.fillRect(unit.x - 40, unit.y - 80, 80, 25);
+                    ctx.strokeStyle = '#8d6e63';
+                    ctx.strokeRect(unit.x - 40, unit.y - 80, 80, 25);
+                    ctx.fillStyle = '#f5e8c8';
+                    ctx.font = '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Программировать', unit.x, unit.y - 65);
                 }
             });
             
@@ -2020,32 +2197,25 @@
         function handleCanvasClick(x, y) {
             if (gameState.currentScreen !== 'game' || gameState.gameOver) return;
             
+            // Проверяем, не кликнули ли на кнопку программирования
+            if (gameState.selectedUnit) {
+                const unit = gameState.selectedUnit;
+                if (x >= unit.x - 40 && x <= unit.x + 40 && 
+                    y >= unit.y - 80 && y <= unit.y - 55) {
+                    openProgrammingPanel();
+                    return;
+                }
+            }
+            
             // Всегда можно размещать юнитов, независимо от фазы игры
             if (gameState.selectedCharacter) {
                 placeUnit(x, y);
             } else {
                 // Попытка выбрать юнита
                 if (!selectUnit(x, y)) {
-                    // Если не выбрали юнит, задаем цель выбранному юниту
-                    if (gameState.selectedUnit) {
-                        // Проверяем, есть ли враг в точке клика
-                        let enemyClicked = false;
-                        for (let i = gameState.enemyUnits.length - 1; i >= 0; i--) {
-                            const enemy = gameState.enemyUnits[i];
-                            if (distance(x, y, enemy.x, enemy.y) < 30) {
-                                setUnitTarget(x, y, true);
-                                enemyClicked = true;
-                                break;
-                            }
-                        }
-                        
-                        if (!enemyClicked) {
-                            setUnitTarget(x, y, false);
-                        }
-                    } else {
-                        // Снимаем выделение с персонажа если кликнули на пустое место
-                        gameState.selectedCharacter = null;
-                    }
+                    // Снимаем выделение с персонажа если кликнули на пустое место
+                    gameState.selectedCharacter = null;
+                    gameState.selectedUnit = null;
                 }
             }
         }
