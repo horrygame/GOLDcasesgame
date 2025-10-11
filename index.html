@@ -351,6 +351,11 @@
             background: linear-gradient(to bottom, #a1887f, #8d6e63);
         }
         
+        .character-button.dragging {
+            transform: scale(0.9);
+            opacity: 0.7;
+        }
+        
         .character-button.disabled {
             background: linear-gradient(to bottom, #795548, #5d4037);
             cursor: not-allowed;
@@ -664,6 +669,21 @@
             z-index: 8;
         }
         
+        .dragging-ghost {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            opacity: 0.7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            transform: translate(-50%, -50%);
+        }
+        
         /* Средневековые декоративные элементы */
         .medieval-border {
             border: 8px solid transparent;
@@ -677,6 +697,13 @@
             border-radius: 5px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             border: 1px solid #8d6e63;
+        }
+        
+        .start-battle-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10;
         }
     </style>
 </head>
@@ -813,8 +840,7 @@
         <!-- Панель подготовки -->
         <div id="preparation-panel" class="preparation-panel hidden">
             <div>Фаза подготовки:</div>
-            <div id="preparation-timer">60</div>
-            <button class="button" id="start-early-btn">Начать заранее</button>
+            <button class="button" id="start-battle-btn">Начать битву</button>
         </div>
         
         <!-- Кнопки выбора персонажей -->
@@ -833,7 +859,7 @@
                 <button class="programming-button" id="close-programming-btn">Закрыть</button>
             </div>
             <div class="programming-help">
-                <h3>Доступные команды:</h3>
+                <h3>Доступные команды (Python):</h3>
                 <ul>
                     <li>move_forward(distance) - двигаться вперед</li>
                     <li>move_backward(distance) - двигаться назад</li>
@@ -842,6 +868,11 @@
                     <li>attack() - атаковать (в радиусе атаки)</li>
                     <li>move_to(x, y) - двигаться к координатам</li>
                     <li>get_enemy_coords() - получить координаты врага</li>
+                    <li>for i in range(n): - цикл повторения n раз</li>
+                    <li>while условие: - цикл с условием</li>
+                    <li>if условие: - условный оператор</li>
+                    <li>elif условие: - дополнительное условие</li>
+                    <li>else: - ветка по умолчанию</li>
                 </ul>
             </div>
         </div>
@@ -864,7 +895,6 @@
         const SCREEN_WIDTH = 1200;
         const SCREEN_HEIGHT = 800;
         const FPS = 60;
-        const PREPARATION_TIME = 60; // 60 секунд на подготовку
         const BATTLE_DURATION = 120; // 120 секунд длительность битвы
 
         // Цвета в средневековом стиле
@@ -998,7 +1028,6 @@
             enemyCounter: 0,
             lastGoldUpdate: 0,
             lastSecondUpdate: 0,
-            preparationTimeLeft: PREPARATION_TIME,
             battleTimeLeft: BATTLE_DURATION,
             gameOver: false,
             gameResult: null,
@@ -1006,7 +1035,9 @@
             selectedCharacter: null,
             selectedUnit: null,
             gamesPlayed: 0,
-            gamesWon: 0
+            gamesWon: 0,
+            draggingCharacter: null,
+            draggingGhost: null
         };
 
         // Получение элементов DOM
@@ -1051,7 +1082,7 @@
             
             // Игра
             continue: document.getElementById('continue-btn'),
-            startEarly: document.getElementById('start-early-btn'),
+            startBattle: document.getElementById('start-battle-btn'),
             
             // Программирование
             applyProgram: document.getElementById('apply-program-btn'),
@@ -1102,8 +1133,6 @@
         // Игровой UI
         const gameUI = document.getElementById('game-ui');
         const preparationPanel = document.getElementById('preparation-panel');
-        const preparationTimer = document.getElementById('preparation-timer');
-        const energyPanel = document.getElementById('energy-panel');
         const characterButtons = document.getElementById('character-buttons');
         const programmingPanel = document.getElementById('programming-panel');
         const programmingTextarea = document.getElementById('programming-textarea');
@@ -1128,6 +1157,9 @@
                 
                 // Создание кнопок персонажей
                 createCharacterButtons();
+                
+                // Настройка перетаскивания
+                setupDragging();
                 
                 // Запуск игрового цикла
                 gameLoop();
@@ -1213,14 +1245,92 @@
                 showScreen('main_menu');
             });
             
-            // Начать заранее
-            buttons.startEarly.addEventListener('click', startBattle);
+            // Начать битву
+            buttons.startBattle.addEventListener('click', startBattle);
             
             // Программирование
             buttons.applyProgram.addEventListener('click', applyProgram);
             buttons.applyAll.addEventListener('click', applyProgramToAll);
             buttons.applyType.addEventListener('click', applyProgramToType);
             buttons.closeProgramming.addEventListener('click', closeProgrammingPanel);
+        }
+
+        // Настройка перетаскивания
+        function setupDragging() {
+            // Обработчики для кнопок персонажей
+            document.addEventListener('mousedown', (e) => {
+                const characterButton = e.target.closest('.character-button');
+                if (!characterButton || gameState.gamePhase !== 'preparation') return;
+                
+                const characterId = characterButton.dataset.characterId;
+                const character = characters[characterId];
+                
+                if (!character || gameState.energy < character.cost) return;
+                
+                // Начинаем перетаскивание
+                gameState.draggingCharacter = characterId;
+                characterButton.classList.add('dragging');
+                
+                // Создаем призрака для перетаскивания
+                gameState.draggingGhost = document.createElement('div');
+                gameState.draggingGhost.className = 'dragging-ghost';
+                gameState.draggingGhost.style.background = '#8d6e63';
+                gameState.draggingGhost.style.color = '#f5e8c8';
+                gameState.draggingGhost.style.fontSize = '24px';
+                gameState.draggingGhost.textContent = character.name.charAt(0);
+                document.body.appendChild(gameState.draggingGhost);
+                
+                updateDraggingGhost(e);
+                
+                // Обработчики для перемещения и завершения перетаскивания
+                document.addEventListener('mousemove', handleDragMove);
+                document.addEventListener('mouseup', handleDragEnd);
+            });
+        }
+
+        // Обновление позиции призрака при перетаскивании
+        function updateDraggingGhost(e) {
+            if (!gameState.draggingGhost) return;
+            
+            gameState.draggingGhost.style.left = e.clientX + 'px';
+            gameState.draggingGhost.style.top = e.clientY + 'px';
+        }
+
+        // Обработка перемещения при перетаскивании
+        function handleDragMove(e) {
+            updateDraggingGhost(e);
+        }
+
+        // Завершение перетаскивания
+        function handleDragEnd(e) {
+            if (!gameState.draggingCharacter) return;
+            
+            // Удаляем призрака
+            if (gameState.draggingGhost) {
+                gameState.draggingGhost.remove();
+                gameState.draggingGhost = null;
+            }
+            
+            // Убираем класс dragging с кнопки
+            const characterButton = document.querySelector(`.character-button[data-character-id="${gameState.draggingCharacter}"]`);
+            if (characterButton) {
+                characterButton.classList.remove('dragging');
+            }
+            
+            // Если отпустили над игровым полем, размещаем юнита
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (x >= 0 && x <= SCREEN_WIDTH && y >= 0 && y <= SCREEN_HEIGHT) {
+                placeUnit(x, y, gameState.draggingCharacter);
+            }
+            
+            // Снимаем обработчики
+            document.removeEventListener('mousemove', handleDragMove);
+            document.removeEventListener('mouseup', handleDragEnd);
+            
+            gameState.draggingCharacter = null;
         }
 
         // Создание кнопок персонажей
@@ -1240,12 +1350,6 @@
                     <div class="character-button-name">${character.name}</div>
                     <div class="character-button-cost">${character.cost}⚡</div>
                 `;
-                
-                button.addEventListener('click', () => {
-                    gameState.selectedCharacter = charId;
-                    // Снимаем выделение с юнитов
-                    gameState.selectedUnit = null;
-                });
                 
                 characterButtons.appendChild(button);
             });
@@ -1269,10 +1373,7 @@
                 // Игровой экран рисуется на canvas
                 gameUI.classList.remove('hidden');
                 characterButtons.classList.remove('hidden');
-                
-                if (gameState.gamePhase === 'preparation') {
-                    preparationPanel.classList.remove('hidden');
-                }
+                preparationPanel.classList.remove('hidden');
             } else if (screens[screenName]) {
                 screens[screenName].classList.remove('hidden');
             }
@@ -1321,10 +1422,7 @@
             stats.gameHealth.textContent = gameState.playerHealth;
             
             // Обновление таймера в зависимости от фазы игры
-            if (gameState.gamePhase === 'preparation') {
-                stats.gameTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
-                preparationTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
-            } else if (gameState.gamePhase === 'battle') {
+            if (gameState.gamePhase === 'battle') {
                 stats.gameTimer.textContent = Math.ceil(gameState.battleTimeLeft);
             }
             
@@ -1420,7 +1518,6 @@
             gameState.enemySpawnTimer = 0;
             gameState.unitCounter = 0;
             gameState.enemyCounter = 0;
-            gameState.preparationTimeLeft = PREPARATION_TIME;
             gameState.battleTimeLeft = BATTLE_DURATION;
             gameState.gamePhase = 'preparation';
             gameState.gameOver = false;
@@ -1437,18 +1534,25 @@
         function startBattle() {
             gameState.gamePhase = 'battle';
             preparationPanel.classList.add('hidden');
+            characterButtons.classList.add('hidden');
+            programmingPanel.classList.add('hidden');
+            
+            // Запускаем выполнение программ всех юнитов
+            gameState.units.forEach(unit => {
+                unit.isExecuting = true;
+            });
         }
 
         // Размещение юнита
-        function placeUnit(x, y) {
-            if (gameState.selectedCharacter && gameState.energy >= characters[gameState.selectedCharacter].cost) {
-                const character = characters[gameState.selectedCharacter];
+        function placeUnit(x, y, characterId) {
+            if (characterId && gameState.energy >= characters[characterId].cost) {
+                const character = characters[characterId];
                 
                 gameState.energy -= character.cost;
                 gameState.unitCounter++;
                 gameState.units.push({
                     id: `unit_${gameState.unitCounter}`,
-                    characterId: gameState.selectedCharacter,
+                    characterId: characterId,
                     x: x,
                     y: y,
                     health: character.health,
@@ -1464,7 +1568,7 @@
                     target: null,
                     moveTarget: null,
                     lastAttackTime: 0,
-                    isExecuting: false // Выполняет ли программу
+                    isExecuting: false // Выполняет ли программу (только в фазе битвы)
                 });
                 
                 // Визуальная обратная связь
@@ -1474,7 +1578,7 @@
                 return true;
             } else {
                 // Визуальная обратная связь при недостатке энергии
-                if (gameState.energy < characters[gameState.selectedCharacter].cost) {
+                if (characterId && gameState.energy < characters[characterId].cost) {
                     energyPanel.classList.add('energy-warning');
                     setTimeout(() => {
                         energyPanel.classList.remove('energy-warning');
@@ -1493,7 +1597,6 @@
                 const unit = gameState.units[i];
                 if (distance(x, y, unit.x, unit.y) < 30) {
                     gameState.selectedUnit = unit;
-                    gameState.selectedCharacter = null;
                     return true;
                 }
             }
@@ -1502,7 +1605,7 @@
 
         // Открыть панель программирования
         function openProgrammingPanel() {
-            if (gameState.selectedUnit) {
+            if (gameState.selectedUnit && gameState.gamePhase === 'preparation') {
                 programmingTextarea.value = gameState.selectedUnit.program.join('\n');
                 programmingPanel.classList.remove('hidden');
             }
@@ -1519,7 +1622,6 @@
                 const programText = programmingTextarea.value;
                 const programLines = programText.split('\n').filter(line => line.trim() !== '');
                 gameState.selectedUnit.program = programLines;
-                gameState.selectedUnit.isExecuting = true;
                 showNotification('Программа применена к юниту!');
             }
         }
@@ -1531,7 +1633,6 @@
             
             gameState.units.forEach(unit => {
                 unit.program = [...programLines];
-                unit.isExecuting = true;
             });
             
             showNotification('Программа применена ко всем юнитам!');
@@ -1547,7 +1648,6 @@
                 gameState.units.forEach(unit => {
                     if (unit.characterId === characterId) {
                         unit.program = [...programLines];
-                        unit.isExecuting = true;
                     }
                 });
                 
@@ -1555,89 +1655,342 @@
             }
         }
 
-        // Интерпретатор программы юнита
+        // Интерпретатор программы юнита (Python-подобный синтаксис)
         function executeUnitProgram(unit) {
-            if (!unit.isExecuting || unit.program.length === 0) return;
+            if (!unit.isExecuting || unit.program.length === 0 || !unit.programState) return;
             
-            const character = characters[unit.characterId];
+            // Если состояние выполнения не инициализировано, инициализируем его
+            if (!unit.programState.initialized) {
+                unit.programState = {
+                    initialized: true,
+                    currentLine: 0,
+                    loopStack: [],
+                    conditionStack: [],
+                    variables: {},
+                    waiting: false,
+                    waitUntil: 0
+                };
+            }
             
-            // Выполняем программу по одной команде за кадр
-            for (let i = 0; i < unit.program.length; i++) {
-                const command = unit.program[i].trim();
+            const state = unit.programState;
+            
+            // Если ждем до определенного времени
+            if (state.waiting && Date.now() < state.waitUntil) {
+                return;
+            } else if (state.waiting) {
+                state.waiting = false;
+            }
+            
+            // Выполняем программу построчно
+            while (state.currentLine < unit.program.length && !state.waiting) {
+                const line = unit.program[state.currentLine].trim();
                 
-                // Парсим команду
-                if (command.startsWith('move_forward(')) {
-                    const distance = parseFloat(command.match(/move_forward\((\d+)\)/)[1]);
-                    unit.y = Math.max(30, unit.y - distance);
-                    break;
+                // Пропускаем пустые строки и комментарии
+                if (line === '' || line.startsWith('#')) {
+                    state.currentLine++;
+                    continue;
                 }
-                else if (command.startsWith('move_backward(')) {
-                    const distance = parseFloat(command.match(/move_backward\((\d+)\)/)[1]);
-                    unit.y = Math.min(SCREEN_HEIGHT - 30, unit.y + distance);
-                    break;
-                }
-                else if (command.startsWith('move_left(')) {
-                    const distance = parseFloat(command.match(/move_left\((\d+)\)/)[1]);
-                    unit.x = Math.max(30, unit.x - distance);
-                    break;
-                }
-                else if (command.startsWith('move_right(')) {
-                    const distance = parseFloat(command.match(/move_right\((\d+)\)/)[1]);
-                    unit.x = Math.min(SCREEN_WIDTH - 30, unit.x + distance);
-                    break;
-                }
-                else if (command === 'attack()') {
-                    // Поиск врага в радиусе атаки
-                    let enemyInRange = null;
-                    for (const enemy of gameState.enemyUnits) {
-                        if (distance(unit.x, unit.y, enemy.x, enemy.y) <= unit.attackRange) {
-                            enemyInRange = enemy;
-                            break;
-                        }
-                    }
+                
+                // Обработка отступов для блоков кода
+                const indent = unit.program[state.currentLine].search(/\S/);
+                
+                // Если мы внутри блока (цикла или условия)
+                if (state.loopStack.length > 0 || state.conditionStack.length > 0) {
+                    const currentBlock = state.loopStack.length > 0 ? state.loopStack[state.loopStack.length - 1] : 
+                                       state.conditionStack[state.conditionStack.length - 1];
                     
-                    if (enemyInRange) {
-                        enemyInRange.health -= unit.damage;
-                        createDamagePopup(enemyInRange.x, enemyInRange.y, `-${unit.damage}`, '#ef5350');
-                        
-                        if (enemyInRange.health <= 0) {
-                            gameState.enemyUnits = gameState.enemyUnits.filter(u => u !== enemyInRange);
+                    // Если отступ меньше, чем у блока, выходим из блока
+                    if (indent < currentBlock.indent) {
+                        if (state.loopStack.length > 0) {
+                            const loop = state.loopStack.pop();
+                            if (loop.type === 'for') {
+                                loop.counter++;
+                                if (loop.counter < loop.iterations) {
+                                    state.currentLine = loop.startLine;
+                                    state.loopStack.push(loop);
+                                    continue;
+                                }
+                            } else if (loop.type === 'while') {
+                                // Проверяем условие while
+                                if (evaluateCondition(loop.condition, unit)) {
+                                    state.currentLine = loop.startLine;
+                                    state.loopStack.push(loop);
+                                    continue;
+                                }
+                            }
+                        } else {
+                            state.conditionStack.pop();
                         }
+                        continue;
                     }
-                    break;
                 }
-                else if (command.startsWith('move_to(')) {
-                    const match = command.match(/move_to\((\d+),\s*(\d+)\)/);
+                
+                // Обработка команд
+                if (line.startsWith('for ')) {
+                    // Обработка цикла for
+                    const match = line.match(/for\s+(\w+)\s+in\s+range\((\d+)\):/);
                     if (match) {
-                        const x = parseInt(match[1]);
-                        const y = parseInt(match[2]);
+                        const varName = match[1];
+                        const iterations = parseInt(match[2]);
                         
-                        // Просто телепортируем юнита к указанным координатам
-                        unit.x = Math.max(30, Math.min(SCREEN_WIDTH - 30, x));
-                        unit.y = Math.max(30, Math.min(SCREEN_HEIGHT - 30, y));
+                        state.loopStack.push({
+                            type: 'for',
+                            startLine: state.currentLine,
+                            indent: indent,
+                            counter: 0,
+                            iterations: iterations,
+                            varName: varName
+                        });
+                        
+                        state.variables[varName] = 0;
                     }
-                    break;
-                }
-                else if (command === 'get_enemy_coords()') {
-                    // Поиск врага в поле зрения
-                    let closestEnemy = null;
-                    let closestDistance = unit.visionRange;
+                    state.currentLine++;
+                } else if (line.startsWith('while ')) {
+                    // Обработка цикла while
+                    const condition = line.substring(6, line.length - 1).trim();
                     
-                    for (const enemy of gameState.enemyUnits) {
-                        const dist = distance(unit.x, unit.y, enemy.x, enemy.y);
-                        if (dist < closestDistance) {
-                            closestDistance = dist;
-                            closestEnemy = enemy;
+                    if (evaluateCondition(condition, unit)) {
+                        state.loopStack.push({
+                            type: 'while',
+                            startLine: state.currentLine,
+                            indent: indent,
+                            condition: condition
+                        });
+                    } else {
+                        // Пропускаем блок while
+                        skipBlock(unit.program, state, indent);
+                    }
+                    state.currentLine++;
+                } else if (line.startsWith('if ')) {
+                    // Обработка условия if
+                    const condition = line.substring(3, line.length - 1).trim();
+                    
+                    if (evaluateCondition(condition, unit)) {
+                        state.conditionStack.push({
+                            type: 'if',
+                            indent: indent,
+                            executed: true
+                        });
+                    } else {
+                        state.conditionStack.push({
+                            type: 'if',
+                            indent: indent,
+                            executed: false
+                        });
+                        // Пропускаем блок if
+                        skipBlock(unit.program, state, indent);
+                    }
+                    state.currentLine++;
+                } else if (line.startsWith('elif ')) {
+                    // Обработка условия elif
+                    if (state.conditionStack.length > 0) {
+                        const lastCondition = state.conditionStack[state.conditionStack.length - 1];
+                        
+                        if (lastCondition.type === 'if' || lastCondition.type === 'elif') {
+                            if (lastCondition.executed) {
+                                // Условие уже выполнено, пропускаем блок
+                                skipBlock(unit.program, state, indent);
+                                state.currentLine++;
+                            } else {
+                                const condition = line.substring(5, line.length - 1).trim();
+                                
+                                if (evaluateCondition(condition, unit)) {
+                                    lastCondition.executed = true;
+                                    lastCondition.type = 'elif';
+                                } else {
+                                    // Пропускаем блок elif
+                                    skipBlock(unit.program, state, indent);
+                                }
+                                state.currentLine++;
+                            }
                         }
                     }
-                    
-                    if (closestEnemy) {
-                        // Сохраняем координаты врага в программе
-                        unit.program.push(`# enemy_coords: ${closestEnemy.x}, ${closestEnemy.y}`);
+                } else if (line === 'else:') {
+                    // Обработка else
+                    if (state.conditionStack.length > 0) {
+                        const lastCondition = state.conditionStack[state.conditionStack.length - 1];
+                        
+                        if (lastCondition.executed) {
+                            // Условие уже выполнено, пропускаем блок else
+                            skipBlock(unit.program, state, indent);
+                            state.currentLine++;
+                        } else {
+                            lastCondition.executed = true;
+                            state.currentLine++;
+                        }
                     }
-                    break;
+                } else {
+                    // Выполнение обычных команд
+                    executeCommand(line, unit, state);
+                    state.currentLine++;
                 }
             }
+            
+            // Если дошли до конца программы, сбрасываем состояние
+            if (state.currentLine >= unit.program.length) {
+                unit.programState.initialized = false;
+                unit.isExecuting = false;
+            }
+        }
+
+        // Выполнение отдельной команды
+        function executeCommand(command, unit, state) {
+            // Пропускаем команды, если мы внутри невыполненного условия
+            if (state.conditionStack.length > 0) {
+                const lastCondition = state.conditionStack[state.conditionStack.length - 1];
+                if (!lastCondition.executed) {
+                    return;
+                }
+            }
+            
+            // Обновляем переменные в циклах for
+            if (state.loopStack.length > 0) {
+                const loop = state.loopStack[state.loopStack.length - 1];
+                if (loop.type === 'for' && loop.varName) {
+                    state.variables[loop.varName] = loop.counter;
+                }
+            }
+            
+            // Выполняем команды
+            if (command.startsWith('move_forward(')) {
+                const match = command.match(/move_forward\((\d+)\)/);
+                if (match) {
+                    const distance = parseInt(match[1]);
+                    unit.y = Math.max(30, unit.y - distance);
+                }
+            } else if (command.startsWith('move_backward(')) {
+                const match = command.match(/move_backward\((\d+)\)/);
+                if (match) {
+                    const distance = parseInt(match[1]);
+                    unit.y = Math.min(SCREEN_HEIGHT - 30, unit.y + distance);
+                }
+            } else if (command.startsWith('move_left(')) {
+                const match = command.match(/move_left\((\d+)\)/);
+                if (match) {
+                    const distance = parseInt(match[1]);
+                    unit.x = Math.max(30, unit.x - distance);
+                }
+            } else if (command.startsWith('move_right(')) {
+                const match = command.match(/move_right\((\d+)\)/);
+                if (match) {
+                    const distance = parseInt(match[1]);
+                    unit.x = Math.min(SCREEN_WIDTH - 30, unit.x + distance);
+                }
+            } else if (command === 'attack()') {
+                // Поиск врага в радиусе атаки
+                let enemyInRange = null;
+                for (const enemy of gameState.enemyUnits) {
+                    if (distance(unit.x, unit.y, enemy.x, enemy.y) <= unit.attackRange) {
+                        enemyInRange = enemy;
+                        break;
+                    }
+                }
+                
+                if (enemyInRange) {
+                    enemyInRange.health -= unit.damage;
+                    createDamagePopup(enemyInRange.x, enemyInRange.y, `-${unit.damage}`, '#ef5350');
+                    
+                    if (enemyInRange.health <= 0) {
+                        gameState.enemyUnits = gameState.enemyUnits.filter(u => u !== enemyInRange);
+                    }
+                }
+            } else if (command.startsWith('move_to(')) {
+                const match = command.match(/move_to\((\d+),\s*(\d+)\)/);
+                if (match) {
+                    const x = parseInt(match[1]);
+                    const y = parseInt(match[2]);
+                    
+                    // Просто телепортируем юнита к указанным координатам
+                    unit.x = Math.max(30, Math.min(SCREEN_WIDTH - 30, x));
+                    unit.y = Math.max(30, Math.min(SCREEN_HEIGHT - 30, y));
+                }
+            } else if (command.startsWith('wait(')) {
+                const match = command.match(/wait\((\d+)\)/);
+                if (match) {
+                    const milliseconds = parseInt(match[1]);
+                    state.waiting = true;
+                    state.waitUntil = Date.now() + milliseconds;
+                }
+            }
+        }
+
+        // Оценка условия
+        function evaluateCondition(condition, unit) {
+            // Простая реализация условий
+            if (condition === 'True' || condition === 'true') {
+                return true;
+            } else if (condition === 'False' || condition === 'false') {
+                return false;
+            } else if (condition.includes('enemy_in_range')) {
+                // Проверка наличия врага в радиусе атаки
+                for (const enemy of gameState.enemyUnits) {
+                    if (distance(unit.x, unit.y, enemy.x, enemy.y) <= unit.attackRange) {
+                        return true;
+                    }
+                }
+                return false;
+            } else if (condition.includes('enemy_in_sight')) {
+                // Проверка наличия врага в радиусе видимости
+                for (const enemy of gameState.enemyUnits) {
+                    if (distance(unit.x, unit.y, enemy.x, enemy.y) <= unit.visionRange) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
+            // Простая проверка числовых условий
+            const match = condition.match(/(\w+)\s*([<>]=?|==)\s*(\d+)/);
+            if (match) {
+                const left = match[1];
+                const operator = match[2];
+                const right = parseInt(match[3]);
+                
+                let leftValue = 0;
+                
+                // Получаем значение левой части
+                if (left === 'health') {
+                    leftValue = unit.health;
+                } else if (left === 'x') {
+                    leftValue = unit.x;
+                } else if (left === 'y') {
+                    leftValue = unit.y;
+                }
+                
+                // Выполняем сравнение
+                switch (operator) {
+                    case '>': return leftValue > right;
+                    case '<': return leftValue < right;
+                    case '>=': return leftValue >= right;
+                    case '<=': return leftValue <= right;
+                    case '==': return leftValue === right;
+                }
+            }
+            
+            return false;
+        }
+
+        // Пропуск блока кода
+        function skipBlock(program, state, currentIndent) {
+            let lineIndex = state.currentLine + 1;
+            
+            while (lineIndex < program.length) {
+                const line = program[lineIndex];
+                const indent = line.search(/\S/);
+                
+                if (indent === -1) {
+                    lineIndex++;
+                    continue;
+                }
+                
+                if (indent <= currentIndent) {
+                    break;
+                }
+                
+                lineIndex++;
+            }
+            
+            state.currentLine = lineIndex;
         }
 
         // Спавн вражеского юнита
@@ -1710,12 +2063,23 @@
             
             // Обновление юнитов игрока
             gameState.units.forEach(unit => {
-                // Выполнение программы юнита
-                if (unit.isExecuting && unit.program.length > 0) {
+                // Выполнение программы юнита (только в фазе битвы)
+                if (unit.isExecuting && unit.program.length > 0 && gameState.gamePhase === 'battle') {
+                    // Инициализация состояния выполнения программы, если нужно
+                    if (!unit.programState) {
+                        unit.programState = {
+                            initialized: false,
+                            currentLine: 0,
+                            loopStack: [],
+                            conditionStack: [],
+                            variables: {},
+                            waiting: false,
+                            waitUntil: 0
+                        };
+                    }
+                    
                     executeUnitProgram(unit);
                 }
-                
-                // Автоматическое поведение отключено - юниты двигаются только по программе
             });
             
             // Обновление вражеских юнитов
@@ -1818,15 +2182,7 @@
             // Обновление таймера каждую секунду
             if (currentTime - gameState.lastSecondUpdate > 1000) {
                 if (gameState.currentScreen === 'game') {
-                    if (gameState.gamePhase === 'preparation') {
-                        // Обновление таймера подготовки
-                        gameState.preparationTimeLeft -= 1;
-                        
-                        // Автоматическое начало битвы по истечении времени
-                        if (gameState.preparationTimeLeft <= 0) {
-                            startBattle();
-                        }
-                    } else if (gameState.gamePhase === 'battle' && !gameState.gameOver) {
+                    if (gameState.gamePhase === 'battle' && !gameState.gameOver) {
                         // Уменьшаем время битвы
                         gameState.battleTimeLeft -= 1;
                         
@@ -2084,7 +2440,7 @@
                 ctx.fillRect(unit.x - 30, unit.y - 40, 60 * (unit.health / unit.maxHealth), 8);
                 
                 // Индикатор состояния
-                if (unit.isExecuting) {
+                if (unit.isExecuting && gameState.gamePhase === 'battle') {
                     ctx.font = '12px Arial';
                     ctx.fillStyle = '#4fc3f7';
                     ctx.textAlign = 'center';
@@ -2092,27 +2448,12 @@
                 }
                 
                 // Выделение выбранного юнита
-                if (gameState.selectedUnit === unit) {
+                if (gameState.selectedUnit === unit && gameState.gamePhase === 'preparation') {
                     ctx.strokeStyle = '#4fc3f7';
                     ctx.lineWidth = 3;
                     ctx.beginPath();
                     ctx.arc(unit.x, unit.y, 35, 0, Math.PI * 2);
                     ctx.stroke();
-                    
-                    // Радиус атаки
-                    ctx.strokeStyle = 'rgba(239, 83, 80, 0.3)';
-                    ctx.setLineDash([5, 5]);
-                    ctx.beginPath();
-                    ctx.arc(unit.x, unit.y, character.attack_range, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    // Радиус видимости
-                    ctx.strokeStyle = 'rgba(79, 195, 247, 0.3)';
-                    ctx.beginPath();
-                    ctx.arc(unit.x, unit.y, character.vision_range, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    ctx.setLineDash([]);
                     
                     // Кнопка программирования
                     ctx.fillStyle = 'rgba(93, 64, 55, 0.9)';
@@ -2189,7 +2530,7 @@
                 ctx.fillStyle = '#f5e8c8';
                 ctx.font = '16px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText('Разместите юнитов вокруг крепости', castleX, castleY + 125);
+                ctx.fillText('Перетащите юнитов из панели внизу', castleX, castleY + 125);
             }
         }
 
@@ -2197,26 +2538,20 @@
         function handleCanvasClick(x, y) {
             if (gameState.currentScreen !== 'game' || gameState.gameOver) return;
             
-            // Проверяем, не кликнули ли на кнопку программирования
-            if (gameState.selectedUnit) {
-                const unit = gameState.selectedUnit;
-                if (x >= unit.x - 40 && x <= unit.x + 40 && 
-                    y >= unit.y - 80 && y <= unit.y - 55) {
-                    openProgrammingPanel();
-                    return;
+            // В фазе подготовки можно выбирать юнитов для программирования
+            if (gameState.gamePhase === 'preparation') {
+                // Проверяем, не кликнули ли на кнопку программирования
+                if (gameState.selectedUnit) {
+                    const unit = gameState.selectedUnit;
+                    if (x >= unit.x - 40 && x <= unit.x + 40 && 
+                        y >= unit.y - 80 && y <= unit.y - 55) {
+                        openProgrammingPanel();
+                        return;
+                    }
                 }
-            }
-            
-            // Всегда можно размещать юнитов, независимо от фазы игры
-            if (gameState.selectedCharacter) {
-                placeUnit(x, y);
-            } else {
+                
                 // Попытка выбрать юнита
-                if (!selectUnit(x, y)) {
-                    // Снимаем выделение с персонажа если кликнули на пустое место
-                    gameState.selectedCharacter = null;
-                    gameState.selectedUnit = null;
-                }
+                selectUnit(x, y);
             }
         }
 
