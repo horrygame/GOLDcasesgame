@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Уровень 1 - Битва Крепостей</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #3e2723, #5d4037);
+            color: #f5e8c8;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .level-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .game-area {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #game-canvas {
+            border: 4px solid #8d6e63;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .info-panel {
+            width: 400px;
+            background: rgba(93, 64, 55, 0.9);
+            padding: 20px;
+            border-left: 2px solid #8d6e63;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .button {
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 2px solid #5d4037;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            font-weight: bold;
+        }
+        
+        .button:hover {
+            background: linear-gradient(to bottom, #a1887f, #8d6e63);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+        }
+        
+        .objective {
+            background: rgba(121, 85, 72, 0.8);
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .commands-help {
+            background: rgba(121, 85, 72, 0.8);
+            padding: 15px;
+            border-radius: 5px;
+            flex: 1;
+        }
+        
+        .level-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .tutorial-text {
+            background: rgba(245, 232, 200, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffd54f;
+        }
+        
+        #code-editor {
+            width: 100%;
+            height: 200px;
+            background: #5d4037;
+            color: #f5e8c8;
+            border: 1px solid #8d6e63;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: none;
+        }
+        
+        h2 {
+            color: #d7ccc8;
+            margin-bottom: 10px;
+        }
+        
+        h3 {
+            color: #ffd54f;
+            margin-bottom: 10px;
+        }
+        
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="level-container">
+        <div class="game-area">
+            <canvas id="game-canvas" width="800" height="800"></canvas>
+        </div>
+        
+        <div class="info-panel">
+            <button class="button" onclick="window.location.href='../levels.html'">← Назад к уровням</button>
+            
+            <h2>Уровень 1: Первые команды</h2>
+            
+            <div class="tutorial-text">
+                <h3>Добро пожаловать в программирование!</h3>
+                <p>Используйте команды движения чтобы привести юнита к замку.</p>
+                <p><strong>Доступные команды:</strong></p>
+                <ul>
+                    <li><code>move_forward(50)</code> - двигаться вперед на 50 пикселей</li>
+                    <li><code>move_backward(50)</code> - двигаться назад на 50 пикселей</li>
+                    <li><code>move_left(50)</code> - двигаться влево на 50 пикселей</li>
+                    <li><code>move_right(50)</code> - двигаться вправо на 50 пикселей</li>
+                </ul>
+            </div>
+
+            <div class="objective">
+                <h3>🎯 Задача уровня</h3>
+                <p>Дойти до замка используя команды движения</p>
+                <p id="level-progress">Прогресс: 0%</p>
+            </div>
+
+            <div class="commands-help">
+                <h3>📝 Ваша программа</h3>
+                <textarea id="code-editor" placeholder="Введите команды здесь...&#10;Пример:&#10;move_forward(100)&#10;move_right(50)"></textarea>
+            </div>
+
+            <div class="level-buttons">
+                <button class="button" id="run-code">Запустить программу</button>
+                <button class="button" id="reset-level">Начать заново</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let unit = {
+            x: 100,
+            y: 100,
+            targetX: 400,
+            targetY: 400,
+            isMoving: false,
+            commands: []
+        };
+
+        function renderLevel() {
+            // Очистка canvas
+            ctx.fillStyle = '#7cb342';
+            ctx.fillRect(0, 0, 800, 800);
+
+            // Текстура травы
+            ctx.fillStyle = '#689f38';
+            for (let i = 0; i < 800; i += 20) {
+                for (let j = 0; j < 800; j += 20) {
+                    if ((i + j) % 40 === 0) {
+                        ctx.fillRect(i, j, 10, 10);
+                    }
+                }
+            }
+
+            // Замок (цель)
+            ctx.fillStyle = '#6d4c41';
+            ctx.beginPath();
+            ctx.arc(unit.targetX, unit.targetY, 60, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#8d6e63';
+            ctx.fillRect(unit.targetX - 30, unit.targetY - 45, 60, 30);
+            ctx.fillRect(unit.targetX - 45, unit.targetY - 15, 90, 15);
+
+            // Юнит
+            ctx.fillStyle = '#8d6e63';
+            ctx.beginPath();
+            ctx.arc(unit.x, unit.y, 25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#5d4037';
+            ctx.beginPath();
+            ctx.arc(unit.x, unit.y, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Линия к цели
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(unit.x, unit.y);
+            ctx.lineTo(unit.targetX, unit.targetY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Расстояние до цели
+            const distance = Math.sqrt((unit.targetX - unit.x) ** 2 + (unit.targetY - unit.y) ** 2);
+            const progress = Math.max(0, 100 - (distance / 500 * 100));
+            document.getElementById('level-progress').textContent = `Прогресс: ${Math.round(progress)}%`;
+
+            // Проверка завершения уровня
+            if (distance < 50 && !unit.isMoving) {
+                completeLevel();
+            }
+        }
+
+        function executeCommands() {
+            const code = document.getElementById('code-editor').value;
+            const commands = code.split('\n').filter(cmd => cmd.trim());
+            
+            unit.commands = commands;
+            unit.isMoving = true;
+            
+            let index = 0;
+            
+            function executeNextCommand() {
+                if (index >= unit.commands.length) {
+                    unit.isMoving = false;
+                    return;
+                }
+                
+                const command = unit.commands[index].trim();
+                
+                if (command.startsWith('move_forward(')) {
+                    const match = command.match(/move_forward\((\d+)\)/);
+                    if (match) {
+                        unit.y -= parseInt(match[1]);
+                    }
+                }
+                else if (command.startsWith('move_backward(')) {
+                    const match = command.match(/move_backward\((\d+)\)/);
+                    if (match) {
+                        unit.y += parseInt(match[1]);
+                    }
+                }
+                else if (command.startsWith('move_left(')) {
+                    const match = command.match(/move_left\((\d+)\)/);
+                    if (match) {
+                        unit.x -= parseInt(match[1]);
+                    }
+                }
+                else if (command.startsWith('move_right(')) {
+                    const match = command.match(/move_right\((\d+)\)/);
+                    if (match) {
+                        unit.x += parseInt(match[1]);
+                    }
+                }
+                
+                // Ограничение границ
+                unit.x = Math.max(25, Math.min(775, unit.x));
+                unit.y = Math.max(25, Math.min(775, unit.y));
+                
+                index++;
+                setTimeout(executeNextCommand, 500);
+            }
+            
+            executeNextCommand();
+        }
+
+        function completeLevel() {
+            alert('🎉 Поздравляем! Уровень пройден!');
+            
+            // Сохранение прогресса
+            const levelsProgress = JSON.parse(localStorage.getItem('fortressBattleLevels') || '{}');
+            levelsProgress['1'] = { completed: true, unlocked: true };
+            levelsProgress['2'] = { completed: false, unlocked: true };
+            localStorage.setItem('fortressBattleLevels', JSON.stringify(levelsProgress));
+            
+            // Возврат к выбору уровней
+            setTimeout(() => {
+                window.location.href = '../levels.html';
+            }, 2000);
+        }
+
+        function resetLevel() {
+            unit.x = 100;
+            unit.y = 100;
+            unit.isMoving = false;
+            unit.commands = [];
+        }
+
+        // Обработчики событий
+        document.getElementById('run-code').addEventListener('click', executeCommands);
+        document.getElementById('reset-level').addEventListener('click', resetLevel);
+
+        // Игровой цикл
+        function gameLoop() {
+            renderLevel();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Запуск игры
+        gameLoop();
+    </script>
+</body>
+</html>
