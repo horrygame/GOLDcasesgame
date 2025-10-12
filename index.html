@@ -84,7 +84,7 @@
         }
         
         .hidden {
-            display: none;
+            display: none !important;
         }
         
         h1 {
@@ -1041,6 +1041,7 @@
                 deviceSelector.classList.add('hidden');
                 gameContainer.classList.remove('hidden');
                 updateCanvasSize();
+                initGame();
             });
             
             buttons.desktop.addEventListener('click', () => {
@@ -1048,6 +1049,7 @@
                 deviceSelector.classList.add('hidden');
                 gameContainer.classList.remove('hidden');
                 updateCanvasSize();
+                initGame();
             });
             
             // Главное меню
@@ -1072,6 +1074,15 @@
             buttons.resetCode.addEventListener('click', resetCode);
             buttons.backToMenu.addEventListener('click', () => showScreen('main_menu'));
             buttons.nextLevel.addEventListener('click', nextLevel);
+        }
+
+        // Инициализация игровой логики
+        function initGame() {
+            // Настройка уровней
+            setupLevels();
+            
+            // Запуск игрового цикла
+            gameLoop();
         }
 
         // Настройка уровней
