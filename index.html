@@ -259,26 +259,6 @@
             color: #f5e8c8;
         }
         
-        .preparation-panel {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(93, 64, 55, 0.8);
-            padding: 12px 20px;
-            border-radius: 5px;
-            font-size: 18px;
-            z-index: 5;
-            border: 2px solid #8d6e63;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            color: #f5e8c8;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
         .game-result {
             position: absolute;
             top: 50%;
@@ -561,11 +541,11 @@
         <canvas id="game-canvas"></canvas>
         
         <div id="code-panel">
-            <h3 id="level-title">Уровень 1: Основы программирования</h3>
+            <h3 id="level-title">Уровень 1: Движение к цели</h3>
             
             <div class="instructions">
                 <div id="level-description">
-                    <p>Напишите код, который заставит ваших воинов защищать замок. Используйте команды движения и атаки.</p>
+                    <p>Запрограммируйте юнита, чтобы он дошел до замка. Используйте команду двигаться_к(x, y)</p>
                 </div>
             </div>
             
@@ -577,7 +557,8 @@
             </div>
             
             <textarea id="code-editor" class="code-editor" placeholder="Введите ваш код здесь...">
-атаковать_ближайшего()
+# Двигайтесь к замку в центре карты
+двигаться_к(400, 400)
             </textarea>
             
             <div class="nav-buttons">
@@ -604,24 +585,24 @@
             
             <div class="levels-grid">
                 <div class="level-card" data-level="1">
-                    <div class="level-title">Уровень 1: Основы</div>
-                    <div class="level-description">Изучите базовые команды программирования</div>
+                    <div class="level-title">Уровень 1: Движение к цели</div>
+                    <div class="level-description">Используйте команду двигаться_к(x, y)</div>
                 </div>
                 <div class="level-card locked" data-level="2">
-                    <div class="level-title">Уровень 2: Ветвления</div>
-                    <div class="level-description">Используйте условия если/иначе</div>
+                    <div class="level-title">Уровень 2: Движение и атака</div>
+                    <div class="level-description">Доберитесь до цели и атакуйте врага</div>
                 </div>
                 <div class="level-card locked" data-level="3">
-                    <div class="level-title">Уровень 3: Циклы</div>
-                    <div class="level-description">Изучите циклы повторить</div>
+                    <div class="level-title">Уровень 3: Простой лабиринт</div>
+                    <div class="level-description">Используйте команды движения для прохождения лабиринта</div>
                 </div>
                 <div class="level-card locked" data-level="4">
-                    <div class="level-title">Уровень 4: Условия в циклах</div>
-                    <div class="level-description">Циклы с условием пока</div>
+                    <div class="level-title">Уровень 4: Ветвления</div>
+                    <div class="level-description">Используйте условия если/иначе</div>
                 </div>
                 <div class="level-card locked" data-level="5">
-                    <div class="level-title">Уровень 5: Комбинирование</div>
-                    <div class="level-description">Сложные алгоритмы защиты</div>
+                    <div class="level-title">Уровень 5: Циклы</div>
+                    <div class="level-description">Изучите циклы повторить</div>
                 </div>
                 <div class="level-card locked" data-level="6">
                     <div class="level-title">Уровень 6: Финальный</div>
@@ -718,28 +699,15 @@
         
         <!-- Игровой UI (отображается поверх игрового экрана) -->
         <div id="game-ui" class="game-ui hidden">
-            <div class="ui-panel" id="energy-panel">
-                ⚡ <span id="game-energy">100</span>/<span id="game-max-energy">100</span>
-            </div>
-            <div class="ui-panel">
-                ❤️ <span id="game-health">1000</span>
-            </div>
             <div class="ui-panel">
                 ⏱️ <span id="game-timer">60</span>с
             </div>
         </div>
         
-        <!-- Панель подготовки -->
-        <div id="preparation-panel" class="preparation-panel hidden">
-            <div>Фаза подготовки:</div>
-            <div id="preparation-timer">60</div>
-            <button class="button" id="start-early-btn">Начать заранее</button>
-        </div>
-        
         <!-- Результат игры -->
         <div id="game-result" class="game-result hidden">
             <h2 id="result-title">ПОБЕДА!</h2>
-            <p id="result-message">Вы успешно защитили крепость!</p>
+            <p id="result-message">Вы успешно выполнили задание!</p>
             <button class="button" id="continue-btn">Продолжить</button>
         </div>
     </div>
@@ -747,71 +715,443 @@
     <script>
         // Константы игры
         let SCREEN_WIDTH = window.innerWidth;
-        let SCREEN_HEIGHT = window.innerHeight * 0.6; // 60% высоты для игрового поля
+        let SCREEN_HEIGHT = window.innerHeight * 0.6;
         const FPS = 60;
-        const PREPARATION_TIME = 60;
         const BATTLE_DURATION = 120;
 
         // Уровни обучения
         const levels = {
             1: {
-                title: "Уровень 1: Основы программирования",
-                description: "Напишите код, который заставит ваших воинов защищать замок. Используйте команды движения и атаки.",
-                startCode: "атаковать_ближайшего()",
-                goal: "Защитите замок в течение 30 секунд",
-                duration: 30,
-                allowedFunctions: ["атаковать_ближайшего", "двигаться_к", "двигаться_вперед", "двигаться_назад", "двигаться_влево", "двигаться_вправо"]
+                title: "Уровень 1: Движение к цели",
+                description: "Запрограммируйте юнита, чтобы он дошел до замка. Используйте команду двигаться_к(x, y)",
+                startCode: "# Двигайтесь к замку в центре карты\nдвигаться_к(400, 400)",
+                goal: "Дойти до замка",
+                duration: 60,
+                allowedFunctions: ["двигаться_к"],
+                setup: function(gameState) {
+                    // Юнит в левом нижнем углу
+                    gameState.units = [{
+                        id: "unit_1",
+                        characterId: 'white_guy',
+                        x: 100,
+                        y: SCREEN_HEIGHT - 100,
+                        health: 100,
+                        maxHealth: 100,
+                        damage: 20,
+                        speed: 2,
+                        attackSpeed: 1.0,
+                        attackRange: 80,
+                        visionRange: 150,
+                        image: 'white_guy.png',
+                        target: null,
+                        moveTarget: null,
+                        lastAttackTime: 0,
+                        state: 'idle'
+                    }];
+                    
+                    // Замок в центре
+                    gameState.castle = {
+                        x: SCREEN_WIDTH / 2,
+                        y: SCREEN_HEIGHT / 2,
+                        radius: 80
+                    };
+                    
+                    // Врагов нет
+                    gameState.enemyUnits = [];
+                },
+                checkWinCondition: function(gameState) {
+                    const unit = gameState.units[0];
+                    const castle = gameState.castle;
+                    const distanceToCastle = Math.sqrt(
+                        Math.pow(unit.x - castle.x, 2) + 
+                        Math.pow(unit.y - castle.y, 2)
+                    );
+                    
+                    return distanceToCastle < castle.radius + 30; // 30 - радиус юнита
+                }
             },
             2: {
-                title: "Уровень 2: Ветвления",
-                description: "Используйте конструкцию если/иначе для создания умного поведения юнитов.",
-                startCode: `если есть_враг_в_радиусе():
-    атаковать_ближайшего()
-иначе:
-    двигаться_к(400, 400)`,
-                goal: "Защитите замок с использованием условий",
-                duration: 45,
-                allowedFunctions: ["атаковать_ближайшего", "двигаться_к", "есть_враг_в_радиусе"]
+                title: "Уровень 2: Движение и атака",
+                description: "Доберитесь до цели и атакуйте врага",
+                startCode: "# Дойдите до замка и атакуйте врага\nдвигаться_к(400, 400)\nатаковать_ближайшего()",
+                goal: "Дойти до замка и победить врага",
+                duration: 90,
+                allowedFunctions: ["двигаться_к", "атаковать_ближайшего"],
+                setup: function(gameState) {
+                    // Юнит в левом нижнем углу
+                    gameState.units = [{
+                        id: "unit_1",
+                        characterId: 'white_guy',
+                        x: 100,
+                        y: SCREEN_HEIGHT - 100,
+                        health: 100,
+                        maxHealth: 100,
+                        damage: 20,
+                        speed: 2,
+                        attackSpeed: 1.0,
+                        attackRange: 80,
+                        visionRange: 150,
+                        image: 'white_guy.png',
+                        target: null,
+                        moveTarget: null,
+                        lastAttackTime: 0,
+                        state: 'idle'
+                    }];
+                    
+                    // Замок в центре
+                    gameState.castle = {
+                        x: SCREEN_WIDTH / 2,
+                        y: SCREEN_HEIGHT / 2,
+                        radius: 80
+                    };
+                    
+                    // Враг рядом с замком
+                    gameState.enemyUnits = [{
+                        id: "enemy_1",
+                        x: SCREEN_WIDTH / 2 + 100,
+                        y: SCREEN_HEIGHT / 2,
+                        health: 50,
+                        maxHealth: 50,
+                        damage: 10,
+                        speed: 1.0,
+                        attackSpeed: 1.0,
+                        attackRange: 70,
+                        visionRange: 120,
+                        image: 'white_guy.png',
+                        target: null,
+                        lastAttackTime: 0,
+                        state: 'idle'
+                    }];
+                },
+                checkWinCondition: function(gameState) {
+                    const unit = gameState.units[0];
+                    const castle = gameState.castle;
+                    const distanceToCastle = Math.sqrt(
+                        Math.pow(unit.x - castle.x, 2) + 
+                        Math.pow(unit.y - castle.y, 2)
+                    );
+                    
+                    // Условие победы: дойти до замка и победить всех врагов
+                    return distanceToCastle < castle.radius + 30 && gameState.enemyUnits.length === 0;
+                }
             },
             3: {
-                title: "Уровень 3: Циклы",
-                description: "Используйте циклы повторить для выполнения повторяющихся действий.",
-                startCode: `повторить 5 раз:
-    двигаться_вперед(50)
-    атаковать_ближайшего()`,
-                goal: "Используйте циклы для патрулирования территории",
-                duration: 60,
-                allowedFunctions: ["атаковать_ближайшего", "двигаться_вперед", "двигаться_назад", "двигаться_влево", "двигаться_вправо"]
+                title: "Уровень 3: Простой лабиринт",
+                description: "Используйте команды движения для прохождения лабиринта",
+                startCode: "# Пройдите лабиринт, используя команды движения\nдвигаться_вперед(200)\nдвигаться_вправо(100)\nдвигаться_вперед(100)",
+                goal: "Пройдите лабиринт и доберитесь до замка",
+                duration: 120,
+                allowedFunctions: ["двигаться_вперед", "двигаться_назад", "двигаться_влево", "двигаться_вправо"],
+                setup: function(gameState) {
+                    // Юнит в левом нижнем углу
+                    gameState.units = [{
+                        id: "unit_1",
+                        characterId: 'white_guy',
+                        x: 100,
+                        y: SCREEN_HEIGHT - 100,
+                        health: 100,
+                        maxHealth: 100,
+                        damage: 20,
+                        speed: 2,
+                        attackSpeed: 1.0,
+                        attackRange: 80,
+                        visionRange: 150,
+                        image: 'white_guy.png',
+                        target: null,
+                        moveTarget: null,
+                        lastAttackTime: 0,
+                        state: 'idle'
+                    }];
+                    
+                    // Замок в центре
+                    gameState.castle = {
+                        x: SCREEN_WIDTH / 2,
+                        y: SCREEN_HEIGHT / 2,
+                        radius: 80
+                    };
+                    
+                    // Врагов нет
+                    gameState.enemyUnits = [];
+                    
+                    // Стены лабиринта
+                    gameState.walls = [
+                        {x: 0, y: SCREEN_HEIGHT - 150, width: SCREEN_WIDTH, height: 10},
+                        {x: 0, y: 0, width: 10, height: SCREEN_HEIGHT},
+                        {x: SCREEN_WIDTH - 10, y: 0, width: 10, height: SCREEN_HEIGHT},
+                        {x: 0, y: 0, width: SCREEN_WIDTH, height: 10},
+                        {x: 200, y: SCREEN_HEIGHT - 150, width: 10, height: 100},
+                        {x: 200, y: SCREEN_HEIGHT - 250, width: 100, height: 10}
+                    ];
+                },
+                checkWinCondition: function(gameState) {
+                    const unit = gameState.units[0];
+                    const castle = gameState.castle;
+                    const distanceToCastle = Math.sqrt(
+                        Math.pow(unit.x - castle.x, 2) + 
+                        Math.pow(unit.y - castle.y, 2)
+                    );
+                    
+                    return distanceToCastle < castle.radius + 30;
+                }
             },
             4: {
-                title: "Уровень 4: Условия в циклах",
-                description: "Используйте циклы с условием пока для создания сложного поведения.",
-                startCode: `пока есть_враг_в_радиусе() истинно:
-    атаковать_ближайшего()`,
-                goal: "Создайте постоянную защиту с помощью циклов",
-                duration: 60,
-                allowedFunctions: ["атаковать_ближайшего", "есть_враг_в_радиусе"]
+                title: "Уровень 4: Ветвления",
+                description: "Используйте условия если/иначе",
+                startCode: "# Если есть враг в радиусе - атакуйте, иначе двигайтесь к замку\nесли есть_враг_в_радиусе():\n    атаковать_ближайшего()\nиначе:\n    двигаться_к(400, 400)",
+                goal: "Дойти до замка, атакуя врагов по пути",
+                duration: 120,
+                allowedFunctions: ["двигаться_к", "атаковать_ближайшего", "есть_враг_в_радиусе"],
+                setup: function(gameState) {
+                    // Юнит в левом нижнем углу
+                    gameState.units = [{
+                        id: "unit_1",
+                        characterId: 'white_guy',
+                        x: 100,
+                        y: SCREEN_HEIGHT - 100,
+                        health: 100,
+                        maxHealth: 100,
+                        damage: 20,
+                        speed: 2,
+                        attackSpeed: 1.0,
+                        attackRange: 80,
+                        visionRange: 150,
+                        image: 'white_guy.png',
+                        target: null,
+                        moveTarget: null,
+                        lastAttackTime: 0,
+                        state: 'idle'
+                    }];
+                    
+                    // Замок в центре
+                    gameState.castle = {
+                        x: SCREEN_WIDTH / 2,
+                        y: SCREEN_HEIGHT / 2,
+                        radius: 80
+                    };
+                    
+                    // Несколько врагов на пути
+                    gameState.enemyUnits = [
+                        {
+                            id: "enemy_1",
+                            x: 300,
+                            y: SCREEN_HEIGHT - 150,
+                            health: 50,
+                            maxHealth: 50,
+                            damage: 10,
+                            speed: 1.0,
+                            attackSpeed: 1.0,
+                            attackRange: 70,
+                            visionRange: 120,
+                            image: 'white_guy.png',
+                            target: null,
+                            lastAttackTime: 0,
+                            state: 'idle'
+                        },
+                        {
+                            id: "enemy_2",
+                            x: 500,
+                            y: SCREEN_HEIGHT - 200,
+                            health: 50,
+                            maxHealth: 50,
+                            damage: 10,
+                            speed: 1.0,
+                            attackSpeed: 1.0,
+                            attackRange: 70,
+                            visionRange: 120,
+                            image: 'white_guy.png',
+                            target: null,
+                            lastAttackTime: 0,
+                            state: 'idle'
+                        }
+                    ];
+                },
+                checkWinCondition: function(gameState) {
+                    const unit = gameState.units[0];
+                    const castle = gameState.castle;
+                    const distanceToCastle = Math.sqrt(
+                        Math.pow(unit.x - castle.x, 2) + 
+                        Math.pow(unit.y - castle.y, 2)
+                    );
+                    
+                    // Условие победы: дойти до замка и победить всех врагов
+                    return distanceToCastle < castle.radius + 30 && gameState.enemyUnits.length === 0;
+                }
             },
             5: {
-                title: "Уровень 5: Комбинирование",
-                description: "Скомбинируйте все изученные конструкции для создания эффективной защиты.",
-                startCode: `если расстояние_до_врага() < 100:
-    атаковать_ближайшего()
-иначе:
-    повторить 3 раз:
-        двигаться_вперед(30)`,
-                goal: "Создайте сложный алгоритм защиты",
-                duration: 90,
-                allowedFunctions: ["атаковать_ближайшего", "двигаться_вперед", "расстояние_до_врага"]
+                title: "Уровень 5: Циклы",
+                description: "Изучите циклы повторить",
+                startCode: "# Используйте цикл для движения по квадрату\nповторить 4 раз:\n    двигаться_вперед(100)\n    двигаться_вправо(100)",
+                goal: "Используйте циклы для достижения цели",
+                duration: 120,
+                allowedFunctions: ["двигаться_вперед", "двигаться_назад", "двигаться_влево", "двигаться_вправо"],
+                setup: function(gameState) {
+                    // Юнит в левом нижнем углу
+                    gameState.units = [{
+                        id: "unit_1",
+                        characterId: 'white_guy',
+                        x: 100,
+                        y: SCREEN_HEIGHT - 100,
+                        health: 100,
+                        maxHealth: 100,
+                        damage: 20,
+                        speed: 2,
+                        attackSpeed: 1.0,
+                        attackRange: 80,
+                        visionRange: 150,
+                        image: 'white_guy.png',
+                        target: null,
+                        moveTarget: null,
+                        lastAttackTime: 0,
+                        state: 'idle'
+                    }];
+                    
+                    // Замок в правом верхнем углу
+                    gameState.castle = {
+                        x: SCREEN_WIDTH - 100,
+                        y: 100,
+                        radius: 80
+                    };
+                    
+                    // Врагов нет
+                    gameState.enemyUnits = [];
+                },
+                checkWinCondition: function(gameState) {
+                    const unit = gameState.units[0];
+                    const castle = gameState.castle;
+                    const distanceToCastle = Math.sqrt(
+                        Math.pow(unit.x - castle.x, 2) + 
+                        Math.pow(unit.y - castle.y, 2)
+                    );
+                    
+                    return distanceToCastle < castle.radius + 30;
+                }
             },
             6: {
                 title: "Уровень 6: Финальный",
-                description: "Примените все полученные знания для создания идеальной защиты замка.",
-                startCode: `# Создайте свою собственную стратегию защиты
-# Используйте все изученные команды и конструкции`,
-                goal: "Защитите замок от мощной атаки",
-                duration: 120,
-                allowedFunctions: ["атаковать_ближайшего", "двигаться_к", "двигаться_вперед", "двигаться_назад", "двигаться_влево", "двигаться_вправо", "есть_враг_в_радиусе", "расстояние_до_врага", "здоровье", "координата_x", "координата_y"]
+                description: "Примените все знания",
+                startCode: "# Создайте свою стратегию для защиты замка\n# Используйте все изученные команды и конструкции",
+                goal: "Защитите замок от врагов",
+                duration: 180,
+                allowedFunctions: ["атаковать_ближайшего", "двигаться_к", "двигаться_вперед", "двигаться_назад", "двигаться_влево", "двигаться_вправо", "есть_враг_в_радиусе", "расстояние_до_врага", "здоровье", "координата_x", "координата_y"],
+                setup: function(gameState) {
+                    // Несколько юнитов вокруг замка
+                    gameState.units = [
+                        {
+                            id: "unit_1",
+                            characterId: 'white_guy',
+                            x: SCREEN_WIDTH / 2 - 150,
+                            y: SCREEN_HEIGHT / 2,
+                            health: 100,
+                            maxHealth: 100,
+                            damage: 20,
+                            speed: 2,
+                            attackSpeed: 1.0,
+                            attackRange: 80,
+                            visionRange: 150,
+                            image: 'white_guy.png',
+                            target: null,
+                            moveTarget: null,
+                            lastAttackTime: 0,
+                            state: 'idle'
+                        },
+                        {
+                            id: "unit_2",
+                            characterId: 'white_guy',
+                            x: SCREEN_WIDTH / 2 + 150,
+                            y: SCREEN_HEIGHT / 2,
+                            health: 100,
+                            maxHealth: 100,
+                            damage: 20,
+                            speed: 2,
+                            attackSpeed: 1.0,
+                            attackRange: 80,
+                            visionRange: 150,
+                            image: 'white_guy.png',
+                            target: null,
+                            moveTarget: null,
+                            lastAttackTime: 0,
+                            state: 'idle'
+                        }
+                    ];
+                    
+                    // Замок в центре
+                    gameState.castle = {
+                        x: SCREEN_WIDTH / 2,
+                        y: SCREEN_HEIGHT / 2,
+                        radius: 80,
+                        health: 1000,
+                        maxHealth: 1000
+                    };
+                    
+                    // Много врагов
+                    gameState.enemyUnits = [];
+                    gameState.enemySpawnTimer = 0;
+                },
+                checkWinCondition: function(gameState) {
+                    // Условие победы: защитить замок в течение времени
+                    return gameState.battleTimeLeft <= 0 && gameState.castle.health > 0;
+                },
+                update: function(gameState) {
+                    // Спавн врагов каждые 2 секунды
+                    gameState.enemySpawnTimer++;
+                    if (gameState.enemySpawnTimer >= 2) {
+                        const enemyType = {
+                            health: 50,
+                            damage: 10,
+                            speed: 1.0,
+                            attackSpeed: 1.0,
+                            attackRange: 70,
+                            visionRange: 120,
+                            image: 'white_guy.png'
+                        };
+                        
+                        // Спавн с края экрана
+                        let x, y;
+                        const side = Math.floor(Math.random() * 4);
+                        
+                        switch (side) {
+                            case 0: // Верх
+                                x = Math.random() * SCREEN_WIDTH;
+                                y = -30;
+                                break;
+                            case 1: // Право
+                                x = SCREEN_WIDTH + 30;
+                                y = Math.random() * SCREEN_HEIGHT;
+                                break;
+                            case 2: // Низ
+                                x = Math.random() * SCREEN_WIDTH;
+                                y = SCREEN_HEIGHT + 30;
+                                break;
+                            case 3: // Лево
+                                x = -30;
+                                y = Math.random() * SCREEN_HEIGHT;
+                                break;
+                        }
+                        
+                        gameState.enemyCounter++;
+                        
+                        // Создаем врага с целью - замком
+                        const enemy = {
+                            id: `enemy_${gameState.enemyCounter}`,
+                            x: x,
+                            y: y,
+                            health: enemyType.health,
+                            maxHealth: enemyType.health,
+                            damage: enemyType.damage,
+                            speed: enemyType.speed,
+                            attackSpeed: enemyType.attack_speed,
+                            attackRange: enemyType.attack_range,
+                            visionRange: enemyType.vision_range,
+                            image: enemyType.image,
+                            target: {x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2, isCastle: true},
+                            lastAttackTime: 0,
+                            state: 'moving'
+                        };
+                        
+                        gameState.enemyUnits.push(enemy);
+                        gameState.enemySpawnTimer = 0;
+                    }
+                }
             }
         };
 
@@ -855,20 +1195,10 @@
             }
         };
 
-        const enemyTypes = [
-            {health: 80, damage: 15, speed: 1.0, attack_speed: 1.0, attack_range: 70, vision_range: 120, image: 'white_guy.png'},
-            {health: 50, damage: 25, speed: 1.5, attack_speed: 1.2, attack_range: 90, vision_range: 130, image: 'yellow_guy.png'},
-            {health: 120, damage: 10, speed: 0.8, attack_speed: 0.8, attack_range: 60, vision_range: 110, image: 'red_guy.png'}
-        ];
-
         // Игровое состояние
         let gameState = {
             currentScreen: 'main_menu',
-            gamePhase: 'preparation',
-            energy: 100,
-            maxEnergy: 100,
-            playerHealth: 1000,
-            maxCastleHealth: 1000,
+            gamePhase: 'battle',
             ownedCharacters: Object.keys(characters),
             units: [],
             enemyUnits: [],
@@ -876,21 +1206,18 @@
             unitCounter: 0,
             enemyCounter: 0,
             lastSecondUpdate: 0,
-            preparationTimeLeft: PREPARATION_TIME,
             battleTimeLeft: BATTLE_DURATION,
             gameOver: false,
             gameResult: null,
             damagePopups: [],
-            selectedCharacter: null,
-            selectedUnit: null,
-            gamesPlayed: 0,
-            gamesWon: 0,
             playerCode: '',
             compiledCode: null,
             currentLevel: 1,
             completedLevels: [1],
             unitDirections: {}, // Направления для каждого юнита
-            isMobile: false
+            isMobile: false,
+            castle: null,
+            walls: []
         };
 
         // Получение элементов DOM
@@ -915,7 +1242,6 @@
             levelsBack: document.getElementById('levels-back-btn'),
             manualBack: document.getElementById('manual-back-btn'),
             continue: document.getElementById('continue-btn'),
-            startEarly: document.getElementById('start-early-btn'),
             compile: document.getElementById('compile-btn'),
             resetCode: document.getElementById('reset-code-btn'),
             backToMenu: document.getElementById('back-to-menu-btn'),
@@ -930,9 +1256,6 @@
 
         // Статистика
         const stats = {
-            gameEnergy: document.getElementById('game-energy'),
-            gameMaxEnergy: document.getElementById('game-max-energy'),
-            gameHealth: document.getElementById('game-health'),
             gameTimer: document.getElementById('game-timer')
         };
 
@@ -943,9 +1266,6 @@
 
         // Игровой UI
         const gameUI = document.getElementById('game-ui');
-        const preparationPanel = document.getElementById('preparation-panel');
-        const preparationTimer = document.getElementById('preparation-timer');
-        const energyPanel = document.getElementById('energy-panel');
 
         // Загруженные изображения
         const images = {};
@@ -997,11 +1317,6 @@
             // Загрузка изображений персонажей
             Object.values(characters).forEach(character => {
                 promises.push(loadImage(character.image));
-            });
-            
-            // Загрузка изображений врагов
-            enemyTypes.forEach(enemy => {
-                promises.push(loadImage(enemy.image));
             });
             
             return Promise.all(promises);
@@ -1066,9 +1381,6 @@
                 showScreen('main_menu');
             });
             
-            // Начать заранее
-            buttons.startEarly.addEventListener('click', startBattle);
-            
             // Код
             buttons.compile.addEventListener('click', compileCode);
             buttons.resetCode.addEventListener('click', resetCode);
@@ -1121,16 +1433,11 @@
             
             // Скрыть игровой UI
             gameUI.classList.add('hidden');
-            preparationPanel.classList.add('hidden');
             
             // Показать выбранный экран
             if (screenName === 'game') {
                 // Игровой экран рисуется на canvas
                 gameUI.classList.remove('hidden');
-                
-                if (gameState.gamePhase === 'preparation') {
-                    preparationPanel.classList.remove('hidden');
-                }
             } else if (screens[screenName]) {
                 screens[screenName].classList.remove('hidden');
             }
@@ -1140,18 +1447,8 @@
 
         // Обновление статистики
         function updateStats() {
-            // Игра
-            stats.gameEnergy.textContent = gameState.energy;
-            stats.gameMaxEnergy.textContent = gameState.maxEnergy;
-            stats.gameHealth.textContent = gameState.playerHealth;
-            
-            // Обновление таймера в зависимости от фазы игры
-            if (gameState.gamePhase === 'preparation') {
-                stats.gameTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
-                preparationTimer.textContent = Math.ceil(gameState.preparationTimeLeft);
-            } else if (gameState.gamePhase === 'battle') {
-                stats.gameTimer.textContent = Math.ceil(gameState.battleTimeLeft);
-            }
+            // Обновление таймера
+            stats.gameTimer.textContent = Math.ceil(gameState.battleTimeLeft);
         }
 
         // Компиляция кода
@@ -1339,23 +1636,23 @@
             codeEditor.value = levelData.startCode;
             
             // Сброс состояния игры
-            gameState.playerHealth = gameState.maxCastleHealth;
-            gameState.energy = gameState.maxEnergy;
             gameState.units = [];
             gameState.enemyUnits = [];
             gameState.enemySpawnTimer = 0;
             gameState.unitCounter = 0;
             gameState.enemyCounter = 0;
-            gameState.preparationTimeLeft = PREPARATION_TIME;
             gameState.battleTimeLeft = levelData.duration;
-            gameState.gamePhase = 'preparation';
+            gameState.gamePhase = 'battle';
             gameState.gameOver = false;
             gameState.gameResult = null;
             gameState.damagePopups = [];
-            gameState.selectedCharacter = null;
-            gameState.selectedUnit = null;
             gameState.lastSecondUpdate = Date.now();
             gameState.unitDirections = {};
+            gameState.castle = null;
+            gameState.walls = [];
+            
+            // Настройка уровня
+            levelData.setup(gameState);
             
             // Скрыть кнопку следующего уровня
             buttons.nextLevel.style.display = 'none';
@@ -1379,105 +1676,6 @@
             } else {
                 showScreen('main_menu');
             }
-        }
-
-        // Начать битву (завершить фазу подготовки)
-        function startBattle() {
-            gameState.gamePhase = 'battle';
-            preparationPanel.classList.add('hidden');
-        }
-
-        // Размещение юнита
-        function placeUnit(x, y) {
-            if (gameState.energy >= characters['white_guy'].cost) {
-                const character = characters['white_guy'];
-                
-                gameState.energy -= character.cost;
-                gameState.unitCounter++;
-                gameState.units.push({
-                    id: `unit_${gameState.unitCounter}`,
-                    characterId: 'white_guy',
-                    x: x,
-                    y: y,
-                    health: character.health,
-                    maxHealth: character.health,
-                    damage: character.damage,
-                    speed: character.speed,
-                    attackSpeed: character.attack_speed,
-                    attackRange: character.attack_range,
-                    visionRange: character.vision_range,
-                    image: character.image,
-                    target: null,
-                    moveTarget: null,
-                    lastAttackTime: 0,
-                    state: 'idle'
-                });
-                
-                // Визуальная обратная связь
-                createDamagePopup(x, y, `-${character.cost}⚡`, '#4fc3f7');
-                updateStats();
-                
-                return true;
-            } else {
-                // Визуальная обратная связь при недостатке энергии
-                energyPanel.classList.add('energy-warning');
-                setTimeout(() => {
-                    energyPanel.classList.remove('energy-warning');
-                }, 1000);
-                
-                createDamagePopup(x, y, "Недостаточно энергии!", '#ef5350');
-                return false;
-            }
-        }
-
-        // Спавн вражеского юнита
-        function spawnEnemyUnit() {
-            const enemyType = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-            
-            // Спавн с края экрана
-            let x, y;
-            const side = Math.floor(Math.random() * 4);
-            
-            switch (side) {
-                case 0: // Верх
-                    x = Math.random() * SCREEN_WIDTH;
-                    y = -30;
-                    break;
-                case 1: // Право
-                    x = SCREEN_WIDTH + 30;
-                    y = Math.random() * SCREEN_HEIGHT;
-                    break;
-                case 2: // Низ
-                    x = Math.random() * SCREEN_WIDTH;
-                    y = SCREEN_HEIGHT + 30;
-                    break;
-                case 3: // Лево
-                    x = -30;
-                    y = Math.random() * SCREEN_HEIGHT;
-                    break;
-            }
-            
-            gameState.enemyCounter++;
-            
-            // Создаем врага с целью - замком
-            const enemy = {
-                id: `enemy_${gameState.enemyCounter}`,
-                x: x,
-                y: y,
-                health: enemyType.health,
-                maxHealth: enemyType.health,
-                damage: enemyType.damage,
-                speed: enemyType.speed,
-                attackSpeed: enemyType.attack_speed,
-                attackRange: enemyType.attack_range,
-                visionRange: enemyType.vision_range,
-                image: enemyType.image,
-                target: {x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2, isCastle: true},
-                lastAttackTime: 0,
-                state: 'moving'
-            };
-            
-            gameState.enemyUnits.push(enemy);
         }
 
         // Создание всплывающего сообщения об уроне
@@ -1506,16 +1704,25 @@
             });
         }
 
+        // Проверка столкновений со стенами
+        function checkWallCollisions(unit) {
+            if (!gameState.walls) return false;
+            
+            for (const wall of gameState.walls) {
+                if (unit.x + 30 > wall.x && unit.x - 30 < wall.x + wall.width &&
+                    unit.y + 30 > wall.y && unit.y - 30 < wall.y + wall.height) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // Обновление юнитов
         function updateUnits() {
             const now = Date.now();
-            const castleX = SCREEN_WIDTH / 2;
-            const castleY = SCREEN_HEIGHT / 2;
             
             // Выполнение кода игрока для юнитов
-            if (gameState.gamePhase === 'battle') {
-                executeUnitCode();
-            }
+            executeUnitCode();
             
             // Обновление юнитов игрока
             gameState.units.forEach(unit => {
@@ -1527,8 +1734,17 @@
                     
                     if (dist > unit.attackRange) {
                         // Двигаемся к цели
+                        const oldX = unit.x;
+                        const oldY = unit.y;
+                        
                         unit.x += (dx / dist) * unit.speed;
                         unit.y += (dy / dist) * unit.speed;
+                        
+                        // Проверяем столкновения со стенами
+                        if (checkWallCollisions(unit)) {
+                            unit.x = oldX;
+                            unit.y = oldY;
+                        }
                         
                         // Обновляем направление юнита
                         gameState.unitDirections[unit.id] = Math.atan2(dy, dx) * 180 / Math.PI;
@@ -1543,8 +1759,17 @@
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
                     if (dist > 5) {
+                        const oldX = unit.x;
+                        const oldY = unit.y;
+                        
                         unit.x += (dx / dist) * unit.speed;
                         unit.y += (dy / dist) * unit.speed;
+                        
+                        // Проверяем столкновения со стенами
+                        if (checkWallCollisions(unit)) {
+                            unit.x = oldX;
+                            unit.y = oldY;
+                        }
                         
                         // Обновляем направление юнита
                         gameState.unitDirections[unit.id] = Math.atan2(dy, dx) * 180 / Math.PI;
@@ -1597,10 +1822,10 @@
                     });
                     
                     // Если не нашли юнита, цель - крепость
-                    if (!closestTarget) {
-                        const distToCastle = distance(enemy.x, enemy.y, castleX, castleY);
+                    if (!closestTarget && gameState.castle) {
+                        const distToCastle = distance(enemy.x, enemy.y, gameState.castle.x, gameState.castle.y);
                         if (distToCastle < enemy.visionRange) {
-                            closestTarget = {x: castleX, y: castleY, isCastle: true};
+                            closestTarget = {x: gameState.castle.x, y: gameState.castle.y, isCastle: true};
                             closestDistance = distToCastle;
                         }
                     }
@@ -1634,8 +1859,10 @@
                         if (!enemy.lastAttackTime || now - enemy.lastAttackTime > (1000 / enemy.attackSpeed)) {
                             if (enemy.target.isCastle) {
                                 // Атака крепости
-                                gameState.playerHealth -= enemy.damage;
-                                createDamagePopup(castleX, castleY, `-${enemy.damage}`, '#ef5350');
+                                if (gameState.castle) {
+                                    gameState.castle.health -= enemy.damage;
+                                    createDamagePopup(gameState.castle.x, gameState.castle.y, `-${enemy.damage}`, '#ef5350');
+                                }
                             } else {
                                 // Атака юнита игрока
                                 enemy.target.health -= enemy.damage;
@@ -1672,25 +1899,14 @@
             
             // Обновление таймера каждую секунду
             if (currentTime - gameState.lastSecondUpdate > 1000) {
-                if (gameState.currentScreen === 'game') {
-                    if (gameState.gamePhase === 'preparation') {
-                        // Обновление таймера подготовки
-                        gameState.preparationTimeLeft -= 1;
-                        
-                        // Автоматическое начало битвы по истечении времени
-                        if (gameState.preparationTimeLeft <= 0) {
-                            startBattle();
-                        }
-                    } else if (gameState.gamePhase === 'battle' && !gameState.gameOver) {
-                        // Уменьшаем время битвы
-                        gameState.battleTimeLeft -= 1;
-                        
-                        // Спавн вражеских юнитов
-                        gameState.enemySpawnTimer += 1;
-                        if (gameState.enemySpawnTimer >= 2) {
-                            spawnEnemyUnit();
-                            gameState.enemySpawnTimer = 0;
-                        }
+                if (gameState.currentScreen === 'game' && !gameState.gameOver) {
+                    // Уменьшаем время битвы
+                    gameState.battleTimeLeft -= 1;
+                    
+                    // Обновление уровня (если есть специальная логика)
+                    const levelData = levels[gameState.currentLevel];
+                    if (levelData.update) {
+                        levelData.update(gameState);
                     }
                 }
                 
@@ -1704,24 +1920,14 @@
                 updateUnits();
                 
                 // Проверка конца игры
-                if (gameState.playerHealth <= 0) {
+                const levelData = levels[gameState.currentLevel];
+                const winCondition = levelData.checkWinCondition(gameState);
+                
+                if (winCondition) {
                     gameState.gameOver = true;
-                    gameState.gamesPlayed++;
-                    
-                    gameState.gameResult = 'lose';
-                    resultTitle.textContent = 'ПОРАЖЕНИЕ';
-                    resultMessage.textContent = 'Попробуйте улучшить свой код!';
-                    
-                    gameResult.classList.remove('hidden');
-                    updateStats();
-                } else if (gameState.gamePhase === 'battle' && gameState.battleTimeLeft <= 0) {
-                    gameState.gameOver = true;
-                    gameState.gamesPlayed++;
-                    gameState.gamesWon++;
-                    
                     gameState.gameResult = 'win';
                     resultTitle.textContent = 'ПОБЕДА!';
-                    resultMessage.textContent = 'Отличный код! Вы защитили крепость!';
+                    resultMessage.textContent = 'Отличный код! Вы выполнили задание!';
                     
                     // Добавляем уровень в завершенные
                     if (!gameState.completedLevels.includes(gameState.currentLevel)) {
@@ -1733,6 +1939,16 @@
                     if (levels[gameState.currentLevel + 1]) {
                         buttons.nextLevel.style.display = 'block';
                     }
+                    
+                    gameResult.classList.remove('hidden');
+                    updateStats();
+                } else if (gameState.battleTimeLeft <= 0 || 
+                          (gameState.castle && gameState.castle.health <= 0) ||
+                          gameState.units.length === 0) {
+                    gameState.gameOver = true;
+                    gameState.gameResult = 'lose';
+                    resultTitle.textContent = 'ПОРАЖЕНИЕ';
+                    resultMessage.textContent = 'Попробуйте улучшить свой код!';
                     
                     gameResult.classList.remove('hidden');
                     updateStats();
@@ -1760,26 +1976,37 @@
                 }
             }
             
-            // Крепость игрока в центре
-            const castleX = SCREEN_WIDTH / 2;
-            const castleY = SCREEN_HEIGHT / 2;
+            // Стены лабиринта
+            if (gameState.walls) {
+                ctx.fillStyle = '#6d4c41';
+                gameState.walls.forEach(wall => {
+                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
+                });
+            }
             
-            // Основание замка
-            ctx.fillStyle = '#6d4c41';
-            ctx.beginPath();
-            ctx.arc(castleX, castleY, 80, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Детали замка
-            ctx.fillStyle = '#8d6e63';
-            ctx.fillRect(castleX - 40, castleY - 60, 80, 40);
-            ctx.fillRect(castleX - 60, castleY - 20, 120, 20);
-            
-            // Полоска здоровья замка
-            ctx.fillStyle = '#5d4037';
-            ctx.fillRect(castleX - 50, castleY - 80, 100, 10);
-            ctx.fillStyle = COLORS.HEALTH;
-            ctx.fillRect(castleX - 50, castleY - 80, 100 * (gameState.playerHealth / gameState.maxCastleHealth), 10);
+            // Замок
+            if (gameState.castle) {
+                const castle = gameState.castle;
+                
+                // Основание замка
+                ctx.fillStyle = '#6d4c41';
+                ctx.beginPath();
+                ctx.arc(castle.x, castle.y, castle.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Детали замка
+                ctx.fillStyle = '#8d6e63';
+                ctx.fillRect(castle.x - 40, castle.y - 60, 80, 40);
+                ctx.fillRect(castle.x - 60, castle.y - 20, 120, 20);
+                
+                // Полоска здоровья замка (если есть здоровье)
+                if (castle.health !== undefined) {
+                    ctx.fillStyle = '#5d4037';
+                    ctx.fillRect(castle.x - 50, castle.y - 80, 100, 10);
+                    ctx.fillStyle = COLORS.HEALTH;
+                    ctx.fillRect(castle.x - 50, castle.y - 80, 100 * (castle.health / castle.maxHealth), 10);
+                }
+            }
             
             // Юниты игрока
             gameState.units.forEach(unit => {
@@ -1865,34 +2092,6 @@
                 ctx.fillText(popup.text, popup.x, y);
                 ctx.restore();
             });
-            
-            // Область размещения (только в фазе подготовки)
-            if (gameState.gamePhase === 'preparation') {
-                ctx.strokeStyle = 'rgba(79, 195, 247, 0.5)';
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.arc(castleX, castleY, 120, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // Подсказка
-                ctx.fillStyle = 'rgba(93, 64, 55, 0.8)';
-                ctx.fillRect(castleX - 150, castleY + 100, 300, 40);
-                ctx.fillStyle = '#f5e8c8';
-                ctx.font = '16px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Разместите юнитов вокруг крепости', castleX, castleY + 125);
-            }
-        }
-
-        // Обработка кликов по canvas
-        function handleCanvasClick(x, y) {
-            if (gameState.currentScreen !== 'game' || gameState.gameOver) return;
-            
-            // В фазе подготовки можно размещать юнитов
-            if (gameState.gamePhase === 'preparation') {
-                placeUnit(x, y);
-            }
         }
 
         // Игровой цикл
@@ -1905,26 +2104,6 @@
             
             requestAnimationFrame(gameLoop);
         }
-
-        // Обработка кликов по canvas
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            handleCanvasClick(x, y);
-        });
-
-        // Обработка касаний для мобильных устройств
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.touches[0];
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            
-            handleCanvasClick(x, y);
-        });
 
         // Запуск игры
         init();
