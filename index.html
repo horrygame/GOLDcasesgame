@@ -1717,6 +1717,77 @@
             return false;
         }
 
+        // Рендер координатной сетки
+        function renderCoordinateGrid() {
+            // Рисуем оси координат
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            
+            // Ось X
+            ctx.beginPath();
+            ctx.moveTo(0, SCREEN_HEIGHT / 2);
+            ctx.lineTo(SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+            ctx.stroke();
+            
+            // Ось Y
+            ctx.beginPath();
+            ctx.moveTo(SCREEN_WIDTH / 2, 0);
+            ctx.lineTo(SCREEN_WIDTH / 2, SCREEN_HEIGHT);
+            ctx.stroke();
+            
+            // Подписи осей
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // Подпись оси X
+            ctx.fillText('X', SCREEN_WIDTH - 10, SCREEN_HEIGHT / 2 - 10);
+            
+            // Подпись оси Y
+            ctx.fillText('Y', SCREEN_WIDTH / 2 + 10, 15);
+            
+            // Деления на оси X
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            for (let x = 0; x < SCREEN_WIDTH; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, SCREEN_HEIGHT / 2 - 5);
+                ctx.lineTo(x, SCREEN_HEIGHT / 2 + 5);
+                ctx.stroke();
+                
+                // Подписи делений
+                if (x % 100 === 0 && x !== SCREEN_WIDTH / 2) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.fillText(x, x, SCREEN_HEIGHT / 2 + 20);
+                }
+            }
+            
+            // Деления на оси Y
+            for (let y = 0; y < SCREEN_HEIGHT; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(SCREEN_WIDTH / 2 - 5, y);
+                ctx.lineTo(SCREEN_WIDTH / 2 + 5, y);
+                ctx.stroke();
+                
+                // Подписи делений
+                if (y % 100 === 0 && y !== SCREEN_HEIGHT / 2) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                    ctx.fillText(y, SCREEN_WIDTH / 2 - 15, y + 4);
+                }
+            }
+            
+            // Центр координат
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillText('(0,0)', SCREEN_WIDTH / 2 + 20, SCREEN_HEIGHT / 2 + 20);
+            
+            // Координаты курсора (если в игре)
+            if (gameState.currentScreen === 'game' && gameState.mouseX !== undefined) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.font = '14px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(`(${Math.round(gameState.mouseX)}, ${Math.round(gameState.mouseY)})`, 10, 30);
+            }
+        }
+
         // Обновление юнитов
         function updateUnits() {
             const now = Date.now();
@@ -1976,6 +2047,9 @@
                 }
             }
             
+            // Рендер координатной сетки
+            renderCoordinateGrid();
+            
             // Стены лабиринта
             if (gameState.walls) {
                 ctx.fillStyle = '#6d4c41';
@@ -2104,6 +2178,13 @@
             
             requestAnimationFrame(gameLoop);
         }
+
+        // Обработчик движения мыши для отображения координат
+        canvas.addEventListener('mousemove', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            gameState.mouseX = event.clientX - rect.left;
+            gameState.mouseY = event.clientY - rect.top;
+        });
 
         // Запуск игры
         init();
