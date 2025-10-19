@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Битва Крепостей: Блочное программирование</title>
+    <title>Программирование Робота</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Times New Roman', serif;
         }
         
         body {
@@ -22,48 +22,22 @@
             align-items: center;
         }
         
-        #device-selector {
+        #game-container {
+            position: relative;
+            width: 1200px;
+            height: 800px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 8px solid #5d4037;
+        }
+        
+        #game-canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: rgba(61, 43, 31, 0.95);
-            z-index: 100;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><rect fill="%235d4037" width="100" height="100"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="%233e2723" stroke-width="2"/></svg>');
-        }
-        
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-            border-radius: 5px;
-            overflow: hidden;
-            border: 8px solid #5d4037;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        #game-canvas {
-            width: 100%;
-            flex-grow: 1;
-            cursor: pointer;
-            background: #7cb342;
-        }
-        
-        #code-panel {
-            width: 100%;
-            height: 40%;
-            background: rgba(61, 43, 31, 0.95);
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
         }
         
         .screen {
@@ -79,16 +53,14 @@
             background: rgba(61, 43, 31, 0.95);
             z-index: 10;
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><rect fill="%235d4037" width="100" height="100"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="%233e2723" stroke-width="2"/></svg>');
-            padding: 20px;
-            overflow-y: auto;
         }
         
         .hidden {
-            display: none !important;
+            display: none;
         }
         
         h1 {
-            font-size: 36px;
+            font-size: 64px;
             color: #d7ccc8;
             margin-bottom: 20px;
             text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7);
@@ -101,7 +73,7 @@
         }
         
         h2 {
-            font-size: 28px;
+            font-size: 48px;
             color: #d7ccc8;
             margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -109,18 +81,11 @@
             font-weight: bold;
         }
         
-        h3 {
-            font-size: 20px;
-            color: #d7ccc8;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
         p {
-            font-size: 16px;
-            margin-bottom: 20px;
+            font-size: 24px;
+            margin-bottom: 40px;
             text-align: center;
-            max-width: 100%;
+            max-width: 80%;
             line-height: 1.5;
             color: #efebe9;
         }
@@ -129,14 +94,14 @@
             background: linear-gradient(to bottom, #8d6e63, #6d4c41);
             color: #fff;
             border: none;
-            padding: 12px 20px;
-            font-size: 16px;
+            padding: 15px 30px;
+            font-size: 22px;
             border-radius: 5px;
             cursor: pointer;
-            margin: 8px;
+            margin: 10px;
             transition: all 0.3s;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            min-width: 160px;
+            min-width: 250px;
             text-align: center;
             border: 2px solid #5d4037;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
@@ -155,11 +120,96 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
         
+        .button:disabled {
+            background: linear-gradient(to bottom, #795548, #5d4037);
+            cursor: not-allowed;
+            transform: none;
+            color: #bcaaa4;
+        }
+        
         .menu-buttons {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            max-width: 100%;
+            max-width: 600px;
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 20px;
+            width: 90%;
+        }
+        
+        .level-card {
+            background: rgba(93, 64, 55, 0.8);
+            border-radius: 5px;
+            padding: 20px;
+            width: 300px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #8d6e63;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .level-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .level-card.locked {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .level-card.locked:hover {
+            transform: none;
+        }
+        
+        .level-number {
+            font-size: 36px;
+            color: #ffd54f;
+            margin-bottom: 10px;
+        }
+        
+        .level-title {
+            font-size: 24px;
+            color: #f5e8c8;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .level-description {
+            font-size: 16px;
+            color: #efebe9;
+            text-align: center;
+            line-height: 1.4;
+        }
+        
+        .lock-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            color: #bcaaa4;
+        }
+        
+        .parchment {
+            background: #f5e8c8;
+            color: #5d4037;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid #8d6e63;
+            max-width: 90%;
+            margin-bottom: 20px;
         }
         
         .game-ui {
@@ -167,7 +217,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 10px;
+            padding: 20px;
             display: flex;
             justify-content: space-between;
             z-index: 5;
@@ -175,12 +225,12 @@
         
         .ui-panel {
             background: rgba(93, 64, 55, 0.8);
-            padding: 8px 15px;
+            padding: 10px 20px;
             border-radius: 5px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 16px;
+            gap: 10px;
+            font-size: 20px;
             border: 2px solid #8d6e63;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             color: #f5e8c8;
@@ -192,36 +242,224 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(61, 43, 31, 0.95);
-            padding: 30px;
+            padding: 40px;
             border-radius: 5px;
             text-align: center;
             z-index: 20;
             border: 3px solid #8d6e63;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
-            width: 90%;
-            max-width: 400px;
+            width: 500px;
         }
         
-        .damage-popup {
+        .programming-area {
             position: absolute;
-            color: #ff5252;
-            font-weight: bold;
-            font-size: 16px;
-            pointer-events: none;
-            z-index: 15;
-            text-shadow: 1px 1px 2px black;
-            animation: floatUp 1s ease-out forwards;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 350px;
+            background: rgba(93, 64, 55, 0.9);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-top: 3px solid #8d6e63;
         }
         
-        @keyframes floatUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
+        .commands-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .command {
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            border: 2px solid #5d4037;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            font-weight: bold;
+            min-width: 200px;
+            text-align: center;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        
+        .command:hover {
+            background: linear-gradient(to bottom, #a1887f, #8d6e63);
+            transform: translateY(-3px);
+        }
+        
+        .command:active {
+            cursor: grabbing;
+        }
+        
+        .program-panel {
+            flex-grow: 1;
+            background: rgba(121, 85, 72, 0.7);
+            border-radius: 5px;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            border: 2px solid #8d6e63;
+            flex-wrap: wrap;
+            align-content: flex-start;
+        }
+        
+        .program-slot {
+            width: 140px;
+            height: 80px;
+            background: rgba(93, 64, 55, 0.5);
+            border: 2px dashed #8d6e63;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #bcaaa4;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .program-slot.filled {
+            background: rgba(141, 110, 99, 0.7);
+            border: 2px solid #5d4037;
+            color: #f5e8c8;
+        }
+        
+        .program-slot.highlight {
+            background: rgba(255, 213, 79, 0.3);
+            border: 2px dashed #ffd54f;
+        }
+        
+        .program-block {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 16px;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            border: 2px solid #5d4037;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            font-weight: bold;
+            user-select: none;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .program-block:hover {
+            background: linear-gradient(to bottom, #a1887f, #8d6e63);
+        }
+        
+        .program-block:active {
+            cursor: grabbing;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ef5350;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .delete-btn:hover {
+            background: #f44336;
+            transform: scale(1.1);
+        }
+        
+        .delete-zone {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            background: rgba(239, 83, 80, 0.7);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 16px;
+            border: 2px dashed #ef5350;
+            transition: all 0.3s;
+        }
+        
+        .delete-zone.highlight {
+            background: rgba(239, 83, 80, 0.9);
+            transform: scale(1.05);
+        }
+        
+        .controls-panel {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .tutorial-content {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            width: 90%;
+            text-align: left;
+        }
+        
+        .tutorial-section {
+            margin-bottom: 30px;
+        }
+        
+        .tutorial-section h3 {
+            color: #ffd54f;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .tutorial-section p {
+            text-align: left;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .tutorial-section ul {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .tutorial-section li {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .code-example {
+            background: #5d4037;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            border-left: 4px solid #ffd54f;
         }
         
         .medieval-border {
@@ -229,1147 +467,451 @@
             border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="%238d6e63" stroke-width="4"/></svg>') 8 round;
         }
         
-        .parchment {
-            background: #f5e8c8;
-            color: #5d4037;
-            padding: 12px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            border: 1px solid #8d6e63;
-        }
-        
-        .code-controls {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .compile-message {
-            padding: 8px;
-            border-radius: 5px;
-            margin-bottom: 12px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .success {
-            background: rgba(76, 175, 80, 0.3);
-            color: #4caf50;
-            border: 1px solid #4caf50;
-        }
-        
-        .error {
-            background: rgba(244, 67, 54, 0.3);
-            color: #f44336;
-            border: 1px solid #f44336;
-        }
-        
-        .levels-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            max-width: 100%;
-            margin-top: 20px;
-        }
-        
-        .level-card {
+        .camera-info {
+            position: absolute;
+            bottom: 370px;
+            left: 20px;
             background: rgba(93, 64, 55, 0.8);
+            padding: 5px 10px;
             border-radius: 5px;
-            padding: 15px;
-            text-align: center;
-            border: 2px solid #8d6e63;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .level-card:hover {
-            transform: translateY(-5px);
-            background: rgba(121, 85, 72, 0.8);
-        }
-        
-        .level-card.locked {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .level-title {
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #ffd54f;
-        }
-        
-        .level-description {
-            font-size: 12px;
-            color: #efebe9;
-        }
-        
-        .manual-container {
-            max-width: 100%;
-            max-height: 70vh;
-            overflow-y: auto;
-            padding: 15px;
-            background: rgba(93, 64, 55, 0.8);
-            border-radius: 5px;
-            border: 2px solid #8d6e63;
-        }
-        
-        .manual-section {
-            margin-bottom: 20px;
-        }
-        
-        .manual-section h3 {
-            color: #ffd54f;
-            border-bottom: 1px solid #8d6e63;
-            padding-bottom: 5px;
-            margin-bottom: 12px;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 100%;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .device-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 300px;
-            width: 100%;
-        }
-        
-        .device-button {
-            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
-            color: #fff;
-            border: none;
-            padding: 20px;
-            font-size: 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            text-align: center;
-            border: 2px solid #5d4037;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        
-        .device-button:hover {
-            background: linear-gradient(to bottom, #a1887f, #8d6e63);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
-        }
-        
-        /* Блочное программирование */
-        .block-programming-container {
-            display: flex;
-            height: 100%;
-            gap: 10px;
-        }
-        
-        .blocks-palette {
-            width: 30%;
-            background: rgba(93, 64, 55, 0.8);
-            border-radius: 5px;
-            padding: 10px;
-            overflow-y: auto;
-            border: 2px solid #8d6e63;
-        }
-        
-        .workspace {
-            width: 70%;
-            background: rgba(61, 43, 31, 0.8);
-            border-radius: 5px;
-            padding: 10px;
-            overflow-y: auto;
-            border: 2px solid #8d6e63;
-            min-height: 200px;
-        }
-        
-        .block-category {
-            margin-bottom: 15px;
-        }
-        
-        .category-title {
             font-size: 14px;
-            color: #ffd54f;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #8d6e63;
-        }
-        
-        .block {
-            background: #8d6e63;
-            border-radius: 4px;
-            padding: 8px;
-            margin-bottom: 8px;
-            cursor: move;
-            user-select: none;
-            border: 1px solid #6d4c41;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-        
-        .block:hover {
-            background: #a1887f;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        
-        .block.dragging {
-            opacity: 0.5;
-        }
-        
-        .block.condition {
-            background: #5d4037;
-            border-left: 4px solid #ffd54f;
-        }
-        
-        .block.loop {
-            background: #5d4037;
-            border-left: 4px solid #4fc3f7;
-        }
-        
-        .block.action {
-            background: #5d4037;
-            border-left: 4px solid #81c784;
-        }
-        
-        .block.sensor {
-            background: #5d4037;
-            border-left: 4px solid #ba68c8;
-        }
-        
-        .block-input {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #8d6e63;
-            border-radius: 3px;
-            padding: 2px 5px;
             color: #f5e8c8;
-            width: 60px;
-            margin: 0 5px;
-        }
-        
-        .nested-blocks {
-            margin-left: 20px;
-            margin-top: 10px;
-            padding-left: 10px;
-            border-left: 2px dashed #8d6e63;
-            min-height: 20px;
-        }
-        
-        .block-placeholder {
-            height: 30px;
-            border: 2px dashed #8d6e63;
-            border-radius: 4px;
-            margin-bottom: 5px;
-            background: rgba(141, 110, 99, 0.3);
-        }
-        
-        .instructions {
-            background: rgba(93, 64, 55, 0.8);
-            border-radius: 5px;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 2px solid #8d6e63;
-            max-width: 100%;
-        }
-        
-        .instructions h3 {
-            color: #ffd54f;
-            margin-bottom: 10px;
-        }
-        
-        .instructions ul {
-            margin-left: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .instructions li {
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        @media (min-width: 768px) {
-            #game-container {
-                width: 95%;
-                height: 95%;
-                max-width: 1400px;
-                max-height: 800px;
-                flex-direction: row;
-            }
-            
-            #game-canvas {
-                width: 60%;
-                height: 100%;
-            }
-            
-            #code-panel {
-                width: 40%;
-                height: 100%;
-            }
-            
-            h1 {
-                font-size: 48px;
-            }
-            
-            h2 {
-                font-size: 36px;
-            }
-            
-            .button {
-                padding: 15px 30px;
-                font-size: 18px;
-                min-width: 200px;
-            }
-            
-            .levels-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .device-buttons {
-                flex-direction: row;
-                max-width: 600px;
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            h1 {
-                font-size: 64px;
-            }
+            border: 1px solid #8d6e63;
         }
     </style>
 </head>
 <body>
-    <div id="device-selector">
-        <h1>⚔️ Битва Крепостей ⚔️</h1>
-        <p class="parchment">Выберите тип устройства для оптимального отображения</p>
-        
-        <div class="device-buttons">
-            <button class="device-button" id="mobile-btn">
-                📱 Телефон
-            </button>
-            <button class="device-button" id="desktop-btn">
-                💻 Компьютер
-            </button>
-        </div>
-    </div>
-    
-    <div id="game-container" class="medieval-border hidden">
-        <canvas id="game-canvas"></canvas>
-        
-        <div id="code-panel">
-            <h3 id="level-title">Уровень 1: Движение к цели</h3>
-            
-            <div class="instructions">
-                <div id="level-description">
-                    <p>Создайте программу, перетаскивая блоки. Перетащите блоки из левой панели в правую область.</p>
-                </div>
-            </div>
-            
-            <div id="compile-message" class="compile-message hidden"></div>
-            
-            <div class="code-controls">
-                <button class="button" id="compile-btn">Запустить программу</button>
-                <button class="button" id="reset-code-btn">Очистить</button>
-            </div>
-            
-            <div class="block-programming-container">
-                <div class="blocks-palette" id="blocks-palette">
-                    <!-- Блоки будут добавляться через JavaScript -->
-                </div>
-                <div class="workspace" id="workspace">
-                    <div class="block-placeholder" id="start-placeholder">Перетащите блоки сюда</div>
-                </div>
-            </div>
-            
-            <div class="nav-buttons">
-                <button class="button" id="back-to-menu-btn">В главное меню</button>
-                <button class="button" id="next-level-btn" style="display:none">Следующий уровень</button>
-            </div>
-        </div>
+    <div id="game-container" class="medieval-border">
+        <canvas id="game-canvas" width="1200" height="800"></canvas>
         
         <!-- Главное меню -->
         <div id="main-menu" class="screen">
-            <h1>⚔️ Битва Крепостей ⚔️</h1>
-            <p class="parchment">Обучающая программированию стратегическая игра</p>
+            <h1>🤖 Программирование Робота</h1>
+            <p class="parchment">Программируйте робота для выполнения заданий на различных уровнях</p>
             
             <div class="menu-buttons">
-                <button class="button" id="levels-btn">🗺️ Уровни</button>
-                <button class="button" id="manual-btn">📚 Пособие</button>
+                <button class="button" id="levels-btn">📚 Уровни</button>
+                <button class="button" id="tutorial-btn">📖 Пособие</button>
             </div>
         </div>
         
         <!-- Экран уровней -->
         <div id="levels-screen" class="screen hidden">
-            <h2>🗺️ Уровни обучения</h2>
-            <p class="parchment">Выберите уровень для изучения программирования</p>
-            
-            <div class="levels-grid">
-                <div class="level-card" data-level="1">
-                    <div class="level-title">Уровень 1: Движение к цели</div>
-                    <div class="level-description">Используйте блоки движения</div>
-                </div>
-                <div class="level-card locked" data-level="2">
-                    <div class="level-title">Уровень 2: Движение и атака</div>
-                    <div class="level-description">Доберитесь до цели и атакуйте врага</div>
-                </div>
-                <div class="level-card locked" data-level="3">
-                    <div class="level-title">Уровень 3: Простой лабиринт</div>
-                    <div class="level-description">Используйте команды движения для прохождения лабиринта</div>
-                </div>
-                <div class="level-card locked" data-level="4">
-                    <div class="level-title">Уровень 4: Ветвления</div>
-                    <div class="level-description">Используйте блоки условий</div>
-                </div>
-                <div class="level-card locked" data-level="5">
-                    <div class="level-title">Уровень 5: Циклы</div>
-                    <div class="level-description">Изучите блоки циклов</div>
-                </div>
-                <div class="level-card locked" data-level="6">
-                    <div class="level-title">Уровень 6: Финальный</div>
-                    <div class="level-description">Примените все знания</div>
-                </div>
-            </div>
+            <h2>📚 Уровни</h2>
+            <p class="parchment">Выберите уровень для программирования робота</p>
             
             <button class="button" id="levels-back-btn">← Назад</button>
+            
+            <div class="card-grid" id="levels-container">
+                <!-- Карточки уровней будут добавлены через JavaScript -->
+            </div>
         </div>
         
         <!-- Экран пособия -->
-        <div id="manual-screen" class="screen hidden">
-            <h2>📚 Пособие по блочному программированию</h2>
+        <div id="tutorial-screen" class="screen hidden">
+            <h2>📖 Пособие</h2>
             
-            <div class="manual-container">
-                <div class="manual-section">
-                    <h3>Как использовать блоки</h3>
-                    <p>Перетаскивайте блоки из левой панели в правую рабочую область. Блоки выполняются сверху вниз.</p>
-                    <p>Некоторые блоки могут содержать другие блоки внутри себя (условия и циклы).</p>
+            <button class="button" id="tutorial-back-btn">← Назад</button>
+            
+            <div class="tutorial-content">
+                <div class="tutorial-section">
+                    <h3>Основы программирования робота</h3>
+                    <p>В этой игре вы будете программировать робота для выполнения различных заданий. Робот может выполнять следующие команды:</p>
+                    <ul>
+                        <li><strong>Идти вперед</strong> - робот перемещается на одну клетку вперед</li>
+                        <li><strong>Идти назад</strong> - робот перемещается на одну клетку назад</li>
+                        <li><strong>Идти вправо</strong> - робот перемещается на одну клетку вправо</li>
+                        <li><strong>Идти влево</strong> - робот перемещается на одну клетку влево</li>
+                        <li><strong>Атаковать ближайшего врага</strong> - робот атакует врага, если тот находится в радиусе атаки</li>
+                    </ul>
                 </div>
                 
-                <div class="manual-section">
-                    <h3>Типы блоков</h3>
-                    <p><strong>Действия</strong> - блоки, которые выполняют определенные действия (движение, атака)</p>
-                    <p><strong>Условия</strong> - блоки, которые проверяют условия и выполняют код в зависимости от результата</p>
-                    <p><strong>Циклы</strong> - блоки, которые повторяют код несколько раз</p>
-                    <p><strong>Сенсоры</strong> - блоки, которые возвращают информацию о состоянии игры</p>
+                <div class="tutorial-section">
+                    <h3>Как программировать робота</h3>
+                    <p>Чтобы запрограммировать робота:</p>
+                    <ol>
+                        <li>Выберите уровень из меню "Уровни"</li>
+                        <li>Изучите задание и расположение объектов на поле</li>
+                        <li>Перетащите команды из панели команд в область программы</li>
+                        <li>Расположите команды в правильном порядке</li>
+                        <li>Нажмите кнопку "Запуск программы" для выполнения программы</li>
+                    </ol>
+                    <p><strong>Совет:</strong> Вы можете перетаскивать блоки между ячейками и удалять их, нажимая на кнопку удаления (красный кружок) на блоке.</p>
+                </div>
+                
+                <div class="tutorial-section">
+                    <h3>Пример программы</h3>
+                    <p>Пример программы для перемещения робота к врагу и атаки:</p>
+                    <div class="code-example">
+                        1. Идти вперед<br>
+                        2. Идти вперед<br>
+                        3. Идти вправо<br>
+                        4. Атаковать ближайшего врага
+                    </div>
+                </div>
+                
+                <div class="tutorial-section">
+                    <h3>Советы</h3>
+                    <ul>
+                        <li>Планируйте маршрут робота заранее</li>
+                        <li>Учитывайте препятствия на пути</li>
+                        <li>Помните, что команда атаки работает только если враг в радиусе атаки</li>
+                        <li>Используйте кнопку "Сброс программы" для очистки программы</li>
+                        <li>Если программа не работает как ожидалось, проверьте порядок команд</li>
+                        <li>Игровое поле большое (100x100 клеток), камера будет следовать за роботом</li>
+                    </ul>
                 </div>
             </div>
-            
-            <button class="button" id="manual-back-btn">← Назад</button>
         </div>
         
         <!-- Игровой UI (отображается поверх игрового экрана) -->
         <div id="game-ui" class="game-ui hidden">
             <div class="ui-panel">
-                ⏱️ <span id="game-timer">60</span>с
+                Уровень: <span id="current-level">1</span>
+            </div>
+            <div class="ui-panel">
+                Задание: <span id="current-task">Дойти до цели</span>
+            </div>
+            <button class="button" id="game-back-btn">← Назад</button>
+        </div>
+        
+        <!-- Информация о камере -->
+        <div id="camera-info" class="camera-info hidden">
+            Камера: X:<span id="camera-x">0</span>, Y:<span id="camera-y">0</span>
+        </div>
+        
+        <!-- Область программирования -->
+        <div id="programming-area" class="programming-area hidden">
+            <div class="commands-panel">
+                <div class="command" draggable="true" data-command="forward">Идти вперед</div>
+                <div class="command" draggable="true" data-command="backward">Идти назад</div>
+                <div class="command" draggable="true" data-command="right">Идти вправо</div>
+                <div class="command" draggable="true" data-command="left">Идти влево</div>
+                <div class="command" draggable="true" data-command="attack">Атаковать ближайшего врага</div>
+            </div>
+            
+            <div class="program-panel" id="program-slots">
+                <!-- Слоты программы будут добавлены через JavaScript -->
+            </div>
+            
+            <div class="delete-zone" id="delete-zone">
+                Удалить<br>блок
+            </div>
+            
+            <div class="controls-panel">
+                <button class="button" id="run-program-btn">Запуск программы</button>
+                <button class="button" id="reset-program-btn">Сброс программы</button>
             </div>
         </div>
         
         <!-- Результат игры -->
         <div id="game-result" class="game-result hidden">
-            <h2 id="result-title">ПОБЕДА!</h2>
-            <p id="result-message">Вы успешно выполнили задание!</p>
-            <button class="button" id="continue-btn">Продолжить</button>
+            <h2 id="result-title">УРОВЕНЬ ПРОЙДЕН!</h2>
+            <p id="result-message">Поздравляем! Вы успешно запрограммировали робота.</p>
+            <button class="button" id="next-level-btn">Следующий уровень</button>
+            <button class="button" id="levels-menu-btn">К выбору уровней</button>
+        </div>
+        
+        <!-- Результат неудачи -->
+        <div id="game-fail" class="game-result hidden">
+            <h2 id="fail-title">ПОПРОБУЙТЕ СНОВА</h2>
+            <p id="fail-message">Робот не достиг цели. Попробуйте другую программу.</p>
+            <button class="button" id="retry-level-btn">Повторить уровень</button>
+            <button class="button" id="fail-levels-menu-btn">К выбору уровней</button>
         </div>
     </div>
 
     <script>
         // Константы игры
-        let SCREEN_WIDTH = window.innerWidth;
-        let SCREEN_HEIGHT = window.innerHeight * 0.6;
-        const FPS = 60;
-        const BATTLE_DURATION = 120;
+        const SCREEN_WIDTH = 1200;
+        const SCREEN_HEIGHT = 800;
+        const GRID_SIZE = 80;
+        const GRID_WIDTH = 100; // Увеличили размер поля до 100x100
+        const GRID_HEIGHT = 100;
+        const VISIBLE_WIDTH = Math.floor(SCREEN_WIDTH / GRID_SIZE);
+        const VISIBLE_HEIGHT = Math.floor((SCREEN_HEIGHT - 350) / GRID_SIZE);
 
-        // Уровни обучения
-        const levels = {
-            1: {
-                title: "Уровень 1: Движение к цели",
-                description: "Создайте программу, используя блоки движения. Перетащите блок 'двигаться к' и укажите координаты замка.",
-                goal: "Дойти до замка",
-                duration: 60,
-                allowedBlocks: ["move_to", "move_forward", "move_backward", "move_left", "move_right"],
-                setup: function(gameState) {
-                    // Юнит в левом нижнем углу
-                    gameState.units = [{
-                        id: "unit_1",
-                        x: 100,
-                        y: SCREEN_HEIGHT - 100,
-                        health: 100,
-                        maxHealth: 100,
-                        damage: 20,
-                        speed: 2,
-                        attackSpeed: 1.0,
-                        attackRange: 80,
-                        visionRange: 150,
-                        target: null,
-                        moveTarget: null,
-                        lastAttackTime: 0,
-                        state: 'idle'
-                    }];
-                    
-                    // Замок в центре
-                    gameState.castle = {
-                        x: SCREEN_WIDTH / 2,
-                        y: SCREEN_HEIGHT / 2,
-                        radius: 80
-                    };
-                    
-                    // Врагов нет
-                    gameState.enemyUnits = [];
-                },
-                checkWinCondition: function(gameState) {
-                    const unit = gameState.units[0];
-                    const castle = gameState.castle;
-                    const distanceToCastle = Math.sqrt(
-                        Math.pow(unit.x - castle.x, 2) + 
-                        Math.pow(unit.y - castle.y, 2)
-                    );
-                    
-                    return distanceToCastle < castle.radius + 30; // 30 - радиус юнита
-                }
-            },
-            2: {
-                title: "Уровень 2: Движение и атака",
-                description: "Доберитесь до цели и атакуйте врага. Используйте блок 'атаковать ближайшего'.",
-                goal: "Дойти до замка и победить врага",
-                duration: 90,
-                allowedBlocks: ["move_to", "move_forward", "move_backward", "move_left", "move_right", "attack_nearest"],
-                setup: function(gameState) {
-                    // Юнит в левом нижнем углу
-                    gameState.units = [{
-                        id: "unit_1",
-                        x: 100,
-                        y: SCREEN_HEIGHT - 100,
-                        health: 100,
-                        maxHealth: 100,
-                        damage: 20,
-                        speed: 2,
-                        attackSpeed: 1.0,
-                        attackRange: 80,
-                        visionRange: 150,
-                        target: null,
-                        moveTarget: null,
-                        lastAttackTime: 0,
-                        state: 'idle'
-                    }];
-                    
-                    // Замок в центре
-                    gameState.castle = {
-                        x: SCREEN_WIDTH / 2,
-                        y: SCREEN_HEIGHT / 2,
-                        radius: 80
-                    };
-                    
-                    // Враг рядом с замком
-                    gameState.enemyUnits = [{
-                        id: "enemy_1",
-                        x: SCREEN_WIDTH / 2 + 100,
-                        y: SCREEN_HEIGHT / 2,
-                        health: 50,
-                        maxHealth: 50,
-                        damage: 10,
-                        speed: 1.0,
-                        attackSpeed: 1.0,
-                        attackRange: 70,
-                        visionRange: 120,
-                        target: null,
-                        lastAttackTime: 0,
-                        state: 'idle'
-                    }];
-                },
-                checkWinCondition: function(gameState) {
-                    const unit = gameState.units[0];
-                    const castle = gameState.castle;
-                    const distanceToCastle = Math.sqrt(
-                        Math.pow(unit.x - castle.x, 2) + 
-                        Math.pow(unit.y - castle.y, 2)
-                    );
-                    
-                    // Условие победы: дойти до замка и победить всех врагов
-                    return distanceToCastle < castle.radius + 30 && gameState.enemyUnits.length === 0;
-                }
-            },
-            3: {
-                title: "Уровень 3: Простой лабиринт",
-                description: "Используйте блоки движения для прохождения лабиринта",
-                goal: "Пройдите лабиринт и доберитесь до замка",
-                duration: 120,
-                allowedBlocks: ["move_forward", "move_backward", "move_left", "move_right"],
-                setup: function(gameState) {
-                    // Юнит в левом нижнем углу
-                    gameState.units = [{
-                        id: "unit_1",
-                        x: 100,
-                        y: SCREEN_HEIGHT - 100,
-                        health: 100,
-                        maxHealth: 100,
-                        damage: 20,
-                        speed: 2,
-                        attackSpeed: 1.0,
-                        attackRange: 80,
-                        visionRange: 150,
-                        target: null,
-                        moveTarget: null,
-                        lastAttackTime: 0,
-                        state: 'idle'
-                    }];
-                    
-                    // Замок в центре
-                    gameState.castle = {
-                        x: SCREEN_WIDTH / 2,
-                        y: SCREEN_HEIGHT / 2,
-                        radius: 80
-                    };
-                    
-                    // Врагов нет
-                    gameState.enemyUnits = [];
-                    
-                    // Стены лабиринта
-                    gameState.walls = [
-                        {x: 0, y: SCREEN_HEIGHT - 150, width: SCREEN_WIDTH, height: 10},
-                        {x: 0, y: 0, width: 10, height: SCREEN_HEIGHT},
-                        {x: SCREEN_WIDTH - 10, y: 0, width: 10, height: SCREEN_HEIGHT},
-                        {x: 0, y: 0, width: SCREEN_WIDTH, height: 10},
-                        {x: 200, y: SCREEN_HEIGHT - 150, width: 10, height: 100},
-                        {x: 200, y: SCREEN_HEIGHT - 250, width: 100, height: 10}
-                    ];
-                },
-                checkWinCondition: function(gameState) {
-                    const unit = gameState.units[0];
-                    const castle = gameState.castle;
-                    const distanceToCastle = Math.sqrt(
-                        Math.pow(unit.x - castle.x, 2) + 
-                        Math.pow(unit.y - castle.y, 2)
-                    );
-                    
-                    return distanceToCastle < castle.radius + 30;
-                }
-            },
-            4: {
-                title: "Уровень 4: Ветвления",
-                description: "Используйте блоки условий для принятия решений",
-                goal: "Дойти до замка, атакуя врагов по пути",
-                duration: 120,
-                allowedBlocks: ["move_to", "attack_nearest", "if_enemy_in_range", "if_health_low"],
-                setup: function(gameState) {
-                    // Юнит в левом нижнем углу
-                    gameState.units = [{
-                        id: "unit_1",
-                        x: 100,
-                        y: SCREEN_HEIGHT - 100,
-                        health: 100,
-                        maxHealth: 100,
-                        damage: 20,
-                        speed: 2,
-                        attackSpeed: 1.0,
-                        attackRange: 80,
-                        visionRange: 150,
-                        target: null,
-                        moveTarget: null,
-                        lastAttackTime: 0,
-                        state: 'idle'
-                    }];
-                    
-                    // Замок в центре
-                    gameState.castle = {
-                        x: SCREEN_WIDTH / 2,
-                        y: SCREEN_HEIGHT / 2,
-                        radius: 80
-                    };
-                    
-                    // Несколько врагов на пути
-                    gameState.enemyUnits = [
-                        {
-                            id: "enemy_1",
-                            x: 300,
-                            y: SCREEN_HEIGHT - 150,
-                            health: 50,
-                            maxHealth: 50,
-                            damage: 10,
-                            speed: 1.0,
-                            attackSpeed: 1.0,
-                            attackRange: 70,
-                            visionRange: 120,
-                            target: null,
-                            lastAttackTime: 0,
-                            state: 'idle'
-                        },
-                        {
-                            id: "enemy_2",
-                            x: 500,
-                            y: SCREEN_HEIGHT - 200,
-                            health: 50,
-                            maxHealth: 50,
-                            damage: 10,
-                            speed: 1.0,
-                            attackSpeed: 1.0,
-                            attackRange: 70,
-                            visionRange: 120,
-                            target: null,
-                            lastAttackTime: 0,
-                            state: 'idle'
-                        }
-                    ];
-                },
-                checkWinCondition: function(gameState) {
-                    const unit = gameState.units[0];
-                    const castle = gameState.castle;
-                    const distanceToCastle = Math.sqrt(
-                        Math.pow(unit.x - castle.x, 2) + 
-                        Math.pow(unit.y - castle.y, 2)
-                    );
-                    
-                    // Условие победы: дойти до замка и победить всех врагов
-                    return distanceToCastle < castle.radius + 30 && gameState.enemyUnits.length === 0;
-                }
-            },
-            5: {
-                title: "Уровень 5: Циклы",
-                description: "Изучите блоки циклов для повторения действий",
-                goal: "Используйте циклы для достижения цели",
-                duration: 120,
-                allowedBlocks: ["move_forward", "move_backward", "move_left", "move_right", "repeat"],
-                setup: function(gameState) {
-                    // Юнит в левом нижнем углу
-                    gameState.units = [{
-                        id: "unit_1",
-                        x: 100,
-                        y: SCREEN_HEIGHT - 100,
-                        health: 100,
-                        maxHealth: 100,
-                        damage: 20,
-                        speed: 2,
-                        attackSpeed: 1.0,
-                        attackRange: 80,
-                        visionRange: 150,
-                        target: null,
-                        moveTarget: null,
-                        lastAttackTime: 0,
-                        state: 'idle'
-                    }];
-                    
-                    // Замок в правом верхнем углу
-                    gameState.castle = {
-                        x: SCREEN_WIDTH - 100,
-                        y: 100,
-                        radius: 80
-                    };
-                    
-                    // Врагов нет
-                    gameState.enemyUnits = [];
-                },
-                checkWinCondition: function(gameState) {
-                    const unit = gameState.units[0];
-                    const castle = gameState.castle;
-                    const distanceToCastle = Math.sqrt(
-                        Math.pow(unit.x - castle.x, 2) + 
-                        Math.pow(unit.y - castle.y, 2)
-                    );
-                    
-                    return distanceToCastle < castle.radius + 30;
-                }
-            },
-            6: {
-                title: "Уровень 6: Финальный",
-                description: "Примените все знания для защиты замка",
-                goal: "Защитите замок от врагов",
-                duration: 180,
-                allowedBlocks: ["move_to", "attack_nearest", "if_enemy_in_range", "if_health_low", "repeat"],
-                setup: function(gameState) {
-                    // Несколько юнитов вокруг замка
-                    gameState.units = [
-                        {
-                            id: "unit_1",
-                            x: SCREEN_WIDTH / 2 - 150,
-                            y: SCREEN_HEIGHT / 2,
-                            health: 100,
-                            maxHealth: 100,
-                            damage: 20,
-                            speed: 2,
-                            attackSpeed: 1.0,
-                            attackRange: 80,
-                            visionRange: 150,
-                            target: null,
-                            moveTarget: null,
-                            lastAttackTime: 0,
-                            state: 'idle'
-                        },
-                        {
-                            id: "unit_2",
-                            x: SCREEN_WIDTH / 2 + 150,
-                            y: SCREEN_HEIGHT / 2,
-                            health: 100,
-                            maxHealth: 100,
-                            damage: 20,
-                            speed: 2,
-                            attackSpeed: 1.0,
-                            attackRange: 80,
-                            visionRange: 150,
-                            target: null,
-                            moveTarget: null,
-                            lastAttackTime: 0,
-                            state: 'idle'
-                        }
-                    ];
-                    
-                    // Замок в центре
-                    gameState.castle = {
-                        x: SCREEN_WIDTH / 2,
-                        y: SCREEN_HEIGHT / 2,
-                        radius: 80,
-                        health: 1000,
-                        maxHealth: 1000
-                    };
-                    
-                    // Много врагов
-                    gameState.enemyUnits = [];
-                    gameState.enemySpawnTimer = 0;
-                },
-                checkWinCondition: function(gameState) {
-                    // Условие победы: защитить замок в течение времени
-                    return gameState.battleTimeLeft <= 0 && gameState.castle.health > 0;
-                },
-                update: function(gameState) {
-                    // Спавн врагов каждые 2 секунды
-                    gameState.enemySpawnTimer++;
-                    if (gameState.enemySpawnTimer >= 2) {
-                        // Спавн с края экрана
-                        let x, y;
-                        const side = Math.floor(Math.random() * 4);
-                        
-                        switch (side) {
-                            case 0: // Верх
-                                x = Math.random() * SCREEN_WIDTH;
-                                y = -30;
-                                break;
-                            case 1: // Право
-                                x = SCREEN_WIDTH + 30;
-                                y = Math.random() * SCREEN_HEIGHT;
-                                break;
-                            case 2: // Низ
-                                x = Math.random() * SCREEN_WIDTH;
-                                y = SCREEN_HEIGHT + 30;
-                                break;
-                            case 3: // Лево
-                                x = -30;
-                                y = Math.random() * SCREEN_HEIGHT;
-                                break;
-                        }
-                        
-                        gameState.enemyCounter++;
-                        
-                        // Создаем врага с целью - замком
-                        const enemy = {
-                            id: `enemy_${gameState.enemyCounter}`,
-                            x: x,
-                            y: y,
-                            health: 50,
-                            maxHealth: 50,
-                            damage: 10,
-                            speed: 1.0,
-                            attackSpeed: 1.0,
-                            attackRange: 70,
-                            visionRange: 120,
-                            target: {x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2, isCastle: true},
-                            lastAttackTime: 0,
-                            state: 'moving'
-                        };
-                        
-                        gameState.enemyUnits.push(enemy);
-                        gameState.enemySpawnTimer = 0;
-                    }
-                }
-            }
-        };
-
-        // Определение блоков
-        const blockDefinitions = {
-            move_to: {
-                type: "action",
-                category: "movement",
-                name: "двигаться к",
-                template: "двигаться к X: <input type='number' class='block-input' value='400'> Y: <input type='number' class='block-input' value='400'>",
-                compile: function(block) {
-                    const inputs = block.querySelectorAll('input');
-                    return `moveTo(${inputs[0].value}, ${inputs[1].value});`;
-                }
-            },
-            move_forward: {
-                type: "action",
-                category: "movement",
-                name: "двигаться вперед",
-                template: "двигаться вперед на <input type='number' class='block-input' value='100'>",
-                compile: function(block) {
-                    const input = block.querySelector('input');
-                    return `moveForward(${input.value});`;
-                }
-            },
-            move_backward: {
-                type: "action",
-                category: "movement",
-                name: "двигаться назад",
-                template: "двигаться назад на <input type='number' class='block-input' value='100'>",
-                compile: function(block) {
-                    const input = block.querySelector('input');
-                    return `moveBackward(${input.value});`;
-                }
-            },
-            move_left: {
-                type: "action",
-                category: "movement",
-                name: "двигаться влево",
-                template: "двигаться влево на <input type='number' class='block-input' value='100'>",
-                compile: function(block) {
-                    const input = block.querySelector('input');
-                    return `moveLeft(${input.value});`;
-                }
-            },
-            move_right: {
-                type: "action",
-                category: "movement",
-                name: "двигаться вправо",
-                template: "двигаться вправо на <input type='number' class='block-input' value='100'>",
-                compile: function(block) {
-                    const input = block.querySelector('input');
-                    return `moveRight(${input.value});`;
-                }
-            },
-            attack_nearest: {
-                type: "action",
-                category: "actions",
-                name: "атаковать ближайшего",
-                template: "атаковать ближайшего врага",
-                compile: function(block) {
-                    return `attackNearestEnemy();`;
-                }
-            },
-            if_enemy_in_range: {
-                type: "condition",
-                category: "conditions",
-                name: "если враг в радиусе",
-                template: "если враг в радиусе <div class='nested-blocks'></div>",
-                compile: function(block) {
-                    const nestedBlocks = block.querySelector('.nested-blocks');
-                    const nestedCode = compileBlocks(nestedBlocks);
-                    return `if (enemyInRange()) { ${nestedCode} }`;
-                }
-            },
-            if_health_low: {
-                type: "condition",
-                category: "conditions",
-                name: "если здоровье низкое",
-                template: "если здоровье < <input type='number' class='block-input' value='30'> <div class='nested-blocks'></div>",
-                compile: function(block) {
-                    const input = block.querySelector('input');
-                    const nestedBlocks = block.querySelector('.nested-blocks');
-                    const nestedCode = compileBlocks(nestedBlocks);
-                    return `if (getHealth() < ${input.value}) { ${nestedCode} }`;
-                }
-            },
-            repeat: {
-                type: "loop",
-                category: "loops",
-                name: "повторить",
-                template: "повторить <input type='number' class='block-input' value='5'> раз <div class='nested-blocks'></div>",
-                compile: function(block) {
-                    const input = block.querySelector('input');
-                    const nestedBlocks = block.querySelector('.nested-blocks');
-                    const nestedCode = compileBlocks(nestedBlocks);
-                    return `for (let i = 0; i < ${input.value}; i++) { ${nestedCode} }`;
-                }
-            }
+        // Цвета в средневековом стиле
+        const COLORS = {
+            BACKGROUND: '#5d4037',
+            GRID: 'rgba(141, 110, 99, 0.3)',
+            ROBOT: '#f5e8c8',
+            ENEMY: '#ef5350',
+            TARGET: '#4caf50',
+            OBSTACLE: '#6d4c41',
+            TEXT: '#f5e8c8'
         };
 
         // Игровое состояние
         let gameState = {
             currentScreen: 'main_menu',
-            gamePhase: 'battle',
-            units: [],
-            enemyUnits: [],
-            enemySpawnTimer: 0,
-            unitCounter: 0,
-            enemyCounter: 0,
-            lastSecondUpdate: 0,
-            battleTimeLeft: BATTLE_DURATION,
+            currentLevel: 0,
+            levels: [
+                {
+                    title: "Движение вперед",
+                    description: "Переместите робота к цели, используя команду 'Идти вперед'",
+                    robot: {x: 2, y: 4},
+                    target: {x: 2, y: 1},
+                    enemies: [],
+                    obstacles: [],
+                    program: [],
+                    completed: false,
+                    unlocked: true
+                },
+                {
+                    title: "Обход препятствия",
+                    description: "Обойдите препятствие, чтобы добраться до цели",
+                    robot: {x: 1, y: 4},
+                    target: {x: 5, y: 4},
+                    enemies: [],
+                    obstacles: [{x: 3, y: 4}],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                },
+                {
+                    title: "Движение в разных направлениях",
+                    description: "Используйте команды движения в разных направлениях",
+                    robot: {x: 1, y: 1},
+                    target: {x: 5, y: 5},
+                    enemies: [],
+                    obstacles: [],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                },
+                {
+                    title: "Первая атака",
+                    description: "Атакуйте врага, чтобы очистить путь к цели",
+                    robot: {x: 1, y: 3},
+                    target: {x: 5, y: 3},
+                    enemies: [{x: 3, y: 3}],
+                    obstacles: [],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                },
+                {
+                    title: "Комбинированное движение",
+                    description: "Сочетайте разные команды движения для достижения цели",
+                    robot: {x: 1, y: 5},
+                    target: {x: 7, y: 1},
+                    enemies: [],
+                    obstacles: [{x: 3, y: 3}, {x: 4, y: 4}],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                },
+                {
+                    title: "Множественные враги",
+                    description: "Уничтожьте всех врагов на пути к цели",
+                    robot: {x: 1, y: 3},
+                    target: {x: 7, y: 3},
+                    enemies: [{x: 3, y: 3}, {x: 5, y: 3}],
+                    obstacles: [],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                },
+                {
+                    title: "Лабиринт",
+                    description: "Найдите путь через лабиринт к цели",
+                    robot: {x: 1, y: 1},
+                    target: {x: 7, y: 5},
+                    enemies: [],
+                    obstacles: [
+                        {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1},
+                        {x: 1, y: 2}, {x: 3, y: 2}, {x: 5, y: 2}, {x: 7, y: 2},
+                        {x: 1, y: 3}, {x: 3, y: 3}, {x: 5, y: 3}, {x: 7, y: 3},
+                        {x: 1, y: 4}, {x: 3, y: 4}, {x: 5, y: 4}, {x: 7, y: 4},
+                        {x: 1, y: 5}, {x: 7, y: 5}
+                    ],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                },
+                {
+                    title: "Тактическая атака",
+                    description: "Подойдите к врагу с правильной стороны для атаки",
+                    robot: {x: 1, y: 3},
+                    target: {x: 7, y: 3},
+                    enemies: [{x: 4, y: 3}],
+                    obstacles: [{x: 4, y: 2}, {x: 4, y: 4}],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                },
+                {
+                    title: "Сложный маршрут",
+                    description: "Составьте сложную программу для достижения цели",
+                    robot: {x: 1, y: 5},
+                    target: {x: 7, y: 1},
+                    enemies: [{x: 3, y: 3}, {x: 5, y: 3}],
+                    obstacles: [
+                        {x: 2, y: 2}, {x: 2, y: 3}, {x: 2, y: 4},
+                        {x: 4, y: 1}, {x: 4, y: 2}, {x: 4, y: 4}, {x: 4, y: 5},
+                        {x: 6, y: 2}, {x: 6, y: 3}, {x: 6, y: 4}
+                    ],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                },
+                {
+                    title: "Финальное испытание",
+                    description: "Примените все полученные навыки в сложном уровне",
+                    robot: {x: 1, y: 1},
+                    target: {x: 9, y: 5},
+                    enemies: [{x: 3, y: 2}, {x: 5, y: 3}, {x: 7, y: 4}],
+                    obstacles: [
+                        {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1}, {x: 7, y: 1}, {x: 8, y: 1},
+                        {x: 1, y: 2}, {x: 4, y: 2}, {x: 6, y: 2}, {x: 8, y: 2}, {x: 9, y: 2},
+                        {x: 1, y: 3}, {x: 2, y: 3}, {x: 4, y: 3}, {x: 6, y: 3}, {x: 8, y: 3},
+                        {x: 1, y: 4}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 6, y: 4}, {x: 8, y: 4}, {x: 9, y: 4},
+                        {x: 1, y: 5}, {x: 3, y: 5}, {x: 5, y: 5}, {x: 7, y: 5}, {x: 8, y: 5}
+                    ],
+                    program: [],
+                    completed: false,
+                    unlocked: false
+                }
+            ],
+            program: [],
+            isRunning: false,
+            currentStep: 0,
             gameOver: false,
             gameResult: null,
-            damagePopups: [],
-            playerCode: '',
-            compiledCode: null,
-            currentLevel: 1,
-            completedLevels: [1],
-            unitDirections: {},
-            isMobile: false,
-            castle: null,
-            walls: []
+            draggedBlock: null,
+            draggedBlockIndex: null,
+            camera: { x: 0, y: 0 }
         };
 
         // Получение элементов DOM
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        const deviceSelector = document.getElementById('device-selector');
-        const gameContainer = document.getElementById('game-container');
 
         const screens = {
             main_menu: document.getElementById('main-menu'),
             levels: document.getElementById('levels-screen'),
-            manual: document.getElementById('manual-screen'),
-            game: null
+            tutorial: document.getElementById('tutorial-screen'),
+            game: null // Игровой экран рисуется на canvas
         };
 
         // Кнопки
         const buttons = {
-            mobile: document.getElementById('mobile-btn'),
-            desktop: document.getElementById('desktop-btn'),
+            // Главное меню
             levels: document.getElementById('levels-btn'),
-            manual: document.getElementById('manual-btn'),
+            tutorial: document.getElementById('tutorial-btn'),
+            
+            // Назад
             levelsBack: document.getElementById('levels-back-btn'),
-            manualBack: document.getElementById('manual-back-btn'),
-            continue: document.getElementById('continue-btn'),
-            compile: document.getElementById('compile-btn'),
-            resetCode: document.getElementById('reset-code-btn'),
-            backToMenu: document.getElementById('back-to-menu-btn'),
-            nextLevel: document.getElementById('next-level-btn')
+            tutorialBack: document.getElementById('tutorial-back-btn'),
+            gameBack: document.getElementById('game-back-btn'),
+            
+            // Программирование
+            runProgram: document.getElementById('run-program-btn'),
+            resetProgram: document.getElementById('reset-program-btn'),
+            
+            // Результат
+            nextLevel: document.getElementById('next-level-btn'),
+            levelsMenu: document.getElementById('levels-menu-btn'),
+            
+            // Неудача
+            retryLevel: document.getElementById('retry-level-btn'),
+            failLevelsMenu: document.getElementById('fail-levels-menu-btn')
         };
 
-        // Элементы блочного программирования
-        const blocksPalette = document.getElementById('blocks-palette');
-        const workspace = document.getElementById('workspace');
-        const compileMessage = document.getElementById('compile-message');
-        const levelTitle = document.getElementById('level-title');
-        const levelDescription = document.getElementById('level-description');
-
-        // Статистика
-        const stats = {
-            gameTimer: document.getElementById('game-timer')
-        };
-
-        // Результаты
-        const gameResult = document.getElementById('game-result');
+        // UI элементы
+        const currentLevelElement = document.getElementById('current-level');
+        const currentTaskElement = document.getElementById('current-task');
+        const gameUI = document.getElementById('game-ui');
+        const programmingArea = document.getElementById('programming-area');
+        const programSlots = document.getElementById('program-slots');
+        const deleteZone = document.getElementById('delete-zone');
+        const gameResultElement = document.getElementById('game-result');
         const resultTitle = document.getElementById('result-title');
         const resultMessage = document.getElementById('result-message');
-
-        // Игровой UI
-        const gameUI = document.getElementById('game-ui');
-
-        // Вспомогательные функции
-        function distance(x1, y1, x2, y2) {
-            return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-        }
-
-        // Обновление размеров canvas
-        function updateCanvasSize() {
-            if (gameState.isMobile) {
-                SCREEN_WIDTH = window.innerWidth;
-                SCREEN_HEIGHT = window.innerHeight * 0.6;
-            } else {
-                SCREEN_WIDTH = 800;
-                SCREEN_HEIGHT = 800;
-            }
-            
-            canvas.width = SCREEN_WIDTH;
-            canvas.height = SCREEN_HEIGHT;
-        }
+        const gameFailElement = document.getElementById('game-fail');
+        const failTitle = document.getElementById('fail-title');
+        const failMessage = document.getElementById('fail-message');
+        const cameraInfo = document.getElementById('camera-info');
+        const cameraX = document.getElementById('camera-x');
+        const cameraY = document.getElementById('camera-y');
 
         // Инициализация игры
         function init() {
             // Настройка кнопок
             setupButtons();
             
-            // Обновление размеров canvas
-            updateCanvasSize();
-            
-            // Настройка блочного программирования
-            setupBlockProgramming();
-            
-            // Настройка уровней
-            setupLevels();
+            // Настройка перетаскивания команд
+            setupDragAndDrop();
             
             // Запуск игрового цикла
             gameLoop();
-            
-            // Обработка изменения размера окна
-            window.addEventListener('resize', updateCanvasSize);
         }
 
         // Настройка обработчиков кнопок
         function setupButtons() {
-            // Выбор устройства
-            buttons.mobile.addEventListener('click', () => {
-                gameState.isMobile = true;
-                deviceSelector.classList.add('hidden');
-                gameContainer.classList.remove('hidden');
-                updateCanvasSize();
-                initGame();
-            });
-            
-            buttons.desktop.addEventListener('click', () => {
-                gameState.isMobile = false;
-                deviceSelector.classList.add('hidden');
-                gameContainer.classList.remove('hidden');
-                updateCanvasSize();
-                initGame();
-            });
-            
             // Главное меню
             buttons.levels.addEventListener('click', () => showScreen('levels'));
-            buttons.manual.addEventListener('click', () => showScreen('manual'));
+            buttons.tutorial.addEventListener('click', () => showScreen('tutorial'));
             
             // Кнопки назад
             buttons.levelsBack.addEventListener('click', () => showScreen('main_menu'));
-            buttons.manualBack.addEventListener('click', () => showScreen('main_menu'));
-            
-            // Игра
-            buttons.continue.addEventListener('click', () => {
-                gameResult.classList.add('hidden');
-                showScreen('main_menu');
+            buttons.tutorialBack.addEventListener('click', () => showScreen('main_menu'));
+            buttons.gameBack.addEventListener('click', () => {
+                resetGame();
+                showScreen('levels');
             });
             
-            // Код
-            buttons.compile.addEventListener('click', compileBlocksToCode);
-            buttons.resetCode.addEventListener('click', resetWorkspace);
-            buttons.backToMenu.addEventListener('click', () => showScreen('main_menu'));
-            buttons.nextLevel.addEventListener('click', nextLevel);
-        }
-
-        // Инициализация игровой логики
-        function initGame() {
-            // Настройка уровней
-            setupLevels();
+            // Программирование
+            buttons.runProgram.addEventListener('click', runProgram);
+            buttons.resetProgram.addEventListener('click', resetProgram);
             
-            // Запуск игрового цикла
-            gameLoop();
+            // Результат
+            buttons.nextLevel.addEventListener('click', nextLevel);
+            buttons.levelsMenu.addEventListener('click', () => {
+                gameResultElement.classList.add('hidden');
+                showScreen('levels');
+            });
+            
+            // Неудача
+            buttons.retryLevel.addEventListener('click', retryLevel);
+            buttons.failLevelsMenu.addEventListener('click', () => {
+                gameFailElement.classList.add('hidden');
+                showScreen('levels');
+            });
         }
 
-        // Настройка уровней
-        function setupLevels() {
-            const levelCards = document.querySelectorAll('.level-card');
-            levelCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    const level = parseInt(this.getAttribute('data-level'));
-                    if (!this.classList.contains('locked')) {
-                        startLevel(level);
-                    }
+        // Настройка перетаскивания команд
+        function setupDragAndDrop() {
+            const commands = document.querySelectorAll('.command');
+            
+            commands.forEach(command => {
+                command.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', command.getAttribute('data-command'));
+                    e.dataTransfer.setData('source', 'panel');
                 });
             });
             
-            // Обновление доступных уровней
-            updateLevels();
-        }
-
-        // Обновление доступных уровней
-        function updateLevels() {
-            const levelCards = document.querySelectorAll('.level-card');
-            levelCards.forEach(card => {
-                const level = parseInt(card.getAttribute('data-level'));
-                if (gameState.completedLevels.includes(level) || level === 1) {
-                    card.classList.remove('locked');
+            // Обработчики для зоны удаления
+            deleteZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                deleteZone.classList.add('highlight');
+            });
+            
+            deleteZone.addEventListener('dragleave', () => {
+                deleteZone.classList.remove('highlight');
+            });
+            
+            deleteZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                deleteZone.classList.remove('highlight');
+                
+                const source = e.dataTransfer.getData('source');
+                
+                if (source === 'slot' && gameState.draggedBlockIndex !== null) {
+                    // Удаляем блок из программы
+                    gameState.program[gameState.draggedBlockIndex] = null;
+                    updateProgramSlots();
                 }
             });
         }
@@ -1381,844 +923,523 @@
                 if (screen) screen.classList.add('hidden');
             });
             
-            // Скрыть игровой UI
+            // Скрыть игровой UI и область программирования
             gameUI.classList.add('hidden');
+            programmingArea.classList.add('hidden');
+            gameResultElement.classList.add('hidden');
+            gameFailElement.classList.add('hidden');
+            cameraInfo.classList.add('hidden');
             
             // Показать выбранный экран
             if (screenName === 'game') {
                 // Игровой экран рисуется на canvas
                 gameUI.classList.remove('hidden');
+                programmingArea.classList.remove('hidden');
+                cameraInfo.classList.remove('hidden');
+                setupProgramSlots();
             } else if (screens[screenName]) {
                 screens[screenName].classList.remove('hidden');
             }
             
             gameState.currentScreen = screenName;
-        }
-
-        // Настройка блочного программирования
-        function setupBlockProgramming() {
-            // Создаем палитру блоков
-            createBlockPalette();
             
-            // Настраиваем перетаскивание блоков
-            setupDragAndDrop();
-        }
-
-        // Создание палитры блоков
-        function createBlockPalette() {
-            // Группируем блоки по категориям
-            const categories = {};
-            
-            for (const [id, definition] of Object.entries(blockDefinitions)) {
-                if (!categories[definition.category]) {
-                    categories[definition.category] = [];
-                }
-                categories[definition.category].push({id, ...definition});
-            }
-            
-            // Создаем HTML для каждой категории
-            for (const [categoryName, blocks] of Object.entries(categories)) {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'block-category';
-                
-                const categoryTitle = document.createElement('div');
-                categoryTitle.className = 'category-title';
-                categoryTitle.textContent = getCategoryDisplayName(categoryName);
-                categoryDiv.appendChild(categoryTitle);
-                
-                blocks.forEach(block => {
-                    const blockElement = createBlockElement(block);
-                    categoryDiv.appendChild(blockElement);
-                });
-                
-                blocksPalette.appendChild(categoryDiv);
+            // Обновление контента экрана
+            if (screenName === 'levels') {
+                renderLevelsScreen();
             }
         }
 
-        // Получение отображаемого имени категории
-        function getCategoryDisplayName(category) {
-            const names = {
-                'movement': 'Движение',
-                'actions': 'Действия',
-                'conditions': 'Условия',
-                'loops': 'Циклы'
-            };
-            return names[category] || category;
-        }
-
-        // Создание элемента блока
-        function createBlockElement(blockDef) {
-            const block = document.createElement('div');
-            block.className = `block ${blockDef.type}`;
-            block.setAttribute('data-block-type', blockDef.id);
-            block.innerHTML = blockDef.template;
+        // Рендер экрана уровней
+        function renderLevelsScreen() {
+            const container = document.getElementById('levels-container');
+            container.innerHTML = '';
             
-            return block;
-        }
-
-        // Настройка перетаскивания блоков
-        function setupDragAndDrop() {
-            let draggedBlock = null;
-            let draggedFromPalette = false;
-            
-            // Обработчики для блоков в палитре
-            blocksPalette.addEventListener('mousedown', (e) => {
-                const block = e.target.closest('.block');
-                if (block) {
-                    draggedBlock = block.cloneNode(true);
-                    draggedFromPalette = true;
-                    draggedBlock.classList.add('dragging');
-                    document.body.appendChild(draggedBlock);
-                    draggedBlock.style.position = 'absolute';
-                    draggedBlock.style.zIndex = '1000';
-                    updateDraggedBlockPosition(e);
-                    
-                    e.preventDefault();
-                }
-            });
-            
-            // Обработчики для рабочей области
-            workspace.addEventListener('mousemove', (e) => {
-                if (draggedBlock) {
-                    updateDraggedBlockPosition(e);
-                }
-            });
-            
-            workspace.addEventListener('mouseup', (e) => {
-                if (draggedBlock && draggedFromPalette) {
-                    // Добавляем блок в рабочую область
-                    const newBlock = draggedBlock.cloneNode(true);
-                    newBlock.classList.remove('dragging');
-                    workspace.appendChild(newBlock);
-                    
-                    // Удаляем placeholder, если он есть
-                    const placeholder = document.getElementById('start-placeholder');
-                    if (placeholder) {
-                        placeholder.remove();
-                    }
-                    
-                    // Удаляем перетаскиваемый блок
-                    draggedBlock.remove();
-                    draggedBlock = null;
-                    draggedFromPalette = false;
-                }
-            });
-            
-            document.addEventListener('mouseup', () => {
-                if (draggedBlock) {
-                    draggedBlock.remove();
-                    draggedBlock = null;
-                    draggedFromPalette = false;
-                }
-            });
-            
-            // Функция обновления позиции перетаскиваемого блока
-            function updateDraggedBlockPosition(e) {
-                if (draggedBlock) {
-                    draggedBlock.style.left = (e.pageX - 50) + 'px';
-                    draggedBlock.style.top = (e.pageY - 25) + 'px';
-                }
-            }
-        }
-
-        // Компиляция блоков в код
-        function compileBlocksToCode() {
-            try {
-                const code = compileBlocks(workspace);
-                gameState.playerCode = code;
+            gameState.levels.forEach((level, index) => {
+                const card = document.createElement('div');
+                card.className = `level-card ${level.unlocked ? '' : 'locked'}`;
+                card.innerHTML = `
+                    <div class="level-number">${index + 1}</div>
+                    <div class="level-title">${level.title}</div>
+                    <div class="level-description">${level.description}</div>
+                    ${level.unlocked ? '' : '<div class="lock-icon">🔒</div>'}
+                    ${level.completed ? '<div style="position:absolute; bottom:10px; color:#81c784;">✓ Пройден</div>' : ''}
+                `;
                 
-                // Создаем функцию из кода
-                gameState.compiledCode = new Function('unit', 'api', code);
-                
-                showCompileMessage('Программа успешно скомпилирована!', 'success');
-            } catch (error) {
-                showCompileMessage('Ошибка компиляции: ' + error.message, 'error');
-                console.error('Ошибка компиляции:', error);
-            }
-        }
-
-        // Рекурсивная компиляция блоков
-        function compileBlocks(container) {
-            let code = '';
-            const blocks = container.querySelectorAll('.block');
-            
-            blocks.forEach(block => {
-                const blockType = block.getAttribute('data-block-type');
-                const definition = blockDefinitions[blockType];
-                
-                if (definition && definition.compile) {
-                    code += definition.compile(block);
-                }
-            });
-            
-            return code;
-        }
-
-        // Сброс рабочей области
-        function resetWorkspace() {
-            workspace.innerHTML = '<div class="block-placeholder" id="start-placeholder">Перетащите блоки сюда</div>';
-            compileMessage.classList.add('hidden');
-        }
-
-        // Показать сообщение о компиляции
-        function showCompileMessage(message, type) {
-            compileMessage.textContent = message;
-            compileMessage.className = 'compile-message ' + type;
-            compileMessage.classList.remove('hidden');
-            
-            setTimeout(() => {
-                compileMessage.classList.add('hidden');
-            }, 3000);
-        }
-
-        // API для юнитов
-        function createUnitAPI(unit) {
-            // Инициализация направления для юнита, если еще не установлено
-            if (!gameState.unitDirections[unit.id]) {
-                gameState.unitDirections[unit.id] = 0; // 0 градусов (вправо)
-            }
-            
-            return {
-                attackNearestEnemy: function() {
-                    let closestEnemy = null;
-                    let closestDistance = unit.visionRange;
-                    
-                    gameState.enemyUnits.forEach(enemy => {
-                        const dist = distance(unit.x, unit.y, enemy.x, enemy.y);
-                        if (dist < closestDistance) {
-                            closestDistance = dist;
-                            closestEnemy = enemy;
-                        }
+                if (level.unlocked) {
+                    card.addEventListener('click', () => {
+                        startLevel(index);
                     });
-                    
-                    if (closestEnemy) {
-                        unit.target = closestEnemy;
-                        unit.state = 'chasing';
-                    }
-                },
-                
-                moveTo: function(x, y) {
-                    unit.moveTarget = {x: parseInt(x), y: parseInt(y)};
-                    unit.target = null;
-                    unit.state = 'moving';
-                },
-                
-                moveForward: function(distance) {
-                    const dir = gameState.unitDirections[unit.id];
-                    const dx = Math.cos(dir * Math.PI / 180) * parseInt(distance);
-                    const dy = Math.sin(dir * Math.PI / 180) * parseInt(distance);
-                    
-                    unit.moveTarget = {x: unit.x + dx, y: unit.y + dy};
-                    unit.target = null;
-                    unit.state = 'moving';
-                },
-                
-                moveBackward: function(distance) {
-                    const dir = gameState.unitDirections[unit.id];
-                    const dx = -Math.cos(dir * Math.PI / 180) * parseInt(distance);
-                    const dy = -Math.sin(dir * Math.PI / 180) * parseInt(distance);
-                    
-                    unit.moveTarget = {x: unit.x + dx, y: unit.y + dy};
-                    unit.target = null;
-                    unit.state = 'moving';
-                },
-                
-                moveLeft: function(distance) {
-                    const dir = gameState.unitDirections[unit.id] - 90;
-                    const dx = Math.cos(dir * Math.PI / 180) * parseInt(distance);
-                    const dy = Math.sin(dir * Math.PI / 180) * parseInt(distance);
-                    
-                    unit.moveTarget = {x: unit.x + dx, y: unit.y + dy};
-                    unit.target = null;
-                    unit.state = 'moving';
-                },
-                
-                moveRight: function(distance) {
-                    const dir = gameState.unitDirections[unit.id] + 90;
-                    const dx = Math.cos(dir * Math.PI / 180) * parseInt(distance);
-                    const dy = Math.sin(dir * Math.PI / 180) * parseInt(distance);
-                    
-                    unit.moveTarget = {x: unit.x + dx, y: unit.y + dy};
-                    unit.target = null;
-                    unit.state = 'moving';
-                },
-                
-                enemyInRange: function() {
-                    for (let i = 0; i < gameState.enemyUnits.length; i++) {
-                        const enemy = gameState.enemyUnits[i];
-                        const dist = distance(unit.x, unit.y, enemy.x, enemy.y);
-                        if (dist < unit.attackRange) {
-                            return true;
-                        }
-                    }
-                    return false;
-                },
-                
-                getHealth: function() {
-                    return unit.health;
                 }
-            };
+                
+                container.appendChild(card);
+            });
         }
 
         // Начать уровень
-        function startLevel(level) {
-            gameState.currentLevel = level;
-            const levelData = levels[level];
+        function startLevel(levelIndex) {
+            if (!gameState.levels[levelIndex].unlocked) return;
             
-            // Обновление интерфейса уровня
-            levelTitle.textContent = levelData.title;
-            levelDescription.innerHTML = `<p>${levelData.description}</p><p><strong>Цель:</strong> ${levelData.goal}</p>`;
+            gameState.currentLevel = levelIndex;
+            const level = gameState.levels[levelIndex];
             
             // Сброс состояния игры
-            gameState.units = [];
-            gameState.enemyUnits = [];
-            gameState.enemySpawnTimer = 0;
-            gameState.unitCounter = 0;
-            gameState.enemyCounter = 0;
-            gameState.battleTimeLeft = levelData.duration;
-            gameState.gamePhase = 'battle';
-            gameState.gameOver = false;
-            gameState.gameResult = null;
-            gameState.damagePopups = [];
-            gameState.lastSecondUpdate = Date.now();
-            gameState.unitDirections = {};
-            gameState.castle = null;
-            gameState.walls = [];
+            resetLevelState(levelIndex);
             
-            // Настройка уровня
-            levelData.setup(gameState);
+            // Центрируем камеру на роботе
+            centerCameraOnRobot();
             
-            // Скрыть кнопку следующего уровня
-            buttons.nextLevel.style.display = 'none';
-            
-            // Очистка рабочей области
-            resetWorkspace();
+            // Обновление UI
+            currentLevelElement.textContent = levelIndex + 1;
+            currentTaskElement.textContent = level.description;
             
             showScreen('game');
+            setupProgramSlots();
+        }
+
+        // Центрировать камеру на роботе
+        function centerCameraOnRobot() {
+            const level = gameState.levels[gameState.currentLevel];
+            gameState.camera.x = Math.max(0, Math.min(level.robot.x - Math.floor(VISIBLE_WIDTH / 2), GRID_WIDTH - VISIBLE_WIDTH));
+            gameState.camera.y = Math.max(0, Math.min(level.robot.y - Math.floor(VISIBLE_HEIGHT / 2), GRID_HEIGHT - VISIBLE_HEIGHT));
+            updateCameraInfo();
+        }
+
+        // Обновить информацию о камере
+        function updateCameraInfo() {
+            cameraX.textContent = gameState.camera.x;
+            cameraY.textContent = gameState.camera.y;
+        }
+
+        // Сброс состояния уровня
+        function resetLevelState(levelIndex) {
+            const level = gameState.levels[levelIndex];
+            const initialLevel = JSON.parse(JSON.stringify(initialLevelStates[levelIndex]));
+            
+            // Восстановление начального состояния уровня
+            level.robot = {...initialLevel.robot};
+            level.enemies = [...initialLevel.enemies];
+            level.obstacles = [...initialLevel.obstacles];
+            
+            gameState.program = [];
+            gameState.isRunning = false;
+            gameState.currentStep = 0;
+            gameState.gameOver = false;
+            gameState.gameResult = null;
+        }
+
+        // Начальные состояния уровней
+        const initialLevelStates = JSON.parse(JSON.stringify(gameState.levels));
+
+        // Настройка слots программы
+        function setupProgramSlots() {
+            programSlots.innerHTML = '';
+            
+            // Создаем 20 слотов для программы
+            for (let i = 0; i < 20; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'program-slot';
+                slot.textContent = i + 1;
+                slot.dataset.index = i;
+                
+                // Обработчики для перетаскивания блоков между слотами
+                slot.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    slot.classList.add('highlight');
+                });
+                
+                slot.addEventListener('dragleave', () => {
+                    slot.classList.remove('highlight');
+                });
+                
+                slot.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    slot.classList.remove('highlight');
+                    
+                    const command = e.dataTransfer.getData('text/plain');
+                    const source = e.dataTransfer.getData('source');
+                    const targetIndex = parseInt(slot.dataset.index);
+                    
+                    if (source === 'panel') {
+                        // Добавляем новую команду из панели
+                        if (!gameState.program[targetIndex]) {
+                            gameState.program[targetIndex] = command;
+                        }
+                    } else if (source === 'slot') {
+                        // Перемещаем блок между слотами
+                        if (gameState.draggedBlockIndex !== null && gameState.draggedBlockIndex !== targetIndex) {
+                            // Меняем местами блоки
+                            const temp = gameState.program[targetIndex];
+                            gameState.program[targetIndex] = gameState.program[gameState.draggedBlockIndex];
+                            gameState.program[gameState.draggedBlockIndex] = temp;
+                        }
+                    }
+                    
+                    updateProgramSlots();
+                });
+                
+                programSlots.appendChild(slot);
+            }
+            
+            updateProgramSlots();
+        }
+
+        // Обновить отображение слотов программы
+        function updateProgramSlots() {
+            const slots = document.querySelectorAll('.program-slot');
+            
+            slots.forEach((slot, index) => {
+                const command = gameState.program[index];
+                
+                // Очищаем слот
+                slot.innerHTML = '';
+                slot.textContent = index + 1;
+                slot.classList.remove('filled');
+                
+                if (command) {
+                    // Создаем блок команды
+                    const block = document.createElement('div');
+                    block.className = 'program-block';
+                    block.textContent = getCommandText(command);
+                    block.draggable = true;
+                    block.dataset.index = index;
+                    
+                    // Обработчики для перетаскивания блоков
+                    block.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', command);
+                        e.dataTransfer.setData('source', 'slot');
+                        gameState.draggedBlockIndex = index;
+                    });
+                    
+                    // Добавляем кнопку удаления
+                    const deleteBtn = document.createElement('div');
+                    deleteBtn.className = 'delete-btn';
+                    deleteBtn.textContent = '×';
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        gameState.program[index] = null;
+                        updateProgramSlots();
+                    });
+                    
+                    block.appendChild(deleteBtn);
+                    slot.appendChild(block);
+                    slot.classList.add('filled');
+                }
+            });
+        }
+
+        // Получить текст команды
+        function getCommandText(command) {
+            const commandTexts = {
+                'forward': 'Вперед',
+                'backward': 'Назад',
+                'right': 'Вправо',
+                'left': 'Влево',
+                'attack': 'Атака'
+            };
+            
+            return commandTexts[command] || command;
+        }
+
+        // Запуск программы
+        function runProgram() {
+            if (gameState.isRunning || gameState.program.length === 0) return;
+            
+            gameState.isRunning = true;
+            gameState.currentStep = 0;
+            executeNextStep();
+        }
+
+        // Выполнить следующий шаг программы
+        function executeNextStep() {
+            if (!gameState.isRunning || gameState.currentStep >= gameState.program.length) {
+                gameState.isRunning = false;
+                checkGameResult();
+                return;
+            }
+            
+            const command = gameState.program[gameState.currentStep];
+            const level = gameState.levels[gameState.currentLevel];
+            
+            if (!command) {
+                // Пропускаем пустые команды
+                gameState.currentStep++;
+                setTimeout(executeNextStep, 100);
+                return;
+            }
+            
+            // Выполнение команды
+            switch (command) {
+                case 'forward':
+                    if (level.robot.y > 0 && !isObstacle(level.robot.x, level.robot.y - 1)) {
+                        level.robot.y--;
+                        updateCamera();
+                    }
+                    break;
+                case 'backward':
+                    if (level.robot.y < GRID_HEIGHT - 1 && !isObstacle(level.robot.x, level.robot.y + 1)) {
+                        level.robot.y++;
+                        updateCamera();
+                    }
+                    break;
+                case 'right':
+                    if (level.robot.x < GRID_WIDTH - 1 && !isObstacle(level.robot.x + 1, level.robot.y)) {
+                        level.robot.x++;
+                        updateCamera();
+                    }
+                    break;
+                case 'left':
+                    if (level.robot.x > 0 && !isObstacle(level.robot.x - 1, level.robot.y)) {
+                        level.robot.x--;
+                        updateCamera();
+                    }
+                    break;
+                case 'attack':
+                    // Атаковать ближайшего врага в радиусе 1 клетки
+                    const enemyIndex = level.enemies.findIndex(enemy => 
+                        Math.abs(enemy.x - level.robot.x) <= 1 && 
+                        Math.abs(enemy.y - level.robot.y) <= 1
+                    );
+                    
+                    if (enemyIndex !== -1) {
+                        level.enemies.splice(enemyIndex, 1);
+                    }
+                    break;
+            }
+            
+            gameState.currentStep++;
+            
+            // Задержка перед следующим шагом для визуализации
+            setTimeout(executeNextStep, 500);
+        }
+
+        // Обновить камеру
+        function updateCamera() {
+            const level = gameState.levels[gameState.currentLevel];
+            
+            // Центрируем камеру на роботе, если он близко к краю
+            const margin = 3;
+            if (level.robot.x - gameState.camera.x < margin) {
+                gameState.camera.x = Math.max(0, level.robot.x - margin);
+            } else if (level.robot.x - gameState.camera.x > VISIBLE_WIDTH - margin - 1) {
+                gameState.camera.x = Math.min(GRID_WIDTH - VISIBLE_WIDTH, level.robot.x - (VISIBLE_WIDTH - margin - 1));
+            }
+            
+            if (level.robot.y - gameState.camera.y < margin) {
+                gameState.camera.y = Math.max(0, level.robot.y - margin);
+            } else if (level.robot.y - gameState.camera.y > VISIBLE_HEIGHT - margin - 1) {
+                gameState.camera.y = Math.min(GRID_HEIGHT - VISIBLE_HEIGHT, level.robot.y - (VISIBLE_HEIGHT - margin - 1));
+            }
+            
+            updateCameraInfo();
+        }
+
+        // Проверить, является ли клетка препятствием
+        function isObstacle(x, y) {
+            const level = gameState.levels[gameState.currentLevel];
+            return level.obstacles.some(obstacle => obstacle.x === x && obstacle.y === y);
+        }
+
+        // Проверить результат игры
+        function checkGameResult() {
+            const level = gameState.levels[gameState.currentLevel];
+            
+            // Проверка достижения цели
+            if (level.robot.x === level.target.x && level.robot.y === level.target.y) {
+                gameState.gameResult = 'win';
+                showGameResult(true);
+                
+                // Помечаем уровень как пройденный
+                level.completed = true;
+                
+                // Открываем следующий уровень, если он существует
+                if (gameState.currentLevel < gameState.levels.length - 1) {
+                    gameState.levels[gameState.currentLevel + 1].unlocked = true;
+                }
+            } else {
+                gameState.gameResult = 'lose';
+                showGameResult(false);
+            }
+        }
+
+        // Показать результат игры
+        function showGameResult(isWin) {
+            if (isWin) {
+                resultTitle.textContent = 'УРОВЕНЬ ПРОЙДЕН!';
+                resultMessage.textContent = 'Поздравляем! Вы успешно запрограммировали робота.';
+                gameResultElement.classList.remove('hidden');
+            } else {
+                failTitle.textContent = 'ПОПРОБУЙТЕ СНОВА';
+                failMessage.textContent = 'Робот не достиг цели. Попробуйте другую программу.';
+                gameFailElement.classList.remove('hidden');
+            }
+        }
+
+        // Повторить уровень
+        function retryLevel() {
+            gameFailElement.classList.add('hidden');
+            resetLevelState(gameState.currentLevel);
+            centerCameraOnRobot();
+            updateProgramSlots();
         }
 
         // Следующий уровень
         function nextLevel() {
-            const nextLevel = gameState.currentLevel + 1;
-            if (levels[nextLevel]) {
-                // Добавляем уровень в завершенные
-                if (!gameState.completedLevels.includes(nextLevel)) {
-                    gameState.completedLevels.push(nextLevel);
-                    updateLevels();
-                }
-                startLevel(nextLevel);
+            gameResultElement.classList.add('hidden');
+            
+            if (gameState.currentLevel < gameState.levels.length - 1) {
+                startLevel(gameState.currentLevel + 1);
             } else {
-                showScreen('main_menu');
+                showScreen('levels');
             }
         }
 
-        // Создание всплывающего сообщения об уроне
-        function createDamagePopup(x, y, text, color) {
-            gameState.damagePopups.push({
-                x: x,
-                y: y,
-                text: text,
-                color: color,
-                life: 1000,
-                createdAt: Date.now()
-            });
+        // Сброс программы
+        function resetProgram() {
+            gameState.program = [];
+            updateProgramSlots();
         }
 
-        // Выполнение кода для юнитов
-        function executeUnitCode() {
-            if (!gameState.compiledCode) return;
+        // Сброс игры
+        function resetGame() {
+            const level = gameState.levels[gameState.currentLevel];
+            // Восстановление начального состояния уровня
+            level.robot = {...initialLevelStates[gameState.currentLevel].robot};
+            level.enemies = [...initialLevelStates[gameState.currentLevel].enemies];
+            level.obstacles = [...initialLevelStates[gameState.currentLevel].obstacles];
             
-            gameState.units.forEach(unit => {
-                try {
-                    const api = createUnitAPI(unit);
-                    gameState.compiledCode(unit, api);
-                } catch (error) {
-                    console.error('Ошибка выполнения кода для юнита:', error);
-                }
-            });
-        }
-
-        // Проверка столкновений со стенами
-        function checkWallCollisions(unit) {
-            if (!gameState.walls) return false;
+            gameState.program = [];
+            gameState.isRunning = false;
+            gameState.currentStep = 0;
+            gameState.gameOver = false;
+            gameState.gameResult = null;
             
-            for (const wall of gameState.walls) {
-                if (unit.x + 30 > wall.x && unit.x - 30 < wall.x + wall.width &&
-                    unit.y + 30 > wall.y && unit.y - 30 < wall.y + wall.height) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        // Рендер координатной сетки
-        function renderCoordinateGrid() {
-            // Рисуем оси координат
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 1;
-            
-            // Ось X
-            ctx.beginPath();
-            ctx.moveTo(0, SCREEN_HEIGHT / 2);
-            ctx.lineTo(SCREEN_WIDTH, SCREEN_HEIGHT / 2);
-            ctx.stroke();
-            
-            // Ось Y
-            ctx.beginPath();
-            ctx.moveTo(SCREEN_WIDTH / 2, 0);
-            ctx.lineTo(SCREEN_WIDTH / 2, SCREEN_HEIGHT);
-            ctx.stroke();
-            
-            // Подписи осей
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            
-            // Подпись оси X
-            ctx.fillText('X', SCREEN_WIDTH - 10, SCREEN_HEIGHT / 2 - 10);
-            
-            // Подпись оси Y
-            ctx.fillText('Y', SCREEN_WIDTH / 2 + 10, 15);
-            
-            // Деления на оси X
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-            for (let x = 0; x < SCREEN_WIDTH; x += 50) {
-                ctx.beginPath();
-                ctx.moveTo(x, SCREEN_HEIGHT / 2 - 5);
-                ctx.lineTo(x, SCREEN_HEIGHT / 2 + 5);
-                ctx.stroke();
-                
-                // Подписи делений
-                if (x % 100 === 0 && x !== SCREEN_WIDTH / 2) {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-                    ctx.fillText(x, x, SCREEN_HEIGHT / 2 + 20);
-                }
-            }
-            
-            // Деления на оси Y
-            for (let y = 0; y < SCREEN_HEIGHT; y += 50) {
-                ctx.beginPath();
-                ctx.moveTo(SCREEN_WIDTH / 2 - 5, y);
-                ctx.lineTo(SCREEN_WIDTH / 2 + 5, y);
-                ctx.stroke();
-                
-                // Подписи делений
-                if (y % 100 === 0 && y !== SCREEN_HEIGHT / 2) {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-                    ctx.fillText(y, SCREEN_WIDTH / 2 - 15, y + 4);
-                }
-            }
-            
-            // Центр координат
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.fillText('(0,0)', SCREEN_WIDTH / 2 + 20, SCREEN_HEIGHT / 2 + 20);
-            
-            // Координаты курсора (если в игре)
-            if (gameState.currentScreen === 'game' && gameState.mouseX !== undefined) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                ctx.font = '14px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText(`(${Math.round(gameState.mouseX)}, ${Math.round(gameState.mouseY)})`, 10, 30);
-            }
-        }
-
-        // Обновление юнитов
-        function updateUnits() {
-            const now = Date.now();
-            
-            // Выполнение кода игрока для юнитов
-            executeUnitCode();
-            
-            // Обновление юнитов игрока
-            gameState.units.forEach(unit => {
-                // Движение к цели
-                if (unit.target && unit.state === 'chasing') {
-                    const dx = unit.target.x - unit.x;
-                    const dy = unit.target.y - unit.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist > unit.attackRange) {
-                        // Двигаемся к цели
-                        const oldX = unit.x;
-                        const oldY = unit.y;
-                        
-                        unit.x += (dx / dist) * unit.speed;
-                        unit.y += (dy / dist) * unit.speed;
-                        
-                        // Проверяем столкновения со стенами
-                        if (checkWallCollisions(unit)) {
-                            unit.x = oldX;
-                            unit.y = oldY;
-                        }
-                        
-                        // Обновляем направление юнита
-                        gameState.unitDirections[unit.id] = Math.atan2(dy, dx) * 180 / Math.PI;
-                    } else {
-                        // Атакуем цель, если в радиусе атаки
-                        unit.state = 'attacking';
-                    }
-                } else if (unit.moveTarget && unit.state === 'moving') {
-                    // Движение к заданной точке
-                    const dx = unit.moveTarget.x - unit.x;
-                    const dy = unit.moveTarget.y - unit.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist > 5) {
-                        const oldX = unit.x;
-                        const oldY = unit.y;
-                        
-                        unit.x += (dx / dist) * unit.speed;
-                        unit.y += (dy / dist) * unit.speed;
-                        
-                        // Проверяем столкновения со стенами
-                        if (checkWallCollisions(unit)) {
-                            unit.x = oldX;
-                            unit.y = oldY;
-                        }
-                        
-                        // Обновляем направление юнита
-                        gameState.unitDirections[unit.id] = Math.atan2(dy, dx) * 180 / Math.PI;
-                    } else {
-                        // Достигли точки назначения
-                        unit.moveTarget = null;
-                        unit.state = 'idle';
-                    }
-                }
-                
-                // Атака
-                if (unit.target && unit.state === 'attacking') {
-                    const dist = distance(unit.x, unit.y, unit.target.x, unit.target.y);
-                    
-                    if (dist <= unit.attackRange) {
-                        if (!unit.lastAttackTime || now - unit.lastAttackTime > (1000 / unit.attackSpeed)) {
-                            unit.target.health -= unit.damage;
-                            unit.lastAttackTime = now;
-                            
-                            // Создание всплывающего урона
-                            createDamagePopup(unit.target.x, unit.target.y, `-${unit.damage}`, '#ef5350');
-                            
-                            if (unit.target.health <= 0) {
-                                gameState.enemyUnits = gameState.enemyUnits.filter(u => u !== unit.target);
-                                unit.target = null;
-                                unit.state = 'idle';
-                            }
-                        }
-                    } else {
-                        // Цель вышла из радиуса атаки - преследуем
-                        unit.state = 'chasing';
-                    }
-                }
-            });
-            
-            // Обновление вражеских юнитов
-            gameState.enemyUnits.forEach(enemy => {
-                // Поиск цели (юнита игрока или крепость)
-                if (!enemy.target) {
-                    let closestTarget = null;
-                    let closestDistance = enemy.visionRange;
-                    
-                    // Ищем ближайшего юнита игрока
-                    gameState.units.forEach(unit => {
-                        const dist = distance(enemy.x, enemy.y, unit.x, unit.y);
-                        if (dist < closestDistance) {
-                            closestDistance = dist;
-                            closestTarget = unit;
-                        }
-                    });
-                    
-                    // Если не нашли юнита, цель - крепость
-                    if (!closestTarget && gameState.castle) {
-                        const distToCastle = distance(enemy.x, enemy.y, gameState.castle.x, gameState.castle.y);
-                        if (distToCastle < enemy.visionRange) {
-                            closestTarget = {x: gameState.castle.x, y: gameState.castle.y, isCastle: true};
-                            closestDistance = distToCastle;
-                        }
-                    }
-                    
-                    if (closestTarget) {
-                        enemy.target = closestTarget;
-                    }
-                }
-                
-                // Движение к цели
-                if (enemy.target && enemy.state === 'moving') {
-                    const dx = enemy.target.x - enemy.x;
-                    const dy = enemy.target.y - enemy.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (dist > enemy.attackRange) {
-                        // Двигаемся к цели
-                        enemy.x += (dx / dist) * enemy.speed;
-                        enemy.y += (dy / dist) * enemy.speed;
-                    } else {
-                        // Атакуем цель, если в радиусе атаки
-                        enemy.state = 'attacking';
-                    }
-                }
-                
-                // Атака
-                if (enemy.target && enemy.state === 'attacking') {
-                    const dist = distance(enemy.x, enemy.y, enemy.target.x, enemy.target.y);
-                    
-                    if (dist <= enemy.attackRange) {
-                        if (!enemy.lastAttackTime || now - enemy.lastAttackTime > (1000 / enemy.attackSpeed)) {
-                            if (enemy.target.isCastle) {
-                                // Атака крепости
-                                if (gameState.castle) {
-                                    gameState.castle.health -= enemy.damage;
-                                    createDamagePopup(gameState.castle.x, gameState.castle.y, `-${enemy.damage}`, '#ef5350');
-                                }
-                            } else {
-                                // Атака юнита игрока
-                                enemy.target.health -= enemy.damage;
-                                createDamagePopup(enemy.target.x, enemy.target.y, `-${enemy.damage}`, '#ef5350');
-                                
-                                if (enemy.target.health <= 0) {
-                                    gameState.units = gameState.units.filter(u => u !== enemy.target);
-                                    enemy.target = null;
-                                    enemy.state = 'moving';
-                                }
-                            }
-                            enemy.lastAttackTime = now;
-                        }
-                    } else {
-                        // Цель вышла из радиуса атаки - преследуем
-                        enemy.state = 'moving';
-                    }
-                }
-            });
-            
-            // Удаление мертвых юнитов
-            gameState.units = gameState.units.filter(unit => unit.health > 0);
-            gameState.enemyUnits = gameState.enemyUnits.filter(unit => unit.health > 0);
-            
-            // Обновление всплывающих сообщений об уроне
-            gameState.damagePopups = gameState.damagePopups.filter(popup => {
-                return now - popup.createdAt < popup.life;
-            });
-        }
-
-        // Обновление игры
-        function updateGame() {
-            const currentTime = Date.now();
-            
-            // Обновление таймера каждую секунду
-            if (currentTime - gameState.lastSecondUpdate > 1000) {
-                if (gameState.currentScreen === 'game' && !gameState.gameOver) {
-                    // Уменьшаем время битвы
-                    gameState.battleTimeLeft -= 1;
-                    
-                    // Обновление уровня (если есть специальная логика)
-                    const levelData = levels[gameState.currentLevel];
-                    if (levelData.update) {
-                        levelData.update(gameState);
-                    }
-                }
-                
-                gameState.lastSecondUpdate = currentTime;
-                updateStats();
-            }
-            
-            // Если мы в игре, обновляем состояние игры
-            if (gameState.currentScreen === 'game' && !gameState.gameOver) {
-                // Обновление позиций и атак юнитов
-                updateUnits();
-                
-                // Проверка конца игры
-                const levelData = levels[gameState.currentLevel];
-                const winCondition = levelData.checkWinCondition(gameState);
-                
-                if (winCondition) {
-                    gameState.gameOver = true;
-                    gameState.gameResult = 'win';
-                    resultTitle.textContent = 'ПОБЕДА!';
-                    resultMessage.textContent = 'Отличная программа! Вы выполнили задание!';
-                    
-                    // Добавляем уровень в завершенные
-                    if (!gameState.completedLevels.includes(gameState.currentLevel)) {
-                        gameState.completedLevels.push(gameState.currentLevel);
-                        updateLevels();
-                    }
-                    
-                    // Показываем кнопку следующего уровня, если он существует
-                    if (levels[gameState.currentLevel + 1]) {
-                        buttons.nextLevel.style.display = 'block';
-                    }
-                    
-                    gameResult.classList.remove('hidden');
-                    updateStats();
-                } else if (gameState.battleTimeLeft <= 0 || 
-                          (gameState.castle && gameState.castle.health <= 0) ||
-                          gameState.units.length === 0) {
-                    gameState.gameOver = true;
-                    gameState.gameResult = 'lose';
-                    resultTitle.textContent = 'ПОРАЖЕНИЕ';
-                    resultMessage.textContent = 'Попробуйте улучшить вашу программу!';
-                    
-                    gameResult.classList.remove('hidden');
-                    updateStats();
-                }
-            }
-        }
-
-        // Обновление статистики
-        function updateStats() {
-            // Обновление таймера
-            stats.gameTimer.textContent = Math.ceil(gameState.battleTimeLeft);
+            centerCameraOnRobot();
+            updateProgramSlots();
         }
 
         // Рендер игры
         function renderGame() {
             // Очистка canvas
-            ctx.fillStyle = '#5d4037';
-            ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            ctx.fillStyle = COLORS.BACKGROUND;
+            ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 350);
             
-            // Поле боя - средневековый ландшафт
-            ctx.fillStyle = '#7cb342';
-            ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+            const level = gameState.levels[gameState.currentLevel];
+            const camera = gameState.camera;
             
-            // Текстура травы
-            ctx.fillStyle = '#689f38';
-            for (let i = 0; i < SCREEN_WIDTH; i += 20) {
-                for (let j = 0; j < SCREEN_HEIGHT; j += 20) {
-                    if ((i + j) % 40 === 0) {
-                        ctx.fillRect(i, j, 10, 10);
-                    }
+            // Отрисовка сетки только для видимой области
+            ctx.strokeStyle = COLORS.GRID;
+            ctx.lineWidth = 1;
+            
+            for (let x = camera.x; x <= camera.x + VISIBLE_WIDTH; x++) {
+                if (x >= 0 && x <= GRID_WIDTH) {
+                    const screenX = (x - camera.x) * GRID_SIZE;
+                    ctx.beginPath();
+                    ctx.moveTo(screenX, 0);
+                    ctx.lineTo(screenX, (SCREEN_HEIGHT - 350));
+                    ctx.stroke();
                 }
             }
             
-            // Рендер координатной сетки
-            renderCoordinateGrid();
-            
-            // Стены лабиринта
-            if (gameState.walls) {
-                ctx.fillStyle = '#6d4c41';
-                gameState.walls.forEach(wall => {
-                    ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
-                });
-            }
-            
-            // Замок
-            if (gameState.castle) {
-                const castle = gameState.castle;
-                
-                // Основание замка
-                ctx.fillStyle = '#6d4c41';
-                ctx.beginPath();
-                ctx.arc(castle.x, castle.y, castle.radius, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Детали замка
-                ctx.fillStyle = '#8d6e63';
-                ctx.fillRect(castle.x - 40, castle.y - 60, 80, 40);
-                ctx.fillRect(castle.x - 60, castle.y - 20, 120, 20);
-                
-                // Полоска здоровья замка (если есть здоровье)
-                if (castle.health !== undefined) {
-                    ctx.fillStyle = '#5d4037';
-                    ctx.fillRect(castle.x - 50, castle.y - 80, 100, 10);
-                    ctx.fillStyle = '#ef5350';
-                    ctx.fillRect(castle.x - 50, castle.y - 80, 100 * (castle.health / castle.maxHealth), 10);
+            for (let y = camera.y; y <= camera.y + VISIBLE_HEIGHT; y++) {
+                if (y >= 0 && y <= GRID_HEIGHT) {
+                    const screenY = (y - camera.y) * GRID_SIZE;
+                    ctx.beginPath();
+                    ctx.moveTo(0, screenY);
+                    ctx.lineTo(SCREEN_WIDTH, screenY);
+                    ctx.stroke();
                 }
             }
             
-            // Юниты игрока
-            gameState.units.forEach(unit => {
-                // Юнит
-                ctx.fillStyle = '#8d6e63';
-                ctx.beginPath();
-                ctx.arc(unit.x, unit.y, 30, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Полоска здоровья юнита
-                ctx.fillStyle = '#5d4037';
-                ctx.fillRect(unit.x - 30, unit.y - 40, 60, 8);
-                ctx.fillStyle = '#4caf50';
-                ctx.fillRect(unit.x - 30, unit.y - 40, 60 * (unit.health / unit.maxHealth), 8);
-                
-                // Текст
-                ctx.fillStyle = '#5d4037';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('ЮНИТ', unit.x, unit.y + 5);
-                
-                // Индикатор состояния
-                if (unit.state === 'attacking') {
-                    ctx.font = '12px Arial';
-                    ctx.fillStyle = '#ef5350';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('⚔️', unit.x, unit.y - 50);
-                } else if (unit.state === 'moving' || unit.state === 'chasing') {
-                    ctx.font = '12px Arial';
-                    ctx.fillStyle = '#4fc3f7';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('➤', unit.x, unit.y - 50);
+            // Отрисовка препятствий в видимой области
+            ctx.fillStyle = COLORS.OBSTACLE;
+            level.obstacles.forEach(obstacle => {
+                if (obstacle.x >= camera.x && obstacle.x < camera.x + VISIBLE_WIDTH &&
+                    obstacle.y >= camera.y && obstacle.y < camera.y + VISIBLE_HEIGHT) {
+                    const screenX = (obstacle.x - camera.x) * GRID_SIZE;
+                    const screenY = (obstacle.y - camera.y) * GRID_SIZE;
+                    ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
                 }
             });
             
-            // Вражеские юниты
-            gameState.enemyUnits.forEach(unit => {
-                // Юнит
-                ctx.fillStyle = '#5d4037';
-                ctx.beginPath();
-                ctx.arc(unit.x, unit.y, 30, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Полоска здоровья юнита
-                ctx.fillStyle = '#5d4037';
-                ctx.fillRect(unit.x - 30, unit.y - 40, 60, 8);
-                ctx.fillStyle = '#4caf50';
-                ctx.fillRect(unit.x - 30, unit.y - 40, 60 * (unit.health / unit.maxHealth), 8);
-                
-                // Текст
-                ctx.fillStyle = '#ef5350';
-                ctx.font = '10px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('ВРАГ', unit.x, unit.y + 5);
-                
-                // Индикатор состояния
-                if (unit.state === 'attacking') {
-                    ctx.font = '12px Arial';
-                    ctx.fillStyle = '#ef5350';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('⚔️', unit.x, unit.y - 50);
+            // Отрисовка цели в видимой области
+            if (level.target.x >= camera.x && level.target.x < camera.x + VISIBLE_WIDTH &&
+                level.target.y >= camera.y && level.target.y < camera.y + VISIBLE_HEIGHT) {
+                ctx.fillStyle = COLORS.TARGET;
+                const screenX = (level.target.x - camera.x) * GRID_SIZE;
+                const screenY = (level.target.y - camera.y) * GRID_SIZE;
+                ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
+            }
+            
+            // Отрисовка врагов в видимой области
+            ctx.fillStyle = COLORS.ENEMY;
+            level.enemies.forEach(enemy => {
+                if (enemy.x >= camera.x && enemy.x < camera.x + VISIBLE_WIDTH &&
+                    enemy.y >= camera.y && enemy.y < camera.y + VISIBLE_HEIGHT) {
+                    const screenX = (enemy.x - camera.x) * GRID_SIZE;
+                    const screenY = (enemy.y - camera.y) * GRID_SIZE;
+                    ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
+                    
+                    // Отображение радиуса атаки
+                    ctx.strokeStyle = 'rgba(239, 83, 80, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(
+                        screenX + GRID_SIZE / 2,
+                        screenY + GRID_SIZE / 2,
+                        GRID_SIZE * 1.5,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.stroke();
                 }
             });
             
-            // Всплывающие сообщения об уроне
-            const now = Date.now();
-            gameState.damagePopups.forEach(popup => {
-                const progress = (now - popup.createdAt) / popup.life;
-                const y = popup.y - progress * 50;
-                const alpha = 1 - progress;
+            // Отрисовка робота в видимой области
+            if (level.robot.x >= camera.x && level.robot.x < camera.x + VISIBLE_WIDTH &&
+                level.robot.y >= camera.y && level.robot.y < camera.y + VISIBLE_HEIGHT) {
+                const screenX = (level.robot.x - camera.x) * GRID_SIZE;
+                const screenY = (level.robot.y - camera.y) * GRID_SIZE;
                 
-                ctx.save();
-                ctx.globalAlpha = alpha;
-                ctx.font = 'bold 18px Arial';
-                ctx.fillStyle = popup.color;
-                ctx.textAlign = 'center';
-                ctx.fillText(popup.text, popup.x, y);
-                ctx.restore();
-            });
+                ctx.fillStyle = COLORS.ROBOT;
+                ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
+                
+                // Добавление деталей роботу
+                ctx.fillStyle = '#5d4037';
+                ctx.fillRect(
+                    screenX + 10,
+                    screenY + 10,
+                    GRID_SIZE - 20,
+                    GRID_SIZE - 20
+                );
+                
+                // Глаза робота
+                ctx.fillStyle = '#4fc3f7';
+                ctx.fillRect(
+                    screenX + 15,
+                    screenY + 20,
+                    10,
+                    10
+                );
+                ctx.fillRect(
+                    screenX + GRID_SIZE - 25,
+                    screenY + 20,
+                    10,
+                    10
+                );
+            }
         }
 
         // Игровой цикл
         function gameLoop() {
-            updateGame();
-            
             if (gameState.currentScreen === 'game') {
                 renderGame();
             }
             
             requestAnimationFrame(gameLoop);
         }
-
-        // Обработчик движения мыши для отображения координат
-        canvas.addEventListener('mousemove', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            gameState.mouseX = event.clientX - rect.left;
-            gameState.mouseY = event.clientY - rect.top;
-        });
 
         // Запуск игры
         init();
