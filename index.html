@@ -781,7 +781,16 @@
             gameResult: null,
             draggedBlock: null,
             draggedBlockIndex: null,
-            camera: { x: 0, y: 0 }
+            camera: { x: 0, y: 0 },
+            attackAnimation: {
+                active: false,
+                frame: 0,
+                totalFrames: 10,
+                x: 0,
+                y: 0,
+                duration: 800, // Длительность анимации в мс
+                startTime: 0
+            }
         };
 
         // Получение элементов DOM
@@ -1025,6 +1034,7 @@
             gameState.currentStep = 0;
             gameState.gameOver = false;
             gameState.gameResult = null;
+            gameState.attackAnimation.active = false;
         }
 
         // Начальные состояния уровней
@@ -1201,7 +1211,22 @@
                     );
                     
                     if (enemyIndex !== -1) {
-                        level.enemies.splice(enemyIndex, 1);
+                        // Запускаем анимацию атаки
+                        const enemy = level.enemies[enemyIndex];
+                        startAttackAnimation(
+                            level.robot.x, 
+                            level.robot.y, 
+                            enemy.x, 
+                            enemy.y,
+                            () => {
+                                // После завершения анимации удаляем врага
+                                level.enemies.splice(enemyIndex, 1);
+                                gameState.currentStep++;
+                                setTimeout(executeNextStep, 100);
+                            }
+                        );
+                        // Не увеличиваем currentStep здесь - это сделается в колбэке анимации
+                        return;
                     }
                     break;
             }
@@ -1210,6 +1235,36 @@
             
             // Задержка перед следующим шагом для визуализации
             setTimeout(executeNextStep, 500);
+        }
+
+        // Запуск анимации атаки
+        function startAttackAnimation(robotX, robotY, enemyX, enemyY, onComplete) {
+            gameState.attackAnimation.active = true;
+            gameState.attackAnimation.frame = 0;
+            gameState.attackAnimation.x = (robotX + enemyX) / 2;
+            gameState.attackAnimation.y = (robotY + enemyY) / 2;
+            gameState.attackAnimation.startTime = Date.now();
+            gameState.attackAnimation.onComplete = onComplete;
+        }
+
+        // Обновить анимацию атаки
+        function updateAttackAnimation() {
+            if (!gameState.attackAnimation.active) return;
+            
+            const currentTime = Date.now();
+            const elapsed = currentTime - gameState.attackAnimation.startTime;
+            const progress = Math.min(elapsed / gameState.attackAnimation.duration, 1);
+            
+            // Обновляем кадр анимации
+            gameState.attackAnimation.frame = Math.floor(progress * gameState.attackAnimation.totalFrames);
+            
+            // Если анимация завершена
+            if (progress >= 1) {
+                gameState.attackAnimation.active = false;
+                if (gameState.attackAnimation.onComplete) {
+                    gameState.attackAnimation.onComplete();
+                }
+            }
         }
 
         // Обновить камеру
@@ -1312,6 +1367,7 @@
             gameState.currentStep = 0;
             gameState.gameOver = false;
             gameState.gameResult = null;
+            gameState.attackAnimation.active = false;
             
             centerCameraOnRobot();
             updateProgramSlots();
@@ -1380,7 +1436,17 @@
                     enemy.y >= camera.y && enemy.y < camera.y + VISIBLE_HEIGHT) {
                     const screenX = (enemy.x - camera.x) * GRID_SIZE;
                     const screenY = (enemy.y - camera.y) * GRID_SIZE;
-                    ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
+                    
+                    // Рисуем врага как красный круг
+                    ctx.beginPath();
+                    ctx.arc(
+                        screenX + GRID_SIZE / 2,
+                        screenY + GRID_SIZE / 2,
+                        GRID_SIZE / 2 - 5,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
                     
                     // Отображение радиуса атаки
                     ctx.strokeStyle = 'rgba(239, 83, 80, 0.5)';
@@ -1403,38 +1469,120 @@
                 const screenX = (level.robot.x - camera.x) * GRID_SIZE;
                 const screenY = (level.robot.y - camera.y) * GRID_SIZE;
                 
+                // Рисуем робота как белый круг
                 ctx.fillStyle = COLORS.ROBOT;
-                ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
+                ctx.beginPath();
+                ctx.arc(
+                    screenX + GRID_SIZE / 2,
+                    screenY + GRID_SIZE / 2,
+                    GRID_SIZE / 2 - 5,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
                 
                 // Добавление деталей роботу
                 ctx.fillStyle = '#5d4037';
-                ctx.fillRect(
-                    screenX + 10,
-                    screenY + 10,
-                    GRID_SIZE - 20,
-                    GRID_SIZE - 20
+                ctx.beginPath();
+                ctx.arc(
+                    screenX + GRID_SIZE / 2,
+                    screenY + GRID_SIZE / 2,
+                    GRID_SIZE / 3,
+                    0,
+                    Math.PI * 2
                 );
+                ctx.fill();
                 
                 // Глаза робота
                 ctx.fillStyle = '#4fc3f7';
-                ctx.fillRect(
-                    screenX + 15,
-                    screenY + 20,
-                    10,
-                    10
+                ctx.beginPath();
+                ctx.arc(
+                    screenX + GRID_SIZE / 2 - 10,
+                    screenY + GRID_SIZE / 2 - 5,
+                    5,
+                    0,
+                    Math.PI * 2
                 );
-                ctx.fillRect(
-                    screenX + GRID_SIZE - 25,
-                    screenY + 20,
-                    10,
-                    10
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(
+                    screenX + GRID_SIZE / 2 + 10,
+                    screenY + GRID_SIZE / 2 - 5,
+                    5,
+                    0,
+                    Math.PI * 2
                 );
+                ctx.fill();
+            }
+            
+            // Отрисовка анимации атаки
+            if (gameState.attackAnimation.active) {
+                const anim = gameState.attackAnimation;
+                if (anim.x >= camera.x && anim.x < camera.x + VISIBLE_WIDTH &&
+                    anim.y >= camera.y && anim.y < camera.y + VISIBLE_HEIGHT) {
+                    
+                    const screenX = (anim.x - camera.x) * GRID_SIZE;
+                    const screenY = (anim.y - camera.y) * GRID_SIZE;
+                    const size = GRID_SIZE * 1.25;
+                    
+                    // Рисуем анимацию атаки (в реальной игре здесь должны быть спрайты)
+                    ctx.fillStyle = `rgba(255, 255, 255, ${0.7 - (anim.frame / anim.totalFrames) * 0.5})`;
+                    ctx.strokeStyle = `rgba(239, 83, 80, ${0.9 - (anim.frame / anim.totalFrames) * 0.5})`;
+                    ctx.lineWidth = 4;
+                    
+                    // Внешний круг
+                    ctx.beginPath();
+                    ctx.arc(
+                        screenX + GRID_SIZE / 2,
+                        screenY + GRID_SIZE / 2,
+                        size / 2 + anim.frame * 2,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.stroke();
+                    
+                    // Внутренний круг
+                    ctx.beginPath();
+                    ctx.arc(
+                        screenX + GRID_SIZE / 2,
+                        screenY + GRID_SIZE / 2,
+                        size / 3 + anim.frame,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                    
+                    // Эффект взрыва
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 - (anim.frame / anim.totalFrames) * 0.7})`;
+                    ctx.lineWidth = 3;
+                    
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i / 8) * Math.PI * 2;
+                        const length = size / 4 + anim.frame * 3;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(
+                            screenX + GRID_SIZE / 2,
+                            screenY + GRID_SIZE / 2
+                        );
+                        ctx.lineTo(
+                            screenX + GRID_SIZE / 2 + Math.cos(angle) * length,
+                            screenY + GRID_SIZE / 2 + Math.sin(angle) * length
+                        );
+                        ctx.stroke();
+                    }
+                }
             }
         }
 
         // Игровой цикл
         function gameLoop() {
             if (gameState.currentScreen === 'game') {
+                // Обновляем анимацию атаки
+                updateAttackAnimation();
+                
+                // Рендерим игру
                 renderGame();
             }
             
