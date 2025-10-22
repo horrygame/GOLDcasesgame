@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Программирование Робота</title>
     <style>
+        /* Все стили остаются без изменений */
         * {
             margin: 0;
             padding: 0;
@@ -24,8 +25,8 @@
         
         #game-container {
             position: relative;
-            width: 1200px;
-            height: 800px;
+            width: 100vw;
+            height: 100vh;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
             border-radius: 5px;
             overflow: hidden;
@@ -134,14 +135,16 @@
             max-width: 600px;
         }
         
+        /* Изменения для горизонтального расположения уровней */
         .card-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
             gap: 30px;
-            max-height: 600px;
-            overflow-y: auto;
+            overflow-x: auto;
             padding: 20px;
             width: 90%;
+            max-width: 90%;
+            height: 300px;
+            align-items: center;
         }
         
         .level-card {
@@ -158,6 +161,7 @@
             transition: transform 0.3s;
             cursor: pointer;
             position: relative;
+            flex-shrink: 0; /* Предотвращает сжатие карточек */
         }
         
         .level-card:hover {
@@ -256,12 +260,13 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 350px;
+            height: 30vh;
             background: rgba(93, 64, 55, 0.9);
             display: flex;
             flex-direction: column;
             padding: 20px;
             border-top: 3px solid #8d6e63;
+            z-index: 5;
         }
         
         .commands-panel {
@@ -289,6 +294,7 @@
             text-align: center;
             transition: all 0.2s;
             user-select: none;
+            position: relative;
         }
         
         .command:hover {
@@ -314,8 +320,8 @@
         }
         
         .program-slot {
-            width: 140px;
-            height: 80px;
+            width: 160px;
+            height: 90px;
             background: rgba(93, 64, 55, 0.5);
             border: 2px dashed #8d6e63;
             border-radius: 5px;
@@ -358,6 +364,8 @@
             user-select: none;
             transition: all 0.2s;
             position: relative;
+            flex-direction: column;
+            padding: 5px;
         }
         
         .program-block:hover {
@@ -467,27 +475,45 @@
             border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z M10,10 L90,10 L90,90 L10,90 Z" fill="none" stroke="%238d6e63" stroke-width="4"/></svg>') 8 round;
         }
         
-        .camera-info {
-            position: absolute;
-            bottom: 370px;
-            left: 20px;
-            background: rgba(93, 64, 55, 0.8);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 14px;
-            color: #f5e8c8;
+        /* Новый стиль для блокировки взаимодействия */
+        .blocked {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        /* Стили для ввода количества шагов */
+        .steps-input-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .steps-input {
+            width: 40px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
             border: 1px solid #8d6e63;
+            border-radius: 3px;
+            color: #fff;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        .steps-label {
+            font-size: 12px;
+            color: #f5e8c8;
         }
     </style>
 </head>
 <body>
     <div id="game-container" class="medieval-border">
-        <canvas id="game-canvas" width="1200" height="800"></canvas>
+        <canvas id="game-canvas"></canvas>
         
         <!-- Главное меню -->
         <div id="main-menu" class="screen">
             <h1>🤖 Программирование Робота</h1>
-            <p class="parchment">Программируйте робота для выполнения заданий на различных уровнях</p>
+            <p class="parchment">Программируйте робота для сбора монет на различных уровнях</p>
             
             <div class="menu-buttons">
                 <button class="button" id="levels-btn">📚 Уровни</button>
@@ -516,14 +542,15 @@
             <div class="tutorial-content">
                 <div class="tutorial-section">
                     <h3>Основы программирования робота</h3>
-                    <p>В этой игре вы будете программировать робота для выполнения различных заданий. Робот может выполнять следующие команды:</p>
+                    <p>В этой игре вы будете программировать робота для сбора монет на различных уровнях. Робот может выполнять следующие команды:</p>
                     <ul>
-                        <li><strong>Идти вперед</strong> - робот перемещается на одну клетку вперед</li>
-                        <li><strong>Идти назад</strong> - робот перемещается на одну клетку назад</li>
-                        <li><strong>Идти вправо</strong> - робот перемещается на одну клетку вправо</li>
-                        <li><strong>Идти влево</strong> - робот перемещается на одну клетку влево</li>
+                        <li><strong>Идти вперед</strong> - робот перемещается на указанное количество клеток вперед</li>
+                        <li><strong>Идти назад</strong> - робот перемещается на указанное количество клеток назад</li>
+                        <li><strong>Идти вправо</strong> - робот перемещается на указанное количество клеток вправо</li>
+                        <li><strong>Идти влево</strong> - робот перемещается на указанное количество клеток влево</li>
                         <li><strong>Атаковать ближайшего врага</strong> - робот атакует врага, если тот находится в радиусе атаки</li>
                     </ul>
+                    <p><strong>Совет:</strong> Вы можете указать произвольное количество клеток для команд движения. Робот будет двигаться последовательно, по одной клетке за шаг.</p>
                 </div>
                 
                 <div class="tutorial-section">
@@ -531,8 +558,9 @@
                     <p>Чтобы запрограммировать робота:</p>
                     <ol>
                         <li>Выберите уровень из меню "Уровни"</li>
-                        <li>Изучите задание и расположение объектов на поле</li>
+                        <li>Изучите расположение монет и врагов на поле</li>
                         <li>Перетащите команды из панели команд в область программы</li>
+                        <li>Укажите количество клеток для команд движения (по умолчанию 1)</li>
                         <li>Расположите команды в правильном порядке</li>
                         <li>Нажмите кнопку "Запуск программы" для выполнения программы</li>
                     </ol>
@@ -541,12 +569,11 @@
                 
                 <div class="tutorial-section">
                     <h3>Пример программы</h3>
-                    <p>Пример программы для перемещения робота к врагу и атаки:</p>
+                    <p>Пример программы для перемещения робота к монете и атаки врага:</p>
                     <div class="code-example">
-                        1. Идти вперед<br>
-                        2. Идти вперед<br>
-                        3. Идти вправо<br>
-                        4. Атаковать ближайшего врага
+                        1. Идти вперед (3 клетки)<br>
+                        2. Идти вправо (2 клетки)<br>
+                        3. Атаковать ближайшего врага
                     </div>
                 </div>
                 
@@ -557,8 +584,7 @@
                         <li>Учитывайте препятствия на пути</li>
                         <li>Помните, что команда атаки работает только если враг в радиусе атаки</li>
                         <li>Используйте кнопку "Сброс программы" для очистки программы</li>
-                        <li>Если программа не работает как ожидалось, проверьте порядок команд</li>
-                        <li>Игровое поле большое (100x100 клеток), камера будет следовать за роботом</li>
+                        <li>Если программа не работает как ожидалось, проверьте порядок команд и количество клеток</li>
                     </ul>
                 </div>
             </div>
@@ -570,14 +596,9 @@
                 Уровень: <span id="current-level">1</span>
             </div>
             <div class="ui-panel">
-                Задание: <span id="current-task">Дойти до цели</span>
+                Задание: <span id="current-task">Собрать монеты</span>
             </div>
             <button class="button" id="game-back-btn">← Назад</button>
-        </div>
-        
-        <!-- Информация о камере -->
-        <div id="camera-info" class="camera-info hidden">
-            Камера: X:<span id="camera-x">0</span>, Y:<span id="camera-y">0</span>
         </div>
         
         <!-- Область программирования -->
@@ -607,7 +628,7 @@
         <!-- Результат игры -->
         <div id="game-result" class="game-result hidden">
             <h2 id="result-title">УРОВЕНЬ ПРОЙДЕН!</h2>
-            <p id="result-message">Поздравляем! Вы успешно запрограммировали робота.</p>
+            <p id="result-message">Поздравляем! Вы успешно собрали все монеты.</p>
             <button class="button" id="next-level-btn">Следующий уровень</button>
             <button class="button" id="levels-menu-btn">К выбору уровней</button>
         </div>
@@ -615,21 +636,24 @@
         <!-- Результат неудачи -->
         <div id="game-fail" class="game-result hidden">
             <h2 id="fail-title">ПОПРОБУЙТЕ СНОВА</h2>
-            <p id="fail-message">Робот не достиг цели. Попробуйте другую программу.</p>
+            <p id="fail-message">Робот не собрал все монеты. Попробуйте другую программу.</p>
             <button class="button" id="retry-level-btn">Повторить уровень</button>
             <button class="button" id="fail-levels-menu-btn">К выбору уровней</button>
+        </div>
+        
+        <!-- Сообщение о столкновении с врагом -->
+        <div id="enemy-collision" class="game-result hidden">
+            <h2 id="enemy-title">СТОЛКНОВЕНИЕ С ВРАГОМ!</h2>
+            <p id="enemy-message">Робот столкнулся с врагом и был уничтожен.</p>
+            <button class="button" id="retry-enemy-btn">Повторить уровень</button>
+            <button class="button" id="enemy-levels-menu-btn">К выбору уровней</button>
         </div>
     </div>
 
     <script>
         // Константы игры
-        const SCREEN_WIDTH = 1200;
-        const SCREEN_HEIGHT = 800;
-        const GRID_SIZE = 80;
-        const GRID_WIDTH = 100; // Увеличили размер поля до 100x100
-        const GRID_HEIGHT = 100;
-        const VISIBLE_WIDTH = Math.floor(SCREEN_WIDTH / GRID_SIZE);
-        const VISIBLE_HEIGHT = Math.floor((SCREEN_HEIGHT - 350) / GRID_SIZE);
+        const GRID_WIDTH = 24;
+        const GRID_HEIGHT = 24;
 
         // Цвета в средневековом стиле
         const COLORS = {
@@ -637,10 +661,20 @@
             GRID: 'rgba(141, 110, 99, 0.3)',
             ROBOT: '#f5e8c8',
             ENEMY: '#ef5350',
-            TARGET: '#4caf50',
+            COIN: '#ffd54f',
             OBSTACLE: '#6d4c41',
             TEXT: '#f5e8c8'
         };
+
+        // Текстуры персонажей
+        const textures = {
+            robot: new Image(),
+            enemy: new Image()
+        };
+
+        // Загрузка текстур
+        textures.robot.src = 'white_guy.png';
+        textures.enemy.src = 'red_guy.png';
 
         // Игровое состояние
         let gameState = {
@@ -649,9 +683,9 @@
             levels: [
                 {
                     title: "Движение вперед",
-                    description: "Переместите робота к цели, используя команду 'Идти вперед'",
+                    description: "Соберите монету, используя команду 'Идти вперед'",
                     robot: {x: 2, y: 4},
-                    target: {x: 2, y: 1},
+                    coins: [{x: 2, y: 1}],
                     enemies: [],
                     obstacles: [],
                     program: [],
@@ -660,9 +694,9 @@
                 },
                 {
                     title: "Обход препятствия",
-                    description: "Обойдите препятствие, чтобы добраться до цели",
+                    description: "Обойдите препятствие, чтобы собрать монету",
                     robot: {x: 1, y: 4},
-                    target: {x: 5, y: 4},
+                    coins: [{x: 5, y: 4}],
                     enemies: [],
                     obstacles: [{x: 3, y: 4}],
                     program: [],
@@ -673,7 +707,7 @@
                     title: "Движение в разных направлениях",
                     description: "Используйте команды движения в разных направлениях",
                     robot: {x: 1, y: 1},
-                    target: {x: 5, y: 5},
+                    coins: [{x: 5, y: 5}],
                     enemies: [],
                     obstacles: [],
                     program: [],
@@ -682,9 +716,9 @@
                 },
                 {
                     title: "Первая атака",
-                    description: "Атакуйте врага, чтобы очистить путь к цели",
+                    description: "Атакуйте врага, чтобы очистить путь к монете",
                     robot: {x: 1, y: 3},
-                    target: {x: 5, y: 3},
+                    coins: [{x: 5, y: 3}],
                     enemies: [{x: 3, y: 3}],
                     obstacles: [],
                     program: [],
@@ -693,9 +727,9 @@
                 },
                 {
                     title: "Комбинированное движение",
-                    description: "Сочетайте разные команды движения для достижения цели",
+                    description: "Сочетайте разные команды движения для сбора монеты",
                     robot: {x: 1, y: 5},
-                    target: {x: 7, y: 1},
+                    coins: [{x: 7, y: 1}],
                     enemies: [],
                     obstacles: [{x: 3, y: 3}, {x: 4, y: 4}],
                     program: [],
@@ -704,9 +738,9 @@
                 },
                 {
                     title: "Множественные враги",
-                    description: "Уничтожьте всех врагов на пути к цели",
+                    description: "Уничтожьте всех врагов на пути к монете",
                     robot: {x: 1, y: 3},
-                    target: {x: 7, y: 3},
+                    coins: [{x: 7, y: 3}],
                     enemies: [{x: 3, y: 3}, {x: 5, y: 3}],
                     obstacles: [],
                     program: [],
@@ -715,16 +749,16 @@
                 },
                 {
                     title: "Лабиринт",
-                    description: "Найдите путь через лабиринт к цели",
+                    description: "Найдите путь через лабиринт к монете",
                     robot: {x: 1, y: 1},
-                    target: {x: 7, y: 5},
+                    coins: [{x: 7, y: 5}],
                     enemies: [],
                     obstacles: [
                         {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1},
-                        {x: 1, y: 2}, {x: 3, y: 2}, {x: 5, y: 2}, {x: 7, y: 2},
+                        {x: 1, y: 2}, {x: 5, y: 2}, {x: 7, y: 2},
                         {x: 1, y: 3}, {x: 3, y: 3}, {x: 5, y: 3}, {x: 7, y: 3},
-                        {x: 1, y: 4}, {x: 3, y: 4}, {x: 5, y: 4}, {x: 7, y: 4},
-                        {x: 1, y: 5}, {x: 7, y: 5}
+                        {x: 1, y: 4}, {x: 3, y: 4},
+                        {x: 3, y: 5}, {x: 4, y: 5}, {x: 5, y: 5}, {x: 6, y: 5}
                     ],
                     program: [],
                     completed: false,
@@ -734,18 +768,18 @@
                     title: "Тактическая атака",
                     description: "Подойдите к врагу с правильной стороны для атаки",
                     robot: {x: 1, y: 3},
-                    target: {x: 7, y: 3},
+                    coins: [{x: 7, y: 3}],
                     enemies: [{x: 4, y: 3}],
-                    obstacles: [{x: 4, y: 2}, {x: 4, y: 4}],
+                    obstacles: [{x: 3, y: 3}, {x: 4, y: 2}, {x: 4, y: 4}],
                     program: [],
                     completed: false,
                     unlocked: false
                 },
                 {
                     title: "Сложный маршрут",
-                    description: "Составьте сложную программу для достижения цели",
+                    description: "Составьте сложную программу для сбора монеты",
                     robot: {x: 1, y: 5},
-                    target: {x: 7, y: 1},
+                    coins: [{x: 7, y: 1}],
                     enemies: [{x: 3, y: 3}, {x: 5, y: 3}],
                     obstacles: [
                         {x: 2, y: 2}, {x: 2, y: 3}, {x: 2, y: 4},
@@ -760,14 +794,14 @@
                     title: "Финальное испытание",
                     description: "Примените все полученные навыки в сложном уровне",
                     robot: {x: 1, y: 1},
-                    target: {x: 9, y: 5},
-                    enemies: [{x: 3, y: 2}, {x: 5, y: 3}, {x: 7, y: 4}],
+                    coins: [{x: 9, y: 5}],
+                    enemies: [{x: 3, y: 2}, {x: 5, y: 3}, {x: 7, y: 3}],
                     obstacles: [
-                        {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1}, {x: 7, y: 1}, {x: 8, y: 1},
+                        {x: 3, y: 1}, {x: 4, y: 1}, {x: 5, y: 1}, {x: 6, y: 1}, {x: 7, y: 1}, {x: 8, y: 1},
                         {x: 1, y: 2}, {x: 4, y: 2}, {x: 6, y: 2}, {x: 8, y: 2}, {x: 9, y: 2},
                         {x: 1, y: 3}, {x: 2, y: 3}, {x: 4, y: 3}, {x: 6, y: 3}, {x: 8, y: 3},
-                        {x: 1, y: 4}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 6, y: 4}, {x: 8, y: 4}, {x: 9, y: 4},
-                        {x: 1, y: 5}, {x: 3, y: 5}, {x: 5, y: 5}, {x: 7, y: 5}, {x: 8, y: 5}
+                        {x: 1, y: 4}, {x: 2, y: 4}, {x: 3, y: 4}, {x: 4, y: 4}, {x: 6, y: 4}, {x: 8, y: 4},
+                        {x: 1, y: 5}, {x: 3, y: 5}, {x: 8, y: 5}
                     ],
                     program: [],
                     completed: false,
@@ -781,16 +815,9 @@
             gameResult: null,
             draggedBlock: null,
             draggedBlockIndex: null,
-            camera: { x: 0, y: 0 },
-            attackAnimation: {
-                active: false,
-                frame: 0,
-                totalFrames: 10,
-                x: 0,
-                y: 0,
-                duration: 800, // Длительность анимации в мс
-                startTime: 0
-            }
+            levelOffset: {x: 0, y: 0},
+            currentCommandSteps: 0, // Текущее количество выполненных шагов команды
+            totalCommandSteps: 0    // Общее количество шагов команды
         };
 
         // Получение элементов DOM
@@ -825,7 +852,11 @@
             
             // Неудача
             retryLevel: document.getElementById('retry-level-btn'),
-            failLevelsMenu: document.getElementById('fail-levels-menu-btn')
+            failLevelsMenu: document.getElementById('fail-levels-menu-btn'),
+            
+            // Столкновение с врагом
+            retryEnemy: document.getElementById('retry-enemy-btn'),
+            enemyLevelsMenu: document.getElementById('enemy-levels-menu-btn')
         };
 
         // UI элементы
@@ -841,9 +872,14 @@
         const gameFailElement = document.getElementById('game-fail');
         const failTitle = document.getElementById('fail-title');
         const failMessage = document.getElementById('fail-message');
-        const cameraInfo = document.getElementById('camera-info');
-        const cameraX = document.getElementById('camera-x');
-        const cameraY = document.getElementById('camera-y');
+        const enemyCollisionElement = document.getElementById('enemy-collision');
+        const enemyTitle = document.getElementById('enemy-title');
+        const enemyMessage = document.getElementById('enemy-message');
+
+        // Переменные для динамического размера
+        let gridSize;
+        let gameAreaHeight;
+        let offsetX, offsetY;
 
         // Инициализация игры
         function init() {
@@ -853,8 +889,34 @@
             // Настройка перетаскивания команд
             setupDragAndDrop();
             
+            // Настройка обработчика изменения размера окна
+            window.addEventListener('resize', handleResize);
+            
+            // Инициализация размеров
+            handleResize();
+            
             // Запуск игрового цикла
             gameLoop();
+        }
+
+        // Обработка изменения размера окна
+        function handleResize() {
+            // Установка размера canvas
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Вычисление размера игровой области
+            gameAreaHeight = window.innerHeight - programmingArea.offsetHeight;
+            
+            // Вычисление размера клетки
+            gridSize = Math.min(
+                window.innerWidth / GRID_WIDTH,
+                gameAreaHeight / GRID_HEIGHT
+            );
+            
+            // Вычисление отступов для центрирования
+            offsetX = (window.innerWidth - GRID_WIDTH * gridSize) / 2;
+            offsetY = (gameAreaHeight - GRID_HEIGHT * gridSize) / 2;
         }
 
         // Настройка обработчиков кнопок
@@ -888,6 +950,13 @@
                 gameFailElement.classList.add('hidden');
                 showScreen('levels');
             });
+            
+            // Столкновение с врагом
+            buttons.retryEnemy.addEventListener('click', retryLevel);
+            buttons.enemyLevelsMenu.addEventListener('click', () => {
+                enemyCollisionElement.classList.add('hidden');
+                showScreen('levels');
+            });
         }
 
         // Настройка перетаскивания команд
@@ -896,7 +965,11 @@
             
             commands.forEach(command => {
                 command.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', command.getAttribute('data-command'));
+                    const commandData = {
+                        command: command.getAttribute('data-command'),
+                        steps: 1 // По умолчанию 1 шаг
+                    };
+                    e.dataTransfer.setData('text/plain', JSON.stringify(commandData));
                     e.dataTransfer.setData('source', 'panel');
                 });
             });
@@ -937,14 +1010,17 @@
             programmingArea.classList.add('hidden');
             gameResultElement.classList.add('hidden');
             gameFailElement.classList.add('hidden');
-            cameraInfo.classList.add('hidden');
+            enemyCollisionElement.classList.add('hidden');
+            
+            // Убрать блокировку взаимодействия
+            gameUI.classList.remove('blocked');
+            programmingArea.classList.remove('blocked');
             
             // Показать выбранный экран
             if (screenName === 'game') {
                 // Игровой экран рисуется на canvas
                 gameUI.classList.remove('hidden');
                 programmingArea.classList.remove('hidden');
-                cameraInfo.classList.remove('hidden');
                 setupProgramSlots();
             } else if (screens[screenName]) {
                 screens[screenName].classList.remove('hidden');
@@ -994,8 +1070,8 @@
             // Сброс состояния игры
             resetLevelState(levelIndex);
             
-            // Центрируем камеру на роботе
-            centerCameraOnRobot();
+            // Вычисление смещения для центрирования уровня
+            calculateLevelOffset(level);
             
             // Обновление UI
             currentLevelElement.textContent = levelIndex + 1;
@@ -1005,18 +1081,40 @@
             setupProgramSlots();
         }
 
-        // Центрировать камеру на роботе
-        function centerCameraOnRobot() {
-            const level = gameState.levels[gameState.currentLevel];
-            gameState.camera.x = Math.max(0, Math.min(level.robot.x - Math.floor(VISIBLE_WIDTH / 2), GRID_WIDTH - VISIBLE_WIDTH));
-            gameState.camera.y = Math.max(0, Math.min(level.robot.y - Math.floor(VISIBLE_HEIGHT / 2), GRID_HEIGHT - VISIBLE_HEIGHT));
-            updateCameraInfo();
-        }
-
-        // Обновить информацию о камере
-        function updateCameraInfo() {
-            cameraX.textContent = gameState.camera.x;
-            cameraY.textContent = gameState.camera.y;
+        // Вычислить смещение для центрирования уровня
+        function calculateLevelOffset(level) {
+            // Собираем все объекты уровня
+            const objects = [
+                level.robot,
+                ...level.coins,
+                ...level.enemies,
+                ...level.obstacles
+            ];
+            
+            // Находим минимальные и максимальные координаты
+            let minX = GRID_WIDTH, maxX = 0;
+            let minY = GRID_HEIGHT, maxY = 0;
+            
+            objects.forEach(obj => {
+                minX = Math.min(minX, obj.x);
+                maxX = Math.max(maxX, obj.x);
+                minY = Math.min(minY, obj.y);
+                maxY = Math.max(maxY, obj.y);
+            });
+            
+            // Вычисляем центр уровня
+            const levelCenterX = (minX + maxX) / 2;
+            const levelCenterY = (minY + maxY) / 2;
+            
+            // Центр игрового поля
+            const gridCenterX = GRID_WIDTH / 2;
+            const gridCenterY = GRID_HEIGHT / 2;
+            
+            // Вычисляем смещение для центрирования уровня
+            gameState.levelOffset = {
+                x: gridCenterX - levelCenterX,
+                y: gridCenterY - levelCenterY
+            };
         }
 
         // Сброс состояния уровня
@@ -1026,6 +1124,7 @@
             
             // Восстановление начального состояния уровня
             level.robot = {...initialLevel.robot};
+            level.coins = [...initialLevel.coins];
             level.enemies = [...initialLevel.enemies];
             level.obstacles = [...initialLevel.obstacles];
             
@@ -1034,13 +1133,14 @@
             gameState.currentStep = 0;
             gameState.gameOver = false;
             gameState.gameResult = null;
-            gameState.attackAnimation.active = false;
+            gameState.currentCommandSteps = 0;
+            gameState.totalCommandSteps = 0;
         }
 
         // Начальные состояния уровней
         const initialLevelStates = JSON.parse(JSON.stringify(gameState.levels));
 
-        // Настройка слots программы
+        // Настройка слотов программы
         function setupProgramSlots() {
             programSlots.innerHTML = '';
             
@@ -1065,14 +1165,14 @@
                     e.preventDefault();
                     slot.classList.remove('highlight');
                     
-                    const command = e.dataTransfer.getData('text/plain');
+                    const commandData = JSON.parse(e.dataTransfer.getData('text/plain'));
                     const source = e.dataTransfer.getData('source');
                     const targetIndex = parseInt(slot.dataset.index);
                     
                     if (source === 'panel') {
                         // Добавляем новую команду из панели
                         if (!gameState.program[targetIndex]) {
-                            gameState.program[targetIndex] = command;
+                            gameState.program[targetIndex] = commandData;
                         }
                     } else if (source === 'slot') {
                         // Перемещаем блок между слотами
@@ -1098,24 +1198,59 @@
             const slots = document.querySelectorAll('.program-slot');
             
             slots.forEach((slot, index) => {
-                const command = gameState.program[index];
+                const commandData = gameState.program[index];
                 
                 // Очищаем слот
                 slot.innerHTML = '';
                 slot.textContent = index + 1;
                 slot.classList.remove('filled');
                 
-                if (command) {
+                if (commandData) {
                     // Создаем блок команды
                     const block = document.createElement('div');
                     block.className = 'program-block';
-                    block.textContent = getCommandText(command);
+                    
+                    // Текст команды
+                    const commandText = document.createElement('div');
+                    commandText.textContent = getCommandText(commandData);
+                    block.appendChild(commandText);
+                    
+                    // Добавляем ввод количества шагов для команд движения
+                    if (commandData.command !== 'attack') {
+                        const stepsContainer = document.createElement('div');
+                        stepsContainer.className = 'steps-input-container';
+                        
+                        const stepsInput = document.createElement('input');
+                        stepsInput.type = 'number';
+                        stepsInput.className = 'steps-input';
+                        stepsInput.min = 1;
+                        stepsInput.max = 99;
+                        stepsInput.value = commandData.steps;
+                        stepsInput.addEventListener('change', (e) => {
+                            const value = parseInt(e.target.value);
+                            if (value >= 1 && value <= 99) {
+                                commandData.steps = value;
+                                updateProgramSlots();
+                            } else {
+                                e.target.value = commandData.steps;
+                            }
+                        });
+                        
+                        const stepsLabel = document.createElement('span');
+                        stepsLabel.className = 'steps-label';
+                        stepsLabel.textContent = 'клетки';
+                        
+                        stepsContainer.appendChild(stepsInput);
+                        stepsContainer.appendChild(stepsLabel);
+                        block.appendChild(stepsContainer);
+                    }
+                    
                     block.draggable = true;
                     block.dataset.index = index;
                     
                     // Обработчики для перетаскивания блоков
                     block.addEventListener('dragstart', (e) => {
-                        e.dataTransfer.setData('text/plain', command);
+                        e.dataTransfer.setData('text/plain', JSON.stringify(commandData));
                         e.dataTransfer.setData('source', 'slot');
                         gameState.draggedBlockIndex = index;
                     });
@@ -1138,7 +1273,7 @@
         }
 
         // Получить текст команды
-        function getCommandText(command) {
+        function getCommandText(commandData) {
             const commandTexts = {
                 'forward': 'Вперед',
                 'backward': 'Назад',
@@ -1147,7 +1282,7 @@
                 'attack': 'Атака'
             };
             
-            return commandTexts[command] || command;
+            return commandTexts[commandData.command] || commandData.command;
         }
 
         // Запуск программы
@@ -1156,21 +1291,42 @@
             
             gameState.isRunning = true;
             gameState.currentStep = 0;
+            gameState.currentCommandSteps = 0;
+            gameState.totalCommandSteps = 0;
             executeNextStep();
         }
 
         // Выполнить следующий шаг программы
         function executeNextStep() {
-            if (!gameState.isRunning || gameState.currentStep >= gameState.program.length) {
+            if (!gameState.isRunning) return;
+            
+            // Если текущая команда движения еще не завершена
+            if (gameState.currentCommandSteps < gameState.totalCommandSteps) {
+                performMovementStep();
+                gameState.currentCommandSteps++;
+                
+                // Если команда движения завершена
+                if (gameState.currentCommandSteps >= gameState.totalCommandSteps) {
+                    gameState.currentStep++;
+                    gameState.currentCommandSteps = 0;
+                    gameState.totalCommandSteps = 0;
+                }
+                
+                // Задержка перед следующим шагом для визуализации
+                setTimeout(executeNextStep, 300);
+                return;
+            }
+            
+            // Если программа завершена
+            if (gameState.currentStep >= gameState.program.length) {
                 gameState.isRunning = false;
                 checkGameResult();
                 return;
             }
             
-            const command = gameState.program[gameState.currentStep];
-            const level = gameState.levels[gameState.currentLevel];
+            const commandData = gameState.program[gameState.currentStep];
             
-            if (!command) {
+            if (!commandData) {
                 // Пропускаем пустые команды
                 gameState.currentStep++;
                 setTimeout(executeNextStep, 100);
@@ -1178,114 +1334,71 @@
             }
             
             // Выполнение команды
-            switch (command) {
+            if (commandData.command === 'attack') {
+                // Атаковать ближайшего врага в радиусе 1 клетки
+                const level = gameState.levels[gameState.currentLevel];
+                const enemyIndex = level.enemies.findIndex(enemy => 
+                    Math.abs(enemy.x - level.robot.x) <= 1 && 
+                    Math.abs(enemy.y - level.robot.y) <= 1
+                );
+                
+                if (enemyIndex !== -1) {
+                    level.enemies.splice(enemyIndex, 1);
+                }
+                
+                gameState.currentStep++;
+                setTimeout(executeNextStep, 500);
+            } else {
+                // Команда движения - начинаем последовательное выполнение
+                gameState.totalCommandSteps = commandData.steps;
+                gameState.currentCommandSteps = 0;
+                executeNextStep();
+            }
+        }
+
+        // Выполнить один шаг движения
+        function performMovementStep() {
+            const commandData = gameState.program[gameState.currentStep];
+            const level = gameState.levels[gameState.currentLevel];
+            
+            // Выполнение одного шага движения
+            switch (commandData.command) {
                 case 'forward':
                     if (level.robot.y > 0 && !isObstacle(level.robot.x, level.robot.y - 1)) {
                         level.robot.y--;
-                        updateCamera();
                     }
                     break;
                 case 'backward':
                     if (level.robot.y < GRID_HEIGHT - 1 && !isObstacle(level.robot.x, level.robot.y + 1)) {
                         level.robot.y++;
-                        updateCamera();
                     }
                     break;
                 case 'right':
                     if (level.robot.x < GRID_WIDTH - 1 && !isObstacle(level.robot.x + 1, level.robot.y)) {
                         level.robot.x++;
-                        updateCamera();
                     }
                     break;
                 case 'left':
                     if (level.robot.x > 0 && !isObstacle(level.robot.x - 1, level.robot.y)) {
                         level.robot.x--;
-                        updateCamera();
-                    }
-                    break;
-                case 'attack':
-                    // Атаковать ближайшего врага в радиусе 1 клетки
-                    const enemyIndex = level.enemies.findIndex(enemy => 
-                        Math.abs(enemy.x - level.robot.x) <= 1 && 
-                        Math.abs(enemy.y - level.robot.y) <= 1
-                    );
-                    
-                    if (enemyIndex !== -1) {
-                        // Запускаем анимацию атаки
-                        const enemy = level.enemies[enemyIndex];
-                        startAttackAnimation(
-                            level.robot.x, 
-                            level.robot.y, 
-                            enemy.x, 
-                            enemy.y,
-                            () => {
-                                // После завершения анимации удаляем врага
-                                level.enemies.splice(enemyIndex, 1);
-                                gameState.currentStep++;
-                                setTimeout(executeNextStep, 100);
-                            }
-                        );
-                        // Не увеличиваем currentStep здесь - это сделается в колбэке анимации
-                        return;
                     }
                     break;
             }
             
-            gameState.currentStep++;
+            // Проверка сбора монеты
+            checkCoinCollection();
             
-            // Задержка перед следующим шагом для визуализации
-            setTimeout(executeNextStep, 500);
-        }
-
-        // Запуск анимации атаки
-        function startAttackAnimation(robotX, robotY, enemyX, enemyY, onComplete) {
-            gameState.attackAnimation.active = true;
-            gameState.attackAnimation.frame = 0;
-            gameState.attackAnimation.x = (robotX + enemyX) / 2;
-            gameState.attackAnimation.y = (robotY + enemyY) / 2;
-            gameState.attackAnimation.startTime = Date.now();
-            gameState.attackAnimation.onComplete = onComplete;
-        }
-
-        // Обновить анимацию атаки
-        function updateAttackAnimation() {
-            if (!gameState.attackAnimation.active) return;
-            
-            const currentTime = Date.now();
-            const elapsed = currentTime - gameState.attackAnimation.startTime;
-            const progress = Math.min(elapsed / gameState.attackAnimation.duration, 1);
-            
-            // Обновляем кадр анимации
-            gameState.attackAnimation.frame = Math.floor(progress * gameState.attackAnimation.totalFrames);
-            
-            // Если анимация завершена
-            if (progress >= 1) {
-                gameState.attackAnimation.active = false;
-                if (gameState.attackAnimation.onComplete) {
-                    gameState.attackAnimation.onComplete();
-                }
+            // Проверка столкновения с врагом
+            if (isOnEnemy(level.robot.x, level.robot.y)) {
+                gameState.isRunning = false;
+                enemyTitle.textContent = 'СТОЛКНОВЕНИЕ С ВРАГОМ!';
+                enemyMessage.textContent = 'Робот столкнулся с врагом и был уничтожен.';
+                enemyCollisionElement.classList.remove('hidden');
+                // Блокируем взаимодействие с игровым полем
+                gameUI.classList.add('blocked');
+                programmingArea.classList.add('blocked');
+                return;
             }
-        }
-
-        // Обновить камеру
-        function updateCamera() {
-            const level = gameState.levels[gameState.currentLevel];
-            
-            // Центрируем камеру на роботе, если он близко к краю
-            const margin = 3;
-            if (level.robot.x - gameState.camera.x < margin) {
-                gameState.camera.x = Math.max(0, level.robot.x - margin);
-            } else if (level.robot.x - gameState.camera.x > VISIBLE_WIDTH - margin - 1) {
-                gameState.camera.x = Math.min(GRID_WIDTH - VISIBLE_WIDTH, level.robot.x - (VISIBLE_WIDTH - margin - 1));
-            }
-            
-            if (level.robot.y - gameState.camera.y < margin) {
-                gameState.camera.y = Math.max(0, level.robot.y - margin);
-            } else if (level.robot.y - gameState.camera.y > VISIBLE_HEIGHT - margin - 1) {
-                gameState.camera.y = Math.min(GRID_HEIGHT - VISIBLE_HEIGHT, level.robot.y - (VISIBLE_HEIGHT - margin - 1));
-            }
-            
-            updateCameraInfo();
         }
 
         // Проверить, является ли клетка препятствием
@@ -1294,12 +1407,33 @@
             return level.obstacles.some(obstacle => obstacle.x === x && obstacle.y === y);
         }
 
+        // Проверить, находится ли робот на клетке с врагом
+        function isOnEnemy(x, y) {
+            const level = gameState.levels[gameState.currentLevel];
+            return level.enemies.some(enemy => enemy.x === x && enemy.y === y);
+        }
+
+        // Проверить сбор монет
+        function checkCoinCollection() {
+            const level = gameState.levels[gameState.currentLevel];
+            const coinIndex = level.coins.findIndex(coin => 
+                coin.x === level.robot.x && coin.y === level.robot.y
+            );
+            
+            if (coinIndex !== -1) {
+                level.coins.splice(coinIndex, 1);
+            }
+        }
+
         // Проверить результат игры
         function checkGameResult() {
             const level = gameState.levels[gameState.currentLevel];
             
-            // Проверка достижения цели
-            if (level.robot.x === level.target.x && level.robot.y === level.target.y) {
+            // Проверка сбора всех монет и уничтожения всех врагов
+            const allCoinsCollected = level.coins.length === 0;
+            const allEnemiesDefeated = level.enemies.length === 0;
+            
+            if (allCoinsCollected && allEnemiesDefeated) {
                 gameState.gameResult = 'win';
                 showGameResult(true);
                 
@@ -1310,21 +1444,31 @@
                 if (gameState.currentLevel < gameState.levels.length - 1) {
                     gameState.levels[gameState.currentLevel + 1].unlocked = true;
                 }
+            } else if (allCoinsCollected && !allEnemiesDefeated) {
+                // Все монеты собраны, но враги остались
+                gameState.gameResult = 'lose';
+                failTitle.textContent = 'ВРАГИ НЕ УНИЧТОЖЕНЫ!';
+                failMessage.textContent = 'Робот собрал все монеты, но не все враги уничтожены.';
+                showGameResult(false);
             } else {
                 gameState.gameResult = 'lose';
+                failTitle.textContent = 'МОНЕТЫ НЕ СОБРАНЫ!';
+                failMessage.textContent = 'Робот не собрал все монеты. Попробуйте другую программу.';
                 showGameResult(false);
             }
         }
 
         // Показать результат игры
         function showGameResult(isWin) {
+            // Блокируем взаимодействие с игровым полем
+            gameUI.classList.add('blocked');
+            programmingArea.classList.add('blocked');
+            
             if (isWin) {
                 resultTitle.textContent = 'УРОВЕНЬ ПРОЙДЕН!';
-                resultMessage.textContent = 'Поздравляем! Вы успешно запрограммировали робота.';
+                resultMessage.textContent = 'Поздравляем! Вы успешно собрали все монеты.';
                 gameResultElement.classList.remove('hidden');
             } else {
-                failTitle.textContent = 'ПОПРОБУЙТЕ СНОВА';
-                failMessage.textContent = 'Робот не достиг цели. Попробуйте другую программу.';
                 gameFailElement.classList.remove('hidden');
             }
         }
@@ -1332,9 +1476,12 @@
         // Повторить уровень
         function retryLevel() {
             gameFailElement.classList.add('hidden');
+            enemyCollisionElement.classList.add('hidden');
             resetLevelState(gameState.currentLevel);
-            centerCameraOnRobot();
             updateProgramSlots();
+            // Разблокируем взаимодействие с игровым полем
+            gameUI.classList.remove('blocked');
+            programmingArea.classList.remove('blocked');
         }
 
         // Следующий уровень
@@ -1359,6 +1506,7 @@
             const level = gameState.levels[gameState.currentLevel];
             // Восстановление начального состояния уровня
             level.robot = {...initialLevelStates[gameState.currentLevel].robot};
+            level.coins = [...initialLevelStates[gameState.currentLevel].coins];
             level.enemies = [...initialLevelStates[gameState.currentLevel].enemies];
             level.obstacles = [...initialLevelStates[gameState.currentLevel].obstacles];
             
@@ -1367,9 +1515,9 @@
             gameState.currentStep = 0;
             gameState.gameOver = false;
             gameState.gameResult = null;
-            gameState.attackAnimation.active = false;
+            gameState.currentCommandSteps = 0;
+            gameState.totalCommandSteps = 0;
             
-            centerCameraOnRobot();
             updateProgramSlots();
         }
 
@@ -1377,212 +1525,154 @@
         function renderGame() {
             // Очистка canvas
             ctx.fillStyle = COLORS.BACKGROUND;
-            ctx.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 350);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             const level = gameState.levels[gameState.currentLevel];
-            const camera = gameState.camera;
             
-            // Отрисовка сетки только для видимой области
+            // Отрисовка сетки
             ctx.strokeStyle = COLORS.GRID;
             ctx.lineWidth = 1;
             
-            for (let x = camera.x; x <= camera.x + VISIBLE_WIDTH; x++) {
-                if (x >= 0 && x <= GRID_WIDTH) {
-                    const screenX = (x - camera.x) * GRID_SIZE;
-                    ctx.beginPath();
-                    ctx.moveTo(screenX, 0);
-                    ctx.lineTo(screenX, (SCREEN_HEIGHT - 350));
-                    ctx.stroke();
-                }
+            for (let x = 0; x <= GRID_WIDTH; x++) {
+                const screenX = offsetX + x * gridSize;
+                ctx.beginPath();
+                ctx.moveTo(screenX, offsetY);
+                ctx.lineTo(screenX, offsetY + GRID_HEIGHT * gridSize);
+                ctx.stroke();
             }
             
-            for (let y = camera.y; y <= camera.y + VISIBLE_HEIGHT; y++) {
-                if (y >= 0 && y <= GRID_HEIGHT) {
-                    const screenY = (y - camera.y) * GRID_SIZE;
-                    ctx.beginPath();
-                    ctx.moveTo(0, screenY);
-                    ctx.lineTo(SCREEN_WIDTH, screenY);
-                    ctx.stroke();
-                }
+            for (let y = 0; y <= GRID_HEIGHT; y++) {
+                const screenY = offsetY + y * gridSize;
+                ctx.beginPath();
+                ctx.moveTo(offsetX, screenY);
+                ctx.lineTo(offsetX + GRID_WIDTH * gridSize, screenY);
+                ctx.stroke();
             }
             
-            // Отрисовка препятствий в видимой области
+            // Отрисовка препятствий
             ctx.fillStyle = COLORS.OBSTACLE;
             level.obstacles.forEach(obstacle => {
-                if (obstacle.x >= camera.x && obstacle.x < camera.x + VISIBLE_WIDTH &&
-                    obstacle.y >= camera.y && obstacle.y < camera.y + VISIBLE_HEIGHT) {
-                    const screenX = (obstacle.x - camera.x) * GRID_SIZE;
-                    const screenY = (obstacle.y - camera.y) * GRID_SIZE;
-                    ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
-                }
+                const screenX = offsetX + (obstacle.x + gameState.levelOffset.x) * gridSize;
+                const screenY = offsetY + (obstacle.y + gameState.levelOffset.y) * gridSize;
+                ctx.fillRect(screenX, screenY, gridSize, gridSize);
             });
             
-            // Отрисовка цели в видимой области
-            if (level.target.x >= camera.x && level.target.x < camera.x + VISIBLE_WIDTH &&
-                level.target.y >= camera.y && level.target.y < camera.y + VISIBLE_HEIGHT) {
-                ctx.fillStyle = COLORS.TARGET;
-                const screenX = (level.target.x - camera.x) * GRID_SIZE;
-                const screenY = (level.target.y - camera.y) * GRID_SIZE;
-                ctx.fillRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(screenX, screenY, GRID_SIZE, GRID_SIZE);
-            }
-            
-            // Отрисовка врагов в видимой области
-            ctx.fillStyle = COLORS.ENEMY;
-            level.enemies.forEach(enemy => {
-                if (enemy.x >= camera.x && enemy.x < camera.x + VISIBLE_WIDTH &&
-                    enemy.y >= camera.y && enemy.y < camera.y + VISIBLE_HEIGHT) {
-                    const screenX = (enemy.x - camera.x) * GRID_SIZE;
-                    const screenY = (enemy.y - camera.y) * GRID_SIZE;
-                    
-                    // Рисуем врага как красный круг
-                    ctx.beginPath();
-                    ctx.arc(
-                        screenX + GRID_SIZE / 2,
-                        screenY + GRID_SIZE / 2,
-                        GRID_SIZE / 2 - 5,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                    
-                    // Отображение радиуса атаки
-                    ctx.strokeStyle = 'rgba(239, 83, 80, 0.5)';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(
-                        screenX + GRID_SIZE / 2,
-                        screenY + GRID_SIZE / 2,
-                        GRID_SIZE * 1.5,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.stroke();
-                }
-            });
-            
-            // Отрисовка робота в видимой области
-            if (level.robot.x >= camera.x && level.robot.x < camera.x + VISIBLE_WIDTH &&
-                level.robot.y >= camera.y && level.robot.y < camera.y + VISIBLE_HEIGHT) {
-                const screenX = (level.robot.x - camera.x) * GRID_SIZE;
-                const screenY = (level.robot.y - camera.y) * GRID_SIZE;
+            // Отрисовка монет
+            level.coins.forEach(coin => {
+                const screenX = offsetX + (coin.x + gameState.levelOffset.x) * gridSize;
+                const screenY = offsetY + (coin.y + gameState.levelOffset.y) * gridSize;
                 
-                // Рисуем робота как белый круг
-                ctx.fillStyle = COLORS.ROBOT;
+                // Желтый кружок для монеты
+                ctx.fillStyle = COLORS.COIN;
                 ctx.beginPath();
                 ctx.arc(
-                    screenX + GRID_SIZE / 2,
-                    screenY + GRID_SIZE / 2,
-                    GRID_SIZE / 2 - 5,
+                    screenX + gridSize / 2,
+                    screenY + gridSize / 2,
+                    gridSize / 2 - 2,
                     0,
                     Math.PI * 2
                 );
                 ctx.fill();
+                
+                // Обводка монеты
+                ctx.strokeStyle = '#ffb300';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Значок доллара на монете
+                ctx.fillStyle = '#5d4037';
+                ctx.font = `bold ${gridSize / 2}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(
+                    '$',
+                    screenX + gridSize / 2,
+                    screenY + gridSize / 2
+                );
+            });
+            
+            // Отрисовка врагов
+            level.enemies.forEach(enemy => {
+                const screenX = offsetX + (enemy.x + gameState.levelOffset.x) * gridSize;
+                const screenY = offsetY + (enemy.y + gameState.levelOffset.y) * gridSize;
+                
+                // Используем текстуру врага с увеличением в 2 раза
+                if (textures.enemy.complete) {
+                    // Рисуем текстуру в 2 раза больше с центром в середине клетки
+                    const size = gridSize * 2;
+                    const offset = (size - gridSize) / 2;
+                    ctx.drawImage(textures.enemy, screenX - offset, screenY - offset, size, size);
+                } else {
+                    // Запасной вариант - цветной прямоугольник увеличенного размера
+                    ctx.fillStyle = COLORS.ENEMY;
+                    const size = gridSize * 1.5;
+                    const offset = (size - gridSize) / 2;
+                    ctx.fillRect(screenX - offset, screenY - offset, size, size);
+                }
+                
+                // Отображение радиуса атаки
+                ctx.strokeStyle = 'rgba(239, 83, 80, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(
+                    screenX + gridSize / 2,
+                    screenY + gridSize / 2,
+                    gridSize * 1.5,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.stroke();
+            });
+            
+            // Отрисовка робота
+            const robotX = offsetX + (level.robot.x + gameState.levelOffset.x) * gridSize;
+            const robotY = offsetY + (level.robot.y + gameState.levelOffset.y) * gridSize;
+            
+            // Используем текстуру робота с увеличением в 2 раза
+            if (textures.robot.complete) {
+                // Рисуем текстуру в 2 раза больше с центром в середине клетки
+                const size = gridSize * 2;
+                const offset = (size - gridSize) / 2;
+                ctx.drawImage(textures.robot, robotX - offset, robotY - offset, size, size);
+            } else {
+                // Запасной вариант - цветной прямоугольник увеличенного размера
+                ctx.fillStyle = COLORS.ROBOT;
+                const size = gridSize * 1.5;
+                const offset = (size - gridSize) / 2;
+                ctx.fillRect(robotX - offset, robotY - offset, size, size);
                 
                 // Добавление деталей роботу
                 ctx.fillStyle = '#5d4037';
-                ctx.beginPath();
-                ctx.arc(
-                    screenX + GRID_SIZE / 2,
-                    screenY + GRID_SIZE / 2,
-                    GRID_SIZE / 3,
-                    0,
-                    Math.PI * 2
+                const innerSize = size * 0.8;
+                const innerOffset = (size - innerSize) / 2;
+                ctx.fillRect(
+                    robotX - offset + innerOffset,
+                    robotY - offset + innerOffset,
+                    innerSize,
+                    innerSize
                 );
-                ctx.fill();
                 
                 // Глаза робота
                 ctx.fillStyle = '#4fc3f7';
-                ctx.beginPath();
-                ctx.arc(
-                    screenX + GRID_SIZE / 2 - 10,
-                    screenY + GRID_SIZE / 2 - 5,
-                    5,
-                    0,
-                    Math.PI * 2
+                const eyeSize = size * 0.15;
+                ctx.fillRect(
+                    robotX - offset + size * 0.2,
+                    robotY - offset + size * 0.3,
+                    eyeSize,
+                    eyeSize
                 );
-                ctx.fill();
-                
-                ctx.beginPath();
-                ctx.arc(
-                    screenX + GRID_SIZE / 2 + 10,
-                    screenY + GRID_SIZE / 2 - 5,
-                    5,
-                    0,
-                    Math.PI * 2
+                ctx.fillRect(
+                    robotX - offset + size * 0.65,
+                    robotY - offset + size * 0.3,
+                    eyeSize,
+                    eyeSize
                 );
-                ctx.fill();
-            }
-            
-            // Отрисовка анимации атаки
-            if (gameState.attackAnimation.active) {
-                const anim = gameState.attackAnimation;
-                if (anim.x >= camera.x && anim.x < camera.x + VISIBLE_WIDTH &&
-                    anim.y >= camera.y && anim.y < camera.y + VISIBLE_HEIGHT) {
-                    
-                    const screenX = (anim.x - camera.x) * GRID_SIZE;
-                    const screenY = (anim.y - camera.y) * GRID_SIZE;
-                    const size = GRID_SIZE * 1.25;
-                    
-                    // Рисуем анимацию атаки (в реальной игре здесь должны быть спрайты)
-                    ctx.fillStyle = `rgba(255, 255, 255, ${0.7 - (anim.frame / anim.totalFrames) * 0.5})`;
-                    ctx.strokeStyle = `rgba(239, 83, 80, ${0.9 - (anim.frame / anim.totalFrames) * 0.5})`;
-                    ctx.lineWidth = 4;
-                    
-                    // Внешний круг
-                    ctx.beginPath();
-                    ctx.arc(
-                        screenX + GRID_SIZE / 2,
-                        screenY + GRID_SIZE / 2,
-                        size / 2 + anim.frame * 2,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.stroke();
-                    
-                    // Внутренний круг
-                    ctx.beginPath();
-                    ctx.arc(
-                        screenX + GRID_SIZE / 2,
-                        screenY + GRID_SIZE / 2,
-                        size / 3 + anim.frame,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                    
-                    // Эффект взрыва
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.8 - (anim.frame / anim.totalFrames) * 0.7})`;
-                    ctx.lineWidth = 3;
-                    
-                    for (let i = 0; i < 8; i++) {
-                        const angle = (i / 8) * Math.PI * 2;
-                        const length = size / 4 + anim.frame * 3;
-                        
-                        ctx.beginPath();
-                        ctx.moveTo(
-                            screenX + GRID_SIZE / 2,
-                            screenY + GRID_SIZE / 2
-                        );
-                        ctx.lineTo(
-                            screenX + GRID_SIZE / 2 + Math.cos(angle) * length,
-                            screenY + GRID_SIZE / 2 + Math.sin(angle) * length
-                        );
-                        ctx.stroke();
-                    }
-                }
             }
         }
 
         // Игровой цикл
         function gameLoop() {
             if (gameState.currentScreen === 'game') {
-                // Обновляем анимацию атаки
-                updateAttackAnimation();
-                
-                // Рендерим игру
                 renderGame();
             }
             
