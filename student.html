@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Режим ученика - Программирование Робота</title>
     <style>
+        /* Стили из teacher.html + игровые стили */
         * {
             margin: 0;
             padding: 0;
@@ -20,7 +21,7 @@
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         
@@ -167,6 +168,53 @@
             justify-content: space-between;
             align-items: center;
         }
+        
+        /* Игровые стили */
+        #game-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #5d4037;
+            z-index: 1000;
+            display: none;
+        }
+        
+        #game-canvas {
+            width: 100%;
+            height: calc(100% - 200px);
+        }
+        
+        .game-programming-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: rgba(93, 64, 55, 0.9);
+            padding: 15px;
+            border-top: 3px solid #8d6e63;
+        }
+        
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .close-game {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(239, 83, 80, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1001;
+        }
     </style>
 </head>
 <body>
@@ -225,13 +273,35 @@
         </div>
     </div>
 
+    <!-- Игровой контейнер -->
+    <div id="game-container">
+        <button class="close-game" onclick="closeGame()">✕ Закрыть</button>
+        <canvas id="game-canvas"></canvas>
+        <div class="game-programming-area">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px; overflow-x: auto;">
+                <div class="button" data-command="forward">Вперед</div>
+                <div class="button" data-command="backward">Назад</div>
+                <div class="button" data-command="right">Вправо</div>
+                <div class="button" data-command="left">Влево</div>
+                <div class="button" data-command="attack">Атака</div>
+            </div>
+            <div id="game-program-slots" style="display: flex; gap: 10px; overflow-x: auto; height: 80px; padding: 10px; background: rgba(121, 85, 72, 0.7); border-radius: 5px;">
+                <!-- Слоты программы -->
+            </div>
+            <div class="game-controls">
+                <button class="button" onclick="runGameProgram()">Запуск</button>
+                <button class="button" onclick="resetGameProgram()">Сброс</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
         let currentStudentId = localStorage.getItem('studentId');
         let currentStudentName = localStorage.getItem('studentName');
         let currentLesson = null;
+        let currentGameState = null;
         
-        // Если ученик уже зарегистрирован, загружаем его уроки
         if (currentStudentId) {
             document.getElementById('student-name').value = currentStudentName;
             showTab('lessons');
@@ -255,7 +325,6 @@
                 return;
             }
             
-            // Создаем или получаем ученика
             if (!currentStudentId) {
                 fetch(`${API_BASE}/users`, {
                     method: 'POST',
@@ -301,7 +370,6 @@
         }
         
         function loadStudentLessons() {
-            // Загружаем все уроки и фильтруем те, где есть текущий ученик
             fetch(`${API_BASE}/lessons`)
                 .then(r => r.json())
                 .then(lessons => {
@@ -316,15 +384,15 @@
                             <div class="card">
                                 <h3>${lesson.title}</h3>
                                 <p>${lesson.description}</p>
+                                <p>Код: ${lesson.code}</p>
                                 <p>Монеты: ${studentData.coins}</p>
-                                <p>Пройдено уровней: ${studentData.completed_levels.length}/${lesson.levels.length}</p>
+                                <p>Пройдено: ${studentData.completed_levels.length}/${lesson.levels.length}</p>
                                 <button class="button" onclick="startGame('${lesson.id}')">Играть</button>
                                 <button class="button" onclick="viewShop('${lesson.id}')">Магазин</button>
                             </div>
                         `;
                     }).join('');
                     
-                    // Показываем статистику если есть уроки
                     if (studentLessons.length > 0) {
                         const studentData = studentLessons[0].students.find(s => s.student_id === currentStudentId);
                         document.getElementById('student-stats').style.display = 'flex';
@@ -332,6 +400,29 @@
                         document.getElementById('levels-count').textContent = studentData.completed_levels.length;
                     }
                 });
+        }
+        
+        function startGame(lessonId) {
+            fetch(`${API_BASE}/lessons/${lessonId}`)
+                .then(r => r.json())
+                .then(lesson => {
+                    currentLesson = lesson;
+                    document.getElementById('game-container').style.display = 'block';
+                    // Здесь будет инициализация игры с уровнями урока
+                    alert(`Запуск игры с урока "${lesson.title}". В полной версии здесь будет игровой движок.`);
+                });
+        }
+        
+        function closeGame() {
+            document.getElementById('game-container').style.display = 'none';
+        }
+        
+        function runGameProgram() {
+            alert('Запуск программы - в разработке');
+        }
+        
+        function resetGameProgram() {
+            alert('Сброс программы - в разработке');
         }
         
         function viewShop(lessonId) {
@@ -385,18 +476,13 @@
             .then(r => r.json())
             .then(result => {
                 if (result.success) {
-                    alert(`Поздравляем! Вы купили оценку! Учитель получил уведомление.`);
-                    viewShop(currentLesson.id); // Обновляем магазин
-                    loadStudentLessons(); // Обновляем список уроков
+                    alert(`Поздравляем! Вы купили оценку ${result.purchase.grade}! Учитель получил уведомление.`);
+                    viewShop(currentLesson.id);
+                    loadStudentLessons();
                 } else {
                     alert('Ошибка: ' + result.error);
                 }
             });
-        }
-        
-        function startGame(lessonId) {
-            alert(`Запуск игры для урока ${lessonId} - эта функция интегрируется с основной игрой`);
-            // Здесь будет интеграция с основной игровой механикой
         }
     </script>
 </body>
