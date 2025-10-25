@@ -29,10 +29,154 @@ def init_data_files():
         PURCHASES_FILE: []
     }
     
+    # Создаем начальные уровни для свободного режима
+    initial_levels = [
+        {
+            'id': 'level_1',
+            'title': "Движение вперед",
+            'description': "Переместите робота к монете, используя команду 'Идти вперед'",
+            'author': 'system',
+            'robot': {'x': 2, 'y': 4},
+            'coins': [{'x': 2, 'y': 1}],
+            'enemies': [],
+            'obstacles': [],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_2',
+            'title': "Обход препятствия",
+            'description': "Обойдите препятствие, чтобы собрать монету",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 4},
+            'coins': [{'x': 5, 'y': 4}],
+            'enemies': [],
+            'obstacles': [{'x': 3, 'y': 4}],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_3',
+            'title': "Движение в разных направлениях",
+            'description': "Используйте команды движения в разных направлениях",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 1},
+            'coins': [{'x': 5, 'y': 5}],
+            'enemies': [],
+            'obstacles': [],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_4',
+            'title': "Первая атака",
+            'description': "Атакуйте врага, чтобы очистить путь к монете",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 3},
+            'coins': [{'x': 5, 'y': 3}],
+            'enemies': [{'x': 3, 'y': 3}],
+            'obstacles': [],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_5',
+            'title': "Комбинированное движение",
+            'description': "Сочетайте разные команды движения для сбора монеты",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 5},
+            'coins': [{'x': 7, 'y': 1}],
+            'enemies': [],
+            'obstacles': [{'x': 3, 'y': 3}, {'x': 4, 'y': 4}],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_6',
+            'title': "Множественные враги",
+            'description': "Уничтожьте всех врагов на пути к монете",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 3},
+            'coins': [{'x': 7, 'y': 3}],
+            'enemies': [{'x': 3, 'y': 3}, {'x': 5, 'y': 3}],
+            'obstacles': [],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_7',
+            'title': "Лабиринт",
+            'description': "Найдите путь через лабиринт к монете",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 1},
+            'coins': [{'x': 7, 'y': 5}],
+            'enemies': [],
+            'obstacles': [
+                {'x': 2, 'y': 1}, {'x': 3, 'y': 1}, {'x': 4, 'y': 1}, {'x': 5, 'y': 1}, {'x': 6, 'y': 1},
+                {'x': 1, 'y': 2}, {'x': 5, 'y': 2}, {'x': 7, 'y': 2},
+                {'x': 1, 'y': 3}, {'x': 3, 'y': 3}, {'x': 5, 'y': 3}, {'x': 7, 'y': 3},
+                {'x': 1, 'y': 4}, {'x': 3, 'y': 4},
+                {'x': 3, 'y': 5}, {'x': 4, 'y': 5}, {'x': 5, 'y': 5}, {'x': 6, 'y': 5}
+            ],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_8',
+            'title': "Тактическая атака",
+            'description': "Подойдите к врагу с правильной стороны для атаки",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 3},
+            'coins': [{'x': 7, 'y': 3}],
+            'enemies': [{'x': 4, 'y': 3}],
+            'obstacles': [{'x': 3, 'y': 3}, {'x': 4, 'y': 2}, {'x': 4, 'y': 4}],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_9',
+            'title': "Сложный маршрут",
+            'description': "Составьте сложную программу для сбора монеты",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 5},
+            'coins': [{'x': 7, 'y': 1}],
+            'enemies': [{'x': 3, 'y': 3}, {'x': 5, 'y': 3}],
+            'obstacles': [
+                {'x': 2, 'y': 2}, {'x': 2, 'y': 3}, {'x': 2, 'y': 4},
+                {'x': 4, 'y': 1}, {'x': 4, 'y': 2}, {'x': 4, 'y': 4}, {'x': 4, 'y': 5},
+                {'x': 6, 'y': 2}, {'x': 6, 'y': 3}, {'x': 6, 'y': 4}
+            ],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        },
+        {
+            'id': 'level_10',
+            'title': "Финальное испытание",
+            'description': "Примените все полученные навыки в сложном уровне",
+            'author': 'system',
+            'robot': {'x': 1, 'y': 1},
+            'coins': [{'x': 9, 'y': 5}],
+            'enemies': [{'x': 3, 'y': 2}, {'x': 5, 'y': 3}, {'x': 7, 'y': 3}],
+            'obstacles': [
+                {'x': 3, 'y': 1}, {'x': 4, 'y': 1}, {'x': 5, 'y': 1}, {'x': 6, 'y': 1}, {'x': 7, 'y': 1}, {'x': 8, 'y': 1},
+                {'x': 1, 'y': 2}, {'x': 4, 'y': 2}, {'x': 6, 'y': 2}, {'x': 8, 'y': 2}, {'x': 9, 'y': 2},
+                {'x': 1, 'y': 3}, {'x': 2, 'y': 3}, {'x': 4, 'y': 3}, {'x': 6, 'y': 3}, {'x': 8, 'y': 3},
+                {'x': 1, 'y': 4}, {'x': 2, 'y': 4}, {'x': 3, 'y': 4}, {'x': 4, 'y': 4}, {'x': 6, 'y': 4}, {'x': 8, 'y': 4},
+                {'x': 1, 'y': 5}, {'x': 3, 'y': 5}, {'x': 8, 'y': 5}
+            ],
+            'is_public': True,
+            'created_at': datetime.now().isoformat()
+        }
+    ]
+    
     for file_path, default_value in default_data.items():
         if not os.path.exists(file_path):
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(default_value, f, ensure_ascii=False, indent=2)
+            if file_path == LEVELS_FILE:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(initial_levels, f, ensure_ascii=False, indent=2)
+            else:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(default_value, f, ensure_ascii=False, indent=2)
 
 init_data_files()
 
@@ -60,6 +204,10 @@ def serve_teacher():
 @app.route('/student')
 def serve_student():
     return send_from_directory('.', 'student.html')
+
+@app.route('/free')
+def serve_free():
+    return send_from_directory('.', 'free.html')
 
 # Пользователи
 @app.route('/api/users', methods=['POST'])
@@ -109,6 +257,19 @@ def create_level():
     
     return jsonify(level)
 
+@app.route('/api/levels/<level_id>', methods=['PUT'])
+def update_level(level_id):
+    data = request.json
+    levels = read_json(LEVELS_FILE)
+    
+    for i, level in enumerate(levels):
+        if level['id'] == level_id:
+            levels[i] = {**level, **data}
+            write_json(LEVELS_FILE, levels)
+            return jsonify(levels[i])
+    
+    return jsonify({'error': 'Level not found'}), 404
+
 # Уроки
 @app.route('/api/lessons', methods=['GET'])
 def get_lessons():
@@ -142,6 +303,16 @@ def create_lesson():
     
     return jsonify(lesson)
 
+@app.route('/api/lessons/<lesson_id>', methods=['GET'])
+def get_lesson(lesson_id):
+    lessons = read_json(LESSONS_FILE)
+    
+    for lesson in lessons:
+        if lesson['id'] == lesson_id:
+            return jsonify(lesson)
+    
+    return jsonify({'error': 'Lesson not found'}), 404
+
 @app.route('/api/lessons/<lesson_code>/join', methods=['POST'])
 def join_lesson(lesson_code):
     data = request.json
@@ -157,9 +328,13 @@ def join_lesson(lesson_code):
                 'joined_at': datetime.now().isoformat()
             }
             
-            if student_data not in lesson['students']:
+            # Проверяем, не присоединился ли уже ученик
+            existing_student = next((s for s in lesson['students'] if s['student_id'] == data['student_id']), None)
+            if not existing_student:
                 lesson['students'].append(student_data)
                 write_json(LESSONS_FILE, lessons)
+                return jsonify({'success': True, 'lesson': lesson})
+            else:
                 return jsonify({'success': True, 'lesson': lesson})
     
     return jsonify({'success': False, 'error': 'Lesson not found'}), 404
@@ -175,7 +350,7 @@ def update_progress():
             for student in lesson['students']:
                 if student['student_id'] == data['student_id']:
                     # Обновляем монеты
-                    student['coins'] = data['coins']
+                    student['coins'] = data.get('coins', student['coins'])
                     
                     # Добавляем пройденный уровень если его еще нет
                     if data['level_id'] not in student['completed_levels']:
