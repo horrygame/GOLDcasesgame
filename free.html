@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Свободный режим - Программирование Робота</title>
+    <style>
+        /* Все стили из основной игры */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #3e2723, #5d4037);
+            color: #f5e8c8;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 8px solid #5d4037;
+        }
+        
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(61, 43, 31, 0.95);
+            z-index: 10;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        h1 {
+            font-size: 64px;
+            color: #d7ccc8;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 48px;
+            color: #d7ccc8;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .button {
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 22px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            min-width: 250px;
+            text-align: center;
+        }
+        
+        .button:hover {
+            background: linear-gradient(to bottom, #a1887f, #8d6e63);
+            transform: translateY(-2px);
+        }
+        
+        .card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 1000px;
+            margin-top: 20px;
+        }
+        
+        .level-card {
+            background: rgba(93, 64, 55, 0.8);
+            border-radius: 5px;
+            padding: 20px;
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #8d6e63;
+            cursor: pointer;
+        }
+        
+        .level-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .level-number {
+            font-size: 36px;
+            color: #ffd54f;
+            margin-bottom: 10px;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(141, 110, 99, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 5;
+        }
+        
+        .ui-panel {
+            background: rgba(93, 64, 55, 0.8);
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            border: 2px solid #8d6e63;
+        }
+        
+        .programming-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30vh;
+            background: rgba(93, 64, 55, 0.9);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            border-top: 3px solid #8d6e63;
+            z-index: 5;
+        }
+        
+        .commands-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding: 10px;
+        }
+        
+        .command {
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .program-panel {
+            flex-grow: 1;
+            background: rgba(121, 85, 72, 0.7);
+            border-radius: 5px;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            border: 2px solid #8d6e63;
+        }
+        
+        .program-slot {
+            width: 160px;
+            height: 90px;
+            background: rgba(93, 64, 55, 0.5);
+            border: 2px dashed #8d6e63;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        
+        .program-block {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #8d6e63, #6d4c41);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            cursor: grab;
+            flex-direction: column;
+            padding: 5px;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            background: #ef5350;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .controls-panel {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .game-result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(61, 43, 31, 0.95);
+            padding: 40px;
+            border-radius: 5px;
+            text-align: center;
+            z-index: 20;
+            border: 3px solid #8d6e63;
+            width: 500px;
+        }
+        
+        .steps-input-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .steps-input {
+            width: 40px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid #8d6e63;
+            border-radius: 3px;
+            color: #fff;
+            text-align: center;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-button">← Назад</a>
+    
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <!-- Главное меню свободного режима -->
+        <div id="main-menu" class="screen">
+            <h1>🎮 Свободный режим</h1>
+            <p>Играйте в уровни без ограничений и оценок</p>
+            
+            <div class="card-grid" id="levels-container">
+                <!-- Уровни будут загружены через JS -->
+            </div>
+        </div>
+        
+        <!-- Игровой UI -->
+        <div id="game-ui" class="game-ui hidden">
+            <div class="ui-panel">
+                Уровень: <span id="current-level">1</span>
+            </div>
+            <div class="ui-panel">
+                Задание: <span id="current-task">Собрать монеты</span>
+            </div>
+            <button class="button" id="game-back-btn">← Назад к уровням</button>
+        </div>
+        
+        <!-- Область программирования -->
+        <div id="programming-area" class="programming-area hidden">
+            <div class="commands-panel">
+                <div class="command" draggable="true" data-command="forward">Идти вперед</div>
+                <div class="command" draggable="true" data-command="backward">Идти назад</div>
+                <div class="command" draggable="true" data-command="right">Идти вправо</div>
+                <div class="command" draggable="true" data-command="left">Идти влево</div>
+                <div class="command" draggable="true" data-command="attack">Атаковать врага</div>
+            </div>
+            
+            <div class="program-panel" id="program-slots">
+                <!-- Слоты программы -->
+            </div>
+            
+            <div class="controls-panel">
+                <button class="button" id="run-program-btn">Запуск программы</button>
+                <button class="button" id="reset-program-btn">Сброс программы</button>
+            </div>
+        </div>
+        
+        <!-- Результат игры -->
+        <div id="game-result" class="game-result hidden">
+            <h2 id="result-title">УРОВЕНЬ ПРОЙДЕН!</h2>
+            <p id="result-message">Поздравляем! Вы успешно собрали все монеты.</p>
+            <button class="button" id="next-level-btn">Следующий уровень</button>
+            <button class="button" id="menu-btn">К выбору уровней</button>
+        </div>
+    </div>
+
+    <script>
+        // Константы и состояние игры (аналогично основной игре)
+        const GRID_WIDTH = 24;
+        const GRID_HEIGHT = 24;
+        const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : '/api';
+
+        const COLORS = {
+            BACKGROUND: '#5d4037',
+            GRID: 'rgba(141, 110, 99, 0.3)',
+            ROBOT: '#f5e8c8',
+            ENEMY: '#ef5350',
+            COIN: '#ffd54f',
+            OBSTACLE: '#6d4c41'
+        };
+
+        let gameState = {
+            currentScreen: 'main_menu',
+            currentLevel: null,
+            levels: [],
+            program: [],
+            isRunning: false,
+            currentStep: 0,
+            currentCommandSteps: 0,
+            totalCommandSteps: 0
+        };
+
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        let gridSize, offsetX, offsetY;
+
+        // Инициализация
+        loadLevels();
+        setupEventListeners();
+        handleResize();
+        gameLoop();
+
+        function loadLevels() {
+            fetch(`${API_BASE}/levels`)
+                .then(r => r.json())
+                .then(levels => {
+                    gameState.levels = levels.filter(level => level.author === 'system');
+                    renderLevelsMenu();
+                });
+        }
+
+        function renderLevelsMenu() {
+            const container = document.getElementById('levels-container');
+            container.innerHTML = gameState.levels.map((level, index) => `
+                <div class="level-card" onclick="startLevel(${index})">
+                    <div class="level-number">${index + 1}</div>
+                    <h3>${level.title}</h3>
+                    <p>${level.description}</p>
+                    <p><small>Монет: ${level.coins.length}</small></p>
+                </div>
+            `).join('');
+        }
+
+        function startLevel(levelIndex) {
+            gameState.currentLevel = levelIndex;
+            const level = gameState.levels[levelIndex];
+            
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('game-ui').classList.remove('hidden');
+            document.getElementById('programming-area').classList.remove('hidden');
+            document.getElementById('current-level').textContent = levelIndex + 1;
+            document.getElementById('current-task').textContent = level.description;
+            
+            gameState.program = [];
+            gameState.isRunning = false;
+            gameState.currentStep = 0;
+            
+            setupProgramSlots();
+            calculateLevelOffset(level);
+        }
+
+        // Остальные функции игры (рендеринг, программирование, выполнение команд)
+        // ... аналогично основной игре ...
+
+        function calculateLevelOffset(level) {
+            const objects = [level.robot, ...level.coins, ...level.enemies, ...level.obstacles];
+            let minX = GRID_WIDTH, maxX = 0, minY = GRID_HEIGHT, maxY = 0;
+            
+            objects.forEach(obj => {
+                minX = Math.min(minX, obj.x);
+                maxX = Math.max(maxX, obj.x);
+                minY = Math.min(minY, obj.y);
+                maxY = Math.max(maxY, obj.y);
+            });
+            
+            const levelCenterX = (minX + maxX) / 2;
+            const levelCenterY = (minY + maxY) / 2;
+            const gridCenterX = GRID_WIDTH / 2;
+            const gridCenterY = GRID_HEIGHT / 2;
+            
+            gameState.levelOffset = {
+                x: gridCenterX - levelCenterX,
+                y: gridCenterY - levelCenterY
+            };
+        }
+
+        function handleResize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const gameAreaHeight = window.innerHeight - document.getElementById('programming-area').offsetHeight;
+            gridSize = Math.min(window.innerWidth / GRID_WIDTH, gameAreaHeight / GRID_HEIGHT);
+            offsetX = (window.innerWidth - GRID_WIDTH * gridSize) / 2;
+            offsetY = (gameAreaHeight - GRID_HEIGHT * gridSize) / 2;
+        }
+
+        function setupEventListeners() {
+            window.addEventListener('resize', handleResize);
+            document.getElementById('game-back-btn').addEventListener('click', backToMenu);
+            document.getElementById('run-program-btn').addEventListener('click', runProgram);
+            document.getElementById('reset-program-btn').addEventListener('click', resetProgram);
+            document.getElementById('next-level-btn').addEventListener('click', nextLevel);
+            document.getElementById('menu-btn').addEventListener('click', backToMenu);
+        }
+
+        function backToMenu() {
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('game-ui').classList.add('hidden');
+            document.getElementById('programming-area').classList.add('hidden');
+            document.getElementById('game-result').classList.add('hidden');
+            gameState.currentScreen = 'main_menu';
+        }
+
+        // Функции программирования и выполнения программы
+        // ... (аналогично основной игре) ...
+
+        function gameLoop() {
+            if (gameState.currentScreen === 'game') {
+                renderGame();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        function renderGame() {
+            ctx.fillStyle = COLORS.BACKGROUND;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const level = gameState.levels[gameState.currentLevel];
+            
+            // Отрисовка сетки
+            ctx.strokeStyle = COLORS.GRID;
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= GRID_WIDTH; x++) {
+                const screenX = offsetX + x * gridSize;
+                ctx.beginPath();
+                ctx.moveTo(screenX, offsetY);
+                ctx.lineTo(screenX, offsetY + GRID_HEIGHT * gridSize);
+                ctx.stroke();
+            }
+            for (let y = 0; y <= GRID_HEIGHT; y++) {
+                const screenY = offsetY + y * gridSize;
+                ctx.beginPath();
+                ctx.moveTo(offsetX, screenY);
+                ctx.lineTo(offsetX + GRID_WIDTH * gridSize, screenY);
+                ctx.stroke();
+            }
+            
+            // Отрисовка объектов уровня
+            // ... (аналогично основной игре) ...
+        }
+
+        // Временные заглушки для функций
+        function setupProgramSlots() {
+            // Заглушка
+            console.log('Setup program slots');
+        }
+
+        function runProgram() {
+            // Заглушка
+            alert('Запуск программы - функция в разработке');
+        }
+
+        function resetProgram() {
+            // Заглушка
+            console.log('Reset program');
+        }
+
+        function nextLevel() {
+            // Заглушка
+            alert('Следующий уровень - функция в разработке');
+        }
+    </script>
+</body>
+</html>
